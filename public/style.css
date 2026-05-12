@@ -42,6 +42,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%; 
+  gap: 15px;
 }
 
 .logo {
@@ -50,11 +52,33 @@ body {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .logo span {
   color: var(--text);
   font-weight: 300;
+}
+
+/* Fixed Navigation Links */
+.nav-links {
+  display: flex;
+  gap: 20px;
+  white-space: nowrap; 
+}
+
+.nav-links a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.nav-links a:hover, .nav-links a.active {
+  color: var(--accent);
 }
 
 .search-wrapper {
@@ -91,12 +115,13 @@ body {
 
 .hero-section {
   position: relative;
-  height: 85vh;
+  min-height: 80vh; 
+  padding-top: 100px; 
   width: 100%;
   display: flex;
   align-items: center;
   background-size: cover;
-  background-position: center;
+  background-position: center top;
   transition: background-image 1s ease-in-out;
 }
 
@@ -106,7 +131,6 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  /* Gradient from transparent to the background color */
   background: linear-gradient(
     to bottom,
     rgba(3, 7, 18, 0.2) 0%,
@@ -119,8 +143,9 @@ body {
 .hero-content {
   position: relative;
   z-index: 2;
-  max-width: 800px;
   padding: 0 5%;
+  width: 100%;
+  max-width: 800px;
 }
 
 .hero-content h1 {
@@ -141,6 +166,32 @@ body {
   overflow: hidden;
 }
 
+/* Hero Action Buttons */
+.hero-btns {
+  display: flex;
+  gap: 15px;
+}
+
+.watch-btn, .info-btn {
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+  border: none;
+}
+
+.watch-btn {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.info-btn {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  backdrop-filter: blur(5px);
+}
+
 /* --- Movie Rows & Cards --- */
 
 .movie-section {
@@ -159,11 +210,11 @@ body {
   gap: 20px;
   overflow-x: auto;
   padding: 10px 0 30px;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none; 
 }
 
 .movie-row::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none; 
 }
 
 .movie-card {
@@ -184,6 +235,8 @@ body {
   width: 100%;
   border-radius: var(--radius);
   display: block;
+  aspect-ratio: 2/3;
+  object-fit: cover;
 }
 
 .rating-badge {
@@ -250,8 +303,38 @@ body {
   transform: translateY(-2px);
 }
 
+/* --- Mobile Responsiveness --- */
+
 @media (max-width: 768px) {
-  .nav-container { flex-direction: column; gap: 15px; }
-  .search-wrapper { width: 100%; }
-  .movie-card { min-width: 160px; }
+  .nav-container { 
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px; 
+  }
+  
+  .search-wrapper { 
+    order: 3;
+    width: 100%; 
+    flex: 1 1 100%;
+  }
+
+  .nav-links {
+    order: 2;
+    gap: 15px;
+  }
+
+  .logo {
+    order: 1;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 5px;
+  }
+
+  .movie-card { 
+    min-width: 160px; 
+  }
+
+  .hero-section {
+    min-height: 60vh;
+  }
 }
