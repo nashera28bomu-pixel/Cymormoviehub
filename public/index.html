@@ -3,53 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Cymor Movie Hub</title>
-
+  
+  <!-- Modern CSS reset and your custom styles -->
   <link rel="stylesheet" href="style.css">
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome for premium icons (Search, Play, Fire) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts: Inter for that clean, tech look -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<nav class="navbar">
+  <!-- Premium Glass Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <i class="fas fa-film"></i> CYMOR<span> MOVIE HUB</span>
+      </div>
 
-  <div class="logo">
-    CYMOR MOVIE HUB
-  </div>
+      <div class="search-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search movies, series, actors...">
+      </div>
+      
+      <div class="nav-links">
+        <a href="#" class="active">Home</a>
+        <a href="#">Movies</a>
+        <a href="#">Series</a>
+      </div>
+    </div>
+  </nav>
 
-  <input type="text" id="searchInput" placeholder="Search movies...">
+  <!-- Dynamic Immersive Hero Section -->
+  <!-- This is where the rotating recommendation appears -->
+  <header id="hero" class="hero-section">
+    <div class="hero-overlay"></div>
+    <div id="heroContent" class="hero-content">
+      <!-- Content injected via script.js -->
+      <div class="skeleton-loader"></div>
+    </div>
+  </header>
 
-</nav>
+  <main class="content-wrapper">
+    
+    <!-- Trending Section -->
+    <section class="movie-section">
+      <div class="section-header">
+        <h2><i class="fas fa-fire"></i> Trending Now</h2>
+        <a href="#" class="view-all">View All</a>
+      </div>
+      <div class="movie-row-container">
+        <div class="movie-row" id="trending"></div>
+      </div>
+    </section>
 
-<header id="hero"></header>
+    <!-- Popular Section -->
+    <section class="movie-section">
+      <div class="section-header">
+        <h2><i class="fas fa-star"></i> Most Popular</h2>
+        <a href="#" class="view-all">View All</a>
+      </div>
+      <div class="movie-row-container">
+        <div class="movie-row" id="popular"></div>
+      </div>
+    </section>
 
-<section>
+    <!-- Top Rated Section -->
+    <section class="movie-section">
+      <div class="section-header">
+        <h2><i class="fas fa-award"></i> Critics' Choice</h2>
+        <a href="#" class="view-all">View All</a>
+      </div>
+      <div class="movie-row-container">
+        <div class="movie-row" id="toprated"></div>
+      </div>
+    </section>
 
-  <h2>Trending</h2>
+  </main>
 
-  <div class="movie-row" id="trending"></div>
+  <footer class="main-footer">
+    <p>&copy; 2026 Cymor Movie Hub.Made by Cymor😎</p>
+  </footer>
 
-</section>
-
-<section>
-
-  <h2>Popular</h2>
-
-  <div class="movie-row" id="popular"></div>
-
-</section>
-
-<section>
-
-  <h2>Top Rated</h2>
-
-  <div class="movie-row" id="toprated"></div>
-
-</section>
-
-<script src="script.js"></script>
-
+  <!-- Your upgraded JS logic -->
+  <script src="script.js"></script>
 </body>
 </html>
