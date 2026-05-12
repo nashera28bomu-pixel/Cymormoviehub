@@ -8,18 +8,28 @@ const NodeCache = require("node-cache");
 require("dotenv").config();
 
 const app = express();
-// Increased TTL slightly for better performance on Render free tier
 const cache = new NodeCache({ stdTTL: 900 }); 
 
 // Middleware
 app.use(express.json());
 app.use(compression());
+
+// Updated Helmet: Specifically allowing vidsrc and superembed for streaming/subs
 app.use(helmet({
-  contentSecurityPolicy: false, // Allows iframes from vidsrc
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+      imgSrc: ["'self'", "data:", "https://image.tmdb.org"],
+      frameSrc: ["'self'", "https://vidsrc.to", "https://vidsrc.me", "https://superembed.stream"],
+      connectSrc: ["'self'", "https://api.themoviedb.org"]
+    },
+  },
 }));
+
 app.use(cors());
 
-// Rate Limiting to prevent API abuse
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100
@@ -30,25 +40,46 @@ app.use(express.static("public"));
 const TMDB = "https://api.themoviedb.org/3";
 const KEY = process.env.TMDB_API_KEY;
 
-/**
- * Helper function to fetch data from TMDB with Caching
- */
-async function fetchTMDB(endpoint) {
-  if (cache.has(endpoint)) {
-    return cache.get(endpoint);
+async function fetchTMDB(endpoint, params = {}) {
+  const cacheKey = endpoint + JSON.stringify(params);
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey);
   }
 
   const res = await axios.get(`${TMDB}${endpoint}`, {
-    params: { api_key: KEY }
+    params: { api_key: KEY, ...params }
   });
 
-  cache.set(endpoint, res.data);
+  cache.set(cacheKey, res.data);
   return res.data;
 }
 
 // --- API ROUTES ---
 
-// Updated Trending: Changes daily for a fresh first recommendation
+// 1. THE ALL-IN-ONE DETAILS ROUTE (Crucial for the Watch Page)
+app.get("/api/details/:id", async (req, res) => {
+  try {
+    const type = req.query.type || 'movie'; // handles 'movie' or 'tv'
+    // append_to_response gets everything for the info, cast, and suggestions tabs at once
+    const data = await fetchTMDB(`/${type}/${req.params.id}`, {
+      append_to_response: "credits,videos,recommendations,similar"
+    });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. TV SEASON/EPISODE ROUTE (For the Episode Grid in Screenshot 4)
+app.get("/api/tv/:id/season/:number", async (req, res) => {
+  try {
+    const data = await fetchTMDB(`/tv/${req.params.id}/season/${req.params.number}`);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get("/api/trending", async (req, res) => {
   try {
     const data = await fetchTMDB("/trending/all/day");
@@ -76,16 +107,6 @@ app.get("/api/toprated", async (req, res) => {
   }
 });
 
-// New Credits Endpoint: Get characters and actors
-app.get("/api/credits/:id", async (req, res) => {
-  try {
-    const data = await fetchTMDB(`/movie/${req.params.id}/credits`);
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 app.get("/api/search", async (req, res) => {
   try {
     const q = req.query.q;
@@ -93,24 +114,6 @@ app.get("/api/search", async (req, res) => {
       params: { api_key: KEY, query: q }
     });
     res.json(resData.data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/api/trailer/:id", async (req, res) => {
-  try {
-    const response = await fetchTMDB(`/movie/${req.params.id}/videos`);
-    res.json(response);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/api/recommend/:id", async (req, res) => {
-  try {
-    const response = await fetchTMDB(`/movie/${req.params.id}/recommendations`);
-    res.json(response);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
