@@ -1,44 +1,81 @@
 const IMG = "https://image.tmdb.org/t/p/w500";
 const ORIGINAL = "https://image.tmdb.org/t/p/original";
+const hero = document.getElementById("hero");
+const heroContent = document.getElementById("heroContent");
+
 let trendingMovies = [];
 let currentHeroIndex = 0;
 
-async function init() {
+async function fetchHomeData() {
+  try {
+    // 1. Fetch Trending for Hero and Row
     const res = await fetch('/api/trending');
     const data = await res.json();
-    trendingMovies = data.results;
-    
-    // Start Rotating Hero
-    rotateHero();
-    setInterval(rotateHero, 8000); // Changes every 8 seconds
+    trendingMovies = data.results.filter(m => m.backdrop_path); // Only movies with images
 
+    // 2. Initial Hero Load
+    updateHero();
     renderMovies(trendingMovies, "trending");
-    fetchOtherSections();
+
+    // 3. Auto-rotate every 8 seconds
+    setInterval(() => {
+      currentHeroIndex = (currentHeroIndex + 1) % trendingMovies.length;
+      updateHero();
+    }, 8000);
+
+    // 4. Fetch others
+    fetchSection('popular', 'popular');
+    fetchSection('toprated', 'toprated');
+
+  } catch (err) {
+    console.error("Failed to load hub:", err);
+  }
 }
 
-function rotateHero() {
-    if (trendingMovies.length === 0) return;
-    const movie = trendingMovies[currentHeroIndex];
-    setHero(movie);
-    currentHeroIndex = (currentHeroIndex + 1) % trendingMovies.length;
+function updateHero() {
+  const movie = trendingMovies[currentHeroIndex];
+  if (!movie) return;
+
+  // Cinematic fade effect
+  hero.style.opacity = 0.8;
+  
+  setTimeout(() => {
+    hero.style.backgroundImage = `url(${ORIGINAL + movie.backdrop_path})`;
+    heroContent.innerHTML = `
+      <h1>${movie.title || movie.name}</h1>
+      <p>${movie.overview}</p>
+      <div class="hero-btns">
+        <button class="watch-btn" onclick="openMovie(${movie.id})">
+          <i class="fas fa-play"></i> Watch Now
+        </button>
+        <button class="info-btn" onclick="openMovie(${movie.id})">
+          <i class="fas fa-info-circle"></i> Details
+        </button>
+      </div>
+    `;
+    hero.style.opacity = 1;
+  }, 500);
+}
+
+async function fetchSection(endpoint, targetId) {
+  const res = await fetch(`/api/${endpoint}`);
+  const data = await res.json();
+  renderMovies(data.results, targetId);
 }
 
 function renderMovies(movies, targetId) {
-    const container = document.getElementById(targetId);
-    container.innerHTML = movies.map(movie => {
-        // Fix broken images
-        const poster = movie.poster_path ? IMG + movie.poster_path : 'https://via.placeholder.com/500x750?text=No+Image';
-        return `
-            <div class="movie-card" onclick="openMovie(${movie.id})">
-                <div class="rating-badge">★ ${movie.vote_average.toFixed(1)}</div>
-                <img src="${poster}" loading="lazy">
-                <div class="movie-info-mini">
-                    <p>${movie.title || movie.name}</p>
-                </div>
-            </div>
-        `;
-    }).join("");
+  const container = document.getElementById(targetId);
+  container.innerHTML = movies.map(movie => `
+    <div class="movie-card" onclick="openMovie(${movie.id})">
+      <div class="rating-badge">★ ${movie.vote_average.toFixed(1)}</div>
+      <img src="${movie.poster_path ? IMG + movie.poster_path : 'https://via.placeholder.com/500x750'}" alt="${movie.title}">
+    </div>
+  `).join("");
 }
 
-// ... existing openMovie function ...
-init();
+function openMovie(id) {
+  window.location.href = `watch.html?id=${id}`;
+}
+
+// Start the hub
+fetchHomeData();
