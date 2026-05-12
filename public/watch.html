@@ -13,17 +13,18 @@
             <a href="/" class="logo"><i class="fas fa-film"></i> CYMOR <span>MOVIE HUB</span></a>
             <div class="nav-links">
                 <a href="/">Home</a>
-            </div>
+            </a>
         </div>
     </nav>
 
     <main class="player-container">
-        <!-- The Video Player Section -->
+        <!-- Video Player -->
         <div class="video-wrapper">
-            <div id="playerOverlay" class="player-overlay">PREVIEW - 15 MIN</div>
+            <div class="player-overlay">AUTO-QUALITY / MULTI-SUB</div>
             <iframe id="videoPlayer" src="" allowfullscreen></iframe>
         </div>
 
+        <!-- Header Info -->
         <div class="movie-detail-header">
             <h1 id="movieTitle">Loading...</h1>
             <div class="action-bar">
@@ -32,42 +33,40 @@
             </div>
         </div>
 
-        <!-- The Tabs Section from 588708_2.jpg -->
-        <div class="tabs-container">
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('info')">Info</div>
-                <div id="episodeTab" class="tab" onclick="switchTab('episodes')" style="display:none;">Episodes</div>
-                <div class="tab" onclick="switchTab('cast')">Cast</div>
-                <div class="tab" onclick="switchTab('download')">Audio/Subs</div>
+        <!-- Overview Section -->
+        <p id="movieOverview" style="margin-bottom: 25px; color: var(--muted); line-height: 1.6;"></p>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('info')">Info</div>
+            <div id="episodeTab" class="tab" style="display:none;" onclick="switchTab('episode')">Episodes</div>
+            <div class="tab" onclick="switchTab('cast')">Cast</div>
+        </div>
+
+        <!-- Tab Panes -->
+        <div class="tab-content-wrapper">
+            <!-- Info Pane: Shows Recommendations -->
+            <div id="infoPane" class="pane active">
+                <h3 style="margin-bottom: 15px; font-size: 0.9rem; letter-spacing: 1px;">YOU MAY ALSO LIKE</h3>
+                <div class="movie-row" id="similarMovies">
+                    <!-- Recommendations will load here -->
+                </div>
             </div>
 
-            <div id="tabContent" class="tab-pane">
-                <div id="infoPane" class="pane active">
-                    <p id="movieOverview"></p>
+            <!-- Episode Pane -->
+            <div id="episodePane" class="pane">
+                <div class="episode-grid" id="episodeGrid">
+                    <!-- Episode boxes will load here -->
                 </div>
-                <div id="episodesPane" class="pane">
-                    <div class="episode-grid" id="episodeGrid"></div>
-                </div>
-                <div id="castPane" class="pane">
-                    <div class="cast-list" id="castList"></div>
-                </div>
-                <div id="downloadPane" class="pane">
-                    <div class="download-options">
-                        <h4>Available Streams (Multi-Sub)</h4>
-                        <div class="res-buttons">
-                            <button onclick="changeRes('360p')">360p</button>
-                            <button onclick="changeRes('720p')">720p</button>
-                            <button class="active" onclick="changeRes('1080p')">1080p</button>
-                        </div>
-                    </div>
+            </div>
+
+            <!-- Cast Pane -->
+            <div id="castPane" class="pane">
+                <div class="cast-list" id="castList">
+                    <!-- Cast cards will load here -->
                 </div>
             </div>
         </div>
-
-        <section class="movie-section">
-            <h3 class="section-title">YOU MAY ALSO LIKE</h3>
-            <div class="movie-row" id="similarMovies"></div>
-        </section>
     </main>
 
     <script src="watch-logic.js"></script>
