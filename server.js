@@ -16,18 +16,23 @@ const watchRoutes = require('./routes/watch');
 
 const app = express();
 
+/* MIDDLEWARE */
 app.use(express.json());
 app.use(compression());
-app.use(helmet());
+
+// Updated Helmet to allow cross-origin resource sharing for images/media
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
+
 app.use(morgan('dev'));
 
-app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true
-}));
+// Updated CORS to allow all origins - fixes the blank screen issue on Vercel
+app.use(cors()); 
 
 app.use(rateLimiter);
 
+/* ROUTES */
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -41,6 +46,7 @@ app.use('/api/subtitles', subtitleRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/watch', watchRoutes);
 
+/* ERROR HANDLING */
 app.use((err, req, res, next) => {
   console.error(err.stack);
 
