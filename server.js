@@ -6,7 +6,8 @@ const compression = require('compression');
 const helmet = require('helmet');
 const morgan = require('morgan');
 
-const rateLimiter = require('./middleware/rateLimiter');
+// Layered rate limiting
+const { generalLimiter, strictLimiter } = require('./middleware/rateLimiter');
 
 const tmdbRoutes = require('./routes/tmdb');
 const trailerRoutes = require('./routes/trailers');
@@ -16,27 +17,37 @@ const watchRoutes = require('./routes/watch');
 
 const app = express();
 
-/* MIDDLEWARE */
+/* --- MIDDLEWARE --- */
+
+// 1. Security & Performance
 app.use(express.json());
 app.use(compression());
-
-// Updated Helmet to allow cross-origin resource sharing for images/media
-app.use(helmet({
-  crossOriginResourcePolicy: false,
-}));
-
 app.use(morgan('dev'));
 
-// Updated CORS to allow all origins - fixes the blank screen issue on Vercel
+// 2. Global Rate Limiting (Applies to all routes)
+app.use(generalLimiter);
+
+// 3. Relaxed Helmet for Media Streaming
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+  contentSecurityPolicy: false, // Useful if you're embedding external players
+}));
+
+// 4. Global CORS (Allows Vercel to communicate with Render)
 app.use(cors()); 
 
-app.use(rateLimiter);
+/* --- SECURE ROUTES --- */
 
-/* ROUTES */
+// Apply Strict Limiter to Search and AI before the general route definitions
+app.use('/api/tmdb/search', strictLimiter);
+app.use('/api/ai', strictLimiter);
+
+/* --- APP ROUTES --- */
+
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'Cymor Movie Hub Backend Running'
+    message: 'Cymor Movie Hub Backend Running (v10.0)'
   });
 });
 
@@ -46,7 +57,8 @@ app.use('/api/subtitles', subtitleRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/watch', watchRoutes);
 
-/* ERROR HANDLING */
+/* --- ERROR HANDLING --- */
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
 
