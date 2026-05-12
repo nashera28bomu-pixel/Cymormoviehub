@@ -8,10 +8,10 @@
   <!-- Modern CSS reset and your custom styles -->
   <link rel="stylesheet" href="style.css">
   
-  <!-- Font Awesome for premium icons (Search, Play, Fire) -->
+  <!-- Font Awesome for premium icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Google Fonts: Inter for that clean, tech look -->
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 </head>
 
@@ -30,15 +30,14 @@
       </div>
       
       <div class="nav-links">
-        <a href="#" class="active">Home</a>
-        <a href="#">Movies</a>
-        <a href="#">Series</a>
+        <a href="/" class="active">Home</a>
+        <a href="/movies">Movies</a>
+        <a href="/series">Series</a>
       </div>
     </div>
   </nav>
 
   <!-- Dynamic Immersive Hero Section -->
-  <!-- This is where the rotating recommendation appears -->
   <header id="hero" class="hero-section">
     <div class="hero-overlay"></div>
     <div id="heroContent" class="hero-content">
@@ -53,7 +52,7 @@
     <section class="movie-section">
       <div class="section-header">
         <h2><i class="fas fa-fire"></i> Trending Now</h2>
-        <a href="#" class="view-all">View All</a>
+        <a href="/movies" class="view-all">View All</a>
       </div>
       <div class="movie-row-container">
         <div class="movie-row" id="trending"></div>
@@ -64,7 +63,7 @@
     <section class="movie-section">
       <div class="section-header">
         <h2><i class="fas fa-star"></i> Most Popular</h2>
-        <a href="#" class="view-all">View All</a>
+        <a href="/movies" class="view-all">View All</a>
       </div>
       <div class="movie-row-container">
         <div class="movie-row" id="popular"></div>
@@ -75,7 +74,7 @@
     <section class="movie-section">
       <div class="section-header">
         <h2><i class="fas fa-award"></i> Critics' Choice</h2>
-        <a href="#" class="view-all">View All</a>
+        <a href="/movies" class="view-all">View All</a>
       </div>
       <div class="movie-row-container">
         <div class="movie-row" id="toprated"></div>
@@ -84,8 +83,8 @@
 
   </main>
 
-  <footer class="main-footer">
-    <p>&copy; 2026 Cymor Movie Hub.Made by Cymor😎</p>
+  <footer class="main-footer" style="text-align: center; padding: 40px 0; color: var(--muted); font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.05);">
+    <p>&copy; 2026 Cymor Movie Hub. Made by CYMOR😎.</p>
   </footer>
 
   <!-- Your upgraded JS logic -->
