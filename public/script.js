@@ -1,87 +1,44 @@
 const IMG = "https://image.tmdb.org/t/p/w500";
+const ORIGINAL = "https://image.tmdb.org/t/p/original";
+let trendingMovies = [];
+let currentHeroIndex = 0;
 
-const hero = document.getElementById("hero");
+async function init() {
+    const res = await fetch('/api/trending');
+    const data = await res.json();
+    trendingMovies = data.results;
+    
+    // Start Rotating Hero
+    rotateHero();
+    setInterval(rotateHero, 8000); // Changes every 8 seconds
 
-async function fetchMovies(endpoint, target) {
+    renderMovies(trendingMovies, "trending");
+    fetchOtherSections();
+}
 
-  const res = await fetch(`/api/${endpoint}`);
-  const data = await res.json();
-
-  renderMovies(data.results, target);
-
-  if(endpoint === "trending") {
-    setHero(data.results[0]);
-  }
-
+function rotateHero() {
+    if (trendingMovies.length === 0) return;
+    const movie = trendingMovies[currentHeroIndex];
+    setHero(movie);
+    currentHeroIndex = (currentHeroIndex + 1) % trendingMovies.length;
 }
 
 function renderMovies(movies, targetId) {
-
-  const container = document.getElementById(targetId);
-
-  container.innerHTML = movies.map(movie => `
-
-    <div class="movie-card"
-      onclick="openMovie(${movie.id})">
-
-      <img src="${IMG + movie.poster_path}">
-
-    </div>
-
-  `).join("");
-
+    const container = document.getElementById(targetId);
+    container.innerHTML = movies.map(movie => {
+        // Fix broken images
+        const poster = movie.poster_path ? IMG + movie.poster_path : 'https://via.placeholder.com/500x750?text=No+Image';
+        return `
+            <div class="movie-card" onclick="openMovie(${movie.id})">
+                <div class="rating-badge">★ ${movie.vote_average.toFixed(1)}</div>
+                <img src="${poster}" loading="lazy">
+                <div class="movie-info-mini">
+                    <p>${movie.title || movie.name}</p>
+                </div>
+            </div>
+        `;
+    }).join("");
 }
 
-function setHero(movie) {
-
-  hero.style.backgroundImage = `
-    linear-gradient(
-      to top,
-      rgba(0,0,0,0.95),
-      rgba(0,0,0,0.2)
-    ),
-    url(https://image.tmdb.org/t/p/original${movie.backdrop_path})
-  `;
-
-  hero.innerHTML = `
-
-    <div class="hero-content">
-
-      <h1>${movie.title}</h1>
-
-      <p>${movie.overview}</p>
-
-      <button onclick="openMovie(${movie.id})">
-        Watch Now
-      </button>
-
-    </div>
-
-  `;
-
-}
-
-function openMovie(id) {
-
-  window.location.href = `watch.html?id=${id}`;
-
-}
-
-const searchInput = document.getElementById("searchInput");
-
-searchInput.addEventListener("input", async (e) => {
-
-  const q = e.target.value;
-
-  if(q.length < 2) return;
-
-  const res = await fetch(`/api/search?q=${q}`);
-  const data = await res.json();
-
-  renderMovies(data.results, "trending");
-
-});
-
-fetchMovies("trending", "trending");
-fetchMovies("popular", "popular");
-fetchMovies("toprated", "toprated");
+// ... existing openMovie function ...
+init();
