@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: cymor-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+
+  - type: static
+    name: cymor-frontend
+    rootDir: frontend
+    buildCommand: npm install
+    staticPublishPath: public
