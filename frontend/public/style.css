@@ -1,0 +1,79 @@
+:root {
+  --bg: #0b0f19;
+  --card: #121826;
+  --accent: #00e5ff;
+  --accent2: #00ff9d;
+  --text: #ffffff;
+  --muted: #9ca3af;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Inter, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: white;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 999;
+  backdrop-filter: blur(16px);
+  background: rgba(0,0,0,0.4);
+}
+
+.logo {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+#searchInput {
+  width: 300px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+}
+
+#hero {
+  height: 80vh;
+  display: flex;
+  align-items: end;
+  padding: 50px;
+  background-size: cover;
+  background-position: center;
+}
+
+.hero-content {
+  max-width: 600px;
+}
+
+.movie-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 20px;
+}
+
+.movie-card {
+  min-width: 200px;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.movie-card:hover {
+  transform: scale(1.06);
+}
+
+.movie-card img {
+  width: 100%;
+  border-radius: 16px;
+}
