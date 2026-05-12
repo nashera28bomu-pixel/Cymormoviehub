@@ -1,26 +1,75 @@
-<div class="watch-layout">
-    <button onclick="history.back()" class="back-btn">← Back</button>
-    
-    <div id="player-wrapper">
-        <div class="preview-tag">PREVIEW - 15 MIN</div>
-        <iframe id="player" src="" allowfullscreen></iframe>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cymor Movie Hub - Watching</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="watch-page">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo"><i class="fas fa-film"></i> CYMOR <span>MOVIE HUB</span></a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+            </div>
+        </div>
+    </nav>
 
-    <div class="movie-details">
-        <h1 id="movieTitle"></h1>
-        <div class="meta-row">
-            <span id="movieRating"></span>
-            <span id="movieYear"></span>
+    <main class="player-container">
+        <!-- The Video Player Section -->
+        <div class="video-wrapper">
+            <div id="playerOverlay" class="player-overlay">PREVIEW - 15 MIN</div>
+            <iframe id="videoPlayer" src="" allowfullscreen></iframe>
         </div>
 
-        <div class="tabs">
-            <div class="tab active" onclick="showTab('info')">Info</div>
-            <div class="tab" onclick="showTab('cast')">Cast</div>
-            <div class="tab" onclick="showTab('download')">Download</div>
+        <div class="movie-detail-header">
+            <h1 id="movieTitle">Loading...</h1>
+            <div class="action-bar">
+                <button class="now-playing-btn"><i class="fas fa-play"></i> Now Playing</button>
+                <button class="download-primary" id="mainDownload"><i class="fas fa-download"></i> Download</button>
+            </div>
         </div>
 
-        <div id="tab-content">
-            <!-- Content dynamically injected here -->
+        <!-- The Tabs Section from 588708_2.jpg -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('info')">Info</div>
+                <div id="episodeTab" class="tab" onclick="switchTab('episodes')" style="display:none;">Episodes</div>
+                <div class="tab" onclick="switchTab('cast')">Cast</div>
+                <div class="tab" onclick="switchTab('download')">Audio/Subs</div>
+            </div>
+
+            <div id="tabContent" class="tab-pane">
+                <div id="infoPane" class="pane active">
+                    <p id="movieOverview"></p>
+                </div>
+                <div id="episodesPane" class="pane">
+                    <div class="episode-grid" id="episodeGrid"></div>
+                </div>
+                <div id="castPane" class="pane">
+                    <div class="cast-list" id="castList"></div>
+                </div>
+                <div id="downloadPane" class="pane">
+                    <div class="download-options">
+                        <h4>Available Streams (Multi-Sub)</h4>
+                        <div class="res-buttons">
+                            <button onclick="changeRes('360p')">360p</button>
+                            <button onclick="changeRes('720p')">720p</button>
+                            <button class="active" onclick="changeRes('1080p')">1080p</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+
+        <section class="movie-section">
+            <h3 class="section-title">YOU MAY ALSO LIKE</h3>
+            <div class="movie-row" id="similarMovies"></div>
+        </section>
+    </main>
+
+    <script src="watch-logic.js"></script>
+</body>
+</html>
