@@ -1,31 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<div class="watch-layout">
+    <button onclick="history.back()" class="back-btn">← Back</button>
+    
+    <div id="player-wrapper">
+        <div class="preview-tag">PREVIEW - 15 MIN</div>
+        <iframe id="player" src="" allowfullscreen></iframe>
+    </div>
 
-<meta charset="UTF-8">
+    <div class="movie-details">
+        <h1 id="movieTitle"></h1>
+        <div class="meta-row">
+            <span id="movieRating"></span>
+            <span id="movieYear"></span>
+        </div>
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('info')">Info</div>
+            <div class="tab" onclick="showTab('cast')">Cast</div>
+            <div class="tab" onclick="showTab('download')">Download</div>
+        </div>
 
-<title>Watch Movie</title>
-
-<link rel="stylesheet" href="style.css">
-
-</head>
-
-<body>
-
-<div class="player-container">
-
-<iframe
-id="player"
-allowfullscreen
-frameborder="0">
-</iframe>
-
+        <div id="tab-content">
+            <!-- Content dynamically injected here -->
+        </div>
+    </div>
 </div>
-
-<script src="watch.js"></script>
-
-</body>
-</html>
