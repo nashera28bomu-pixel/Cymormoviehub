@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Movies - Cymor Movie Hub</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/" class="logo">
+      <i class="fas fa-film"></i>
+      CYMOR <span>MOVIE HUB</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a class="active">Movies</a>
+    </div>
+  </div>
+</nav>
+
+<section class="movie-section" style="padding-top:120px;">
+  <div class="section-header">
+    <h2>All Trending Movies</h2>
+  </div>
+
+  <div class="movie-row" id="allMovies"
+  style="flex-wrap:wrap; overflow:visible;">
+  </div>
+</section>
+
+<script>
+const IMG = "https://image.tmdb.org/t/p/w500";
+
+async function loadMovies() {
+  const res = await fetch('/api/trending');
+  const data = await res.json();
+
+  const container = document.getElementById('allMovies');
+
+  container.innerHTML = data.results.map(movie => `
+    <div class="movie-card"
+      onclick="location.href='watch.html?id=${movie.id}&type=${movie.media_type || 'movie'}'">
+
+      <div class="rating-badge">
+        ★ ${movie.vote_average?.toFixed(1) || 'N/A'}
+      </div>
+
+      <img src="${IMG + movie.poster_path}">
+    </div>
+  `).join('');
+}
+
+loadMovies();
+</script>
+
+</body>
+</html>
