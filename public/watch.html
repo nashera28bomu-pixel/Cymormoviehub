@@ -1,74 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cymor Movie Hub - Watching</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+  <title>Cymor Player</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="watch-page">
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="/" class="logo"><i class="fas fa-film"></i> CYMOR <span>MOVIE HUB</span></a>
-            <div class="nav-links">
-                <a href="/">Home</a>
-            </a>
-        </div>
-    </nav>
 
-    <main class="player-container">
-        <!-- Video Player -->
-        <div class="video-wrapper">
-            <div class="player-overlay">AUTO-QUALITY / MULTI-SUB</div>
-            <iframe id="videoPlayer" src="" allowfullscreen></iframe>
-        </div>
+<body>
 
-        <!-- Header Info -->
-        <div class="movie-detail-header">
-            <h1 id="movieTitle">Loading...</h1>
-            <div class="action-bar">
-                <button class="now-playing-btn"><i class="fas fa-play"></i> Now Playing</button>
-                <button class="download-primary" id="mainDownload"><i class="fas fa-download"></i> Download</button>
-            </div>
-        </div>
+<nav class="navbar">
+  <div class="nav-container">
 
-        <!-- Overview Section -->
-        <p id="movieOverview" style="margin-bottom: 25px; color: var(--muted); line-height: 1.6;"></p>
+    <a href="/" class="logo">
+      <i class="fas fa-film"></i>
+      CYMOR <span>MOVIE HUB</span>
+    </a>
 
-        <!-- Tabs -->
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('info')">Info</div>
-            <div id="episodeTab" class="tab" style="display:none;" onclick="switchTab('episode')">Episodes</div>
-            <div class="tab" onclick="switchTab('cast')">Cast</div>
-        </div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+    </div>
 
-        <!-- Tab Panes -->
-        <div class="tab-content-wrapper">
-            <!-- Info Pane: Shows Recommendations -->
-            <div id="infoPane" class="pane active">
-                <h3 style="margin-bottom: 15px; font-size: 0.9rem; letter-spacing: 1px;">YOU MAY ALSO LIKE</h3>
-                <div class="movie-row" id="similarMovies">
-                    <!-- Recommendations will load here -->
-                </div>
-            </div>
+  </div>
+</nav>
 
-            <!-- Episode Pane -->
-            <div id="episodePane" class="pane">
-                <div class="episode-grid" id="episodeGrid">
-                    <!-- Episode boxes will load here -->
-                </div>
-            </div>
+<main class="player-container">
 
-            <!-- Cast Pane -->
-            <div id="castPane" class="pane">
-                <div class="cast-list" id="castList">
-                    <!-- Cast cards will load here -->
-                </div>
-            </div>
-        </div>
-    </main>
+  <!-- PLAYER -->
 
-    <script src="watch-logic.js"></script>
+  <div class="video-wrapper">
+    <iframe id="videoPlayer"
+    allowfullscreen></iframe>
+  </div>
+
+  <!-- TITLE -->
+
+  <div class="movie-detail-header">
+
+    <h1 id="movieTitle">Loading...</h1>
+
+    <div class="hero-btns">
+
+      <button class="watch-btn">
+        <i class="fas fa-play"></i>
+        Streaming
+      </button>
+
+      <button class="info-btn"
+      onclick="scrollToDownloads()">
+
+        <i class="fas fa-download"></i>
+        Download
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- OVERVIEW -->
+
+  <p id="movieOverview"
+  style="margin:20px 0; color:var(--muted);"></p>
+
+  <!-- DOWNLOADS -->
+
+  <div id="downloads">
+
+    <h2 style="margin-bottom:20px;">
+      Download Quality
+    </h2>
+
+    <div class="download-grid">
+
+      <button class="download-btn">360p</button>
+      <button class="download-btn">480p</button>
+      <button class="download-btn">720p</button>
+      <button class="download-btn">1080p</button>
+
+    </div>
+
+  </div>
+
+  <!-- TABS -->
+
+  <div class="tabs">
+
+    <div class="tab active"
+    onclick="switchTab('info', this)">
+      Related
+    </div>
+
+    <div class="tab"
+    onclick="switchTab('cast', this)">
+      Cast
+    </div>
+
+    <div id="episodeTab"
+    class="tab"
+    style="display:none;"
+    onclick="switchTab('episode', this)">
+      Episodes
+    </div>
+
+  </div>
+
+  <!-- RELATED -->
+
+  <div id="infoPane"
+  class="pane active">
+
+    <div class="movie-row"
+    id="similarMovies"></div>
+
+  </div>
+
+  <!-- CAST -->
+
+  <div id="castPane"
+  class="pane">
+
+    <div class="cast-list"
+    id="castList"></div>
+
+  </div>
+
+  <!-- EPISODES -->
+
+  <div id="episodePane"
+  class="pane">
+
+    <div class="episode-grid"
+    id="episodeGrid"></div>
+
+  </div>
+
+</main>
+
+<script src="watch-logic.js"></script>
+
 </body>
 </html>
