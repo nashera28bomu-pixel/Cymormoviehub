@@ -1,39 +1,73 @@
-async function loadMatches(){
+async function loadFixtures() {
+  try {
+    const res = await fetch("/api/fixtures");
+    const result = await res.json();
 
-  const res =
-  await fetch("/api/fixtures");
+    const container = document.getElementById("fixtures");
 
-  const matches =
-  await res.json();
+    if (!container) return;
 
-  const container =
-  document.getElementById("matches");
+    const matches = result.data || [];
 
-  container.innerHTML =
-  matches.map(match=>`
+    if (!Array.isArray(matches) || matches.length === 0) {
+      container.innerHTML = `
+        <p style="color:#9ca3af;">No fixtures available today.</p>
+      `;
+      return;
+    }
 
-    <div class="match-card">
+    container.innerHTML = matches.map(match => {
 
-      <h3>
+      const time = new Date(match.time);
+      const now = new Date();
 
-      ${match.teams?.home?.name}
+      const diff = Math.floor((time - now) / 60000);
 
-      vs
+      const countdown =
+        diff > 0 ? `Starts in ${diff} min` : "LIVE 🔴";
 
-      ${match.teams?.away?.name}
+      return `
+        <div class="fixture-card">
 
-      </h3>
+          <div class="fixture-top">
 
-      <p>
+            <span class="league">
+              ${match.league || "League"}
+            </span>
 
-      ${match.fixture?.status?.short}
+            <span class="${match.live ? "live-badge" : "kickoff"}">
+              ${match.live ? "LIVE 🔴" : countdown}
+            </span>
 
-      </p>
+          </div>
 
-    </div>
+          <div class="teams">
 
-  `).join("");
+            <div class="team">
+              <img src="${match.home.logo || ''}" />
+              <p>${match.home.name || "Home"}</p>
+            </div>
 
+            <div class="vs">VS</div>
+
+            <div class="team">
+              <img src="${match.away.logo || ''}" />
+              <p>${match.away.name || "Away"}</p>
+            </div>
+
+          </div>
+
+        </div>
+      `;
+    }).join("");
+
+  } catch (err) {
+    console.error("❌ Fixtures UI error:", err);
+  }
 }
 
-loadMatches();
+/* ========================
+   INIT
+======================== */
+
+document.addEventListener("DOMContentLoaded", loadFixtures);
