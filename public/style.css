@@ -9,9 +9,9 @@
   --nav-bg: rgba(3, 7, 18, 0.88);
 }
 
-/* =========================
+/* =========================================
    GLOBAL RESET
-========================= */
+========================================= */
 
 * {
   margin: 0;
@@ -26,29 +26,34 @@ html {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   overflow-x: hidden;
   line-height: 1.5;
 }
 
-/* =========================
-   CLICKABILITY FIXES
-========================= */
+/* =========================================
+   CLICK FIXES
+========================================= */
 
-.hero-btns,
 .movie-card,
-.view-all,
-.nav-links a,
-button {
-  position: relative !important;
-  z-index: 50 !important;
+.watch-btn,
+.info-btn,
+.hero-btns,
+.hero-content,
+.rating-badge {
+
   pointer-events: auto !important;
+
+  position: relative !important;
+
+  z-index: 9999 !important;
+
   cursor: pointer !important;
 }
 
-/* =========================
+/* =========================================
    NAVBAR
-========================= */
+========================================= */
 
 .navbar {
   position: fixed;
@@ -58,7 +63,7 @@ button {
   background: var(--nav-bg);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(255,255,255,0.06);
-  z-index: 1000;
+  z-index: 10000;
 }
 
 .nav-container {
@@ -74,7 +79,7 @@ button {
 .logo {
   color: var(--accent);
   text-decoration: none;
-  font-size: 1.6rem;
+  font-size: 1.7rem;
   font-weight: 900;
   display: flex;
   align-items: center;
@@ -95,7 +100,7 @@ button {
 .nav-links a {
   color: white;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
   transition: 0.3s;
 }
 
@@ -104,9 +109,9 @@ button {
   color: var(--accent);
 }
 
-/* =========================
+/* =========================================
    SEARCH BAR
-========================= */
+========================================= */
 
 .search-wrapper {
   position: relative;
@@ -119,118 +124,187 @@ button {
   top: 50%;
   transform: translateY(-50%);
   color: var(--muted);
+  z-index: 2;
 }
 
 #searchInput {
   width: 100%;
-  padding: 13px 16px 13px 48px;
+  padding: 14px 16px 14px 50px;
   border-radius: 50px;
   border: 1px solid rgba(255,255,255,0.08);
   background: rgba(255,255,255,0.05);
   color: white;
+  font-size: 1rem;
   transition: 0.3s;
 }
 
 #searchInput:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 18px var(--accent-glow);
   background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 20px var(--accent-glow);
 }
 
-/* =========================
+/* =========================================
    HERO SECTION
-========================= */
+========================================= */
 
 .hero-section {
   position: relative;
-  min-height: 85vh;
+  min-height: 80vh;
+  padding-top: 120px;
+  width: 100%;
   display: flex;
   align-items: center;
-  padding-top: 100px;
   background-size: cover;
-  background-position: center top;
-  transition: background-image 1s ease-in-out;
+  background-position: center;
+  overflow: hidden;
 }
+
+/* DARK OVERLAY */
 
 .hero-overlay {
   position: absolute;
   inset: 0;
+
   background:
-    linear-gradient(to bottom,
-    rgba(3,7,18,0.2) 0%,
-    rgba(3,7,18,0.7) 50%,
-    var(--bg) 100%),
-    linear-gradient(to right,
-    var(--bg) 0%,
-    transparent 100%);
+    linear-gradient(
+      to top,
+      rgba(3,7,18,1) 0%,
+      rgba(3,7,18,0.7) 40%,
+      rgba(3,7,18,0.3) 100%
+    );
+
   z-index: 1;
+
   pointer-events: none;
 }
 
+/* HERO CONTENT */
+
 .hero-content {
   position: relative;
-  z-index: 2;
+
+  z-index: 50;
+
+  width: 100%;
+
+  max-width: 750px;
+
   padding: 0 5%;
-  max-width: 760px;
 }
+
+/* TITLE */
 
 .hero-content h1 {
-  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-size: clamp(3rem, 7vw, 5rem);
+
+  line-height: 0.95;
+
+  margin-bottom: 20px;
+
   font-weight: 900;
-  margin-bottom: 1rem;
-  line-height: 1;
-  text-shadow: 0 0 20px rgba(0,0,0,0.5);
+
+  color: white;
+
+  text-shadow: 0 5px 20px rgba(0,0,0,0.7);
 }
 
+/* DESCRIPTION */
+
 .hero-content p {
-  color: var(--muted);
   font-size: 1.1rem;
-  margin-bottom: 2rem;
-  max-width: 620px;
+
+  line-height: 1.7;
+
+  color: #d1d5db;
+
+  max-width: 650px;
+
+  margin-bottom: 30px;
 
   display: -webkit-box;
+
   -webkit-line-clamp: 3;
+
   -webkit-box-orient: vertical;
+
   overflow: hidden;
 }
 
+/* BUTTONS */
+
 .hero-btns {
   display: flex;
-  gap: 16px;
+
+  gap: 20px;
+
   flex-wrap: wrap;
+
+  position: relative;
+
+  z-index: 9999;
 }
+
+/* BOTH BUTTONS */
 
 .watch-btn,
 .info-btn {
+
+  position: relative;
+
+  z-index: 9999;
+
+  pointer-events: auto;
+
   border: none;
-  padding: 14px 26px;
-  border-radius: var(--radius);
-  font-weight: 800;
-  transition: 0.3s;
+
+  padding: 16px 28px;
+
+  border-radius: 14px;
+
   font-size: 1rem;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition: 0.3s ease;
 }
+
+/* WATCH */
 
 .watch-btn {
   background: var(--accent);
-  color: black;
+
+  color: #000;
+
+  box-shadow: 0 0 20px rgba(6,182,212,0.3);
 }
+
+/* DETAILS */
 
 .info-btn {
   background: rgba(255,255,255,0.12);
+
   color: white;
-  backdrop-filter: blur(6px);
+
+  backdrop-filter: blur(10px);
 }
+
+/* HOVER */
 
 .watch-btn:hover,
 .info-btn:hover {
+
   transform: translateY(-3px);
-  opacity: 0.92;
+
+  opacity: 0.95;
 }
 
-/* =========================
-   MOVIE SECTIONS
-========================= */
+/* =========================================
+   MOVIE SECTION
+========================================= */
 
 .movie-section {
   padding: 2rem 5%;
@@ -245,18 +319,18 @@ button {
 
 .section-header h2 {
   font-size: 2rem;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .view-all {
-  text-decoration: none;
   color: var(--accent);
+  text-decoration: none;
   font-weight: 700;
 }
 
-/* =========================
+/* =========================================
    MOVIE ROW
-========================= */
+========================================= */
 
 .movie-row {
   display: flex;
@@ -270,9 +344,9 @@ button {
   display: none;
 }
 
-/* =========================
+/* =========================================
    MOVIE CARDS
-========================= */
+========================================= */
 
 .movie-card {
   position: relative;
@@ -281,12 +355,11 @@ button {
   overflow: hidden;
   background: var(--card);
   transition: 0.35s;
-  cursor: pointer;
 }
 
 .movie-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  transform: scale(1.06);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.55);
 }
 
 .movie-card img {
@@ -306,12 +379,11 @@ button {
   border-radius: 8px;
   font-size: 0.8rem;
   font-weight: 900;
-  z-index: 3;
 }
 
-/* =========================
+/* =========================================
    WATCH PAGE
-========================= */
+========================================= */
 
 .player-container {
   max-width: 1250px;
@@ -322,7 +394,6 @@ button {
 }
 
 .video-wrapper {
-  position: relative;
   width: 100%;
   aspect-ratio: 16/9;
   border-radius: 18px;
@@ -339,18 +410,17 @@ button {
 
 .movie-detail-header {
   margin-top: 25px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .movie-detail-header h1 {
   font-size: clamp(2rem, 5vw, 3.2rem);
   font-weight: 900;
-  margin-bottom: 15px;
 }
 
-/* =========================
+/* =========================================
    DOWNLOAD GRID
-========================= */
+========================================= */
 
 .download-grid {
   display: grid;
@@ -374,9 +444,9 @@ button {
   transform: scale(1.05);
 }
 
-/* =========================
+/* =========================================
    TABS
-========================= */
+========================================= */
 
 .tabs {
   display: flex;
@@ -417,9 +487,9 @@ button {
   display: block;
 }
 
-/* =========================
+/* =========================================
    CAST SECTION
-========================= */
+========================================= */
 
 .cast-list {
   display: flex;
@@ -448,9 +518,9 @@ button {
   font-size: 0.9rem;
 }
 
-/* =========================
+/* =========================================
    EPISODES
-========================= */
+========================================= */
 
 .episode-grid {
   display: grid;
@@ -473,9 +543,9 @@ button {
   color: black;
 }
 
-/* =========================
-   MOBILE RESPONSIVE
-========================= */
+/* =========================================
+   MOBILE
+========================================= */
 
 @media (max-width: 768px) {
 
@@ -500,7 +570,16 @@ button {
   }
 
   .hero-section {
-    min-height: 65vh;
+    min-height: 75vh;
+  }
+
+  .hero-btns {
+    flex-direction: column;
+  }
+
+  .watch-btn,
+  .info-btn {
+    width: 100%;
   }
 
   .movie-card {
@@ -513,12 +592,6 @@ button {
 
   .hero-content p {
     font-size: 1rem;
-  }
-
-  .watch-btn,
-  .info-btn {
-    width: 100%;
-    justify-content: center;
   }
 
   .tabs {
