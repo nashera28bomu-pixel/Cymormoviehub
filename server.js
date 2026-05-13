@@ -1,424 +1,73 @@
 const express = require("express");
-const axios = require("axios");
 const path = require("path");
-const compression = require("compression");
-const helmet = require("helmet");
+const http = require("http");
 const cors = require("cors");
-const rateLimit = require("express-rate-limit");
-const NodeCache = require("node-cache");
+const helmet = require("helmet");
+const compression = require("compression");
+const morgan = require("morgan");
+const { Server } = require("socket.io");
 
 require("dotenv").config();
 
+const fixtures = require("./engine/matches/fixtures");
+const standings = require("./engine/standings/standings");
+
 const app = express();
 
-/* =========================
-   RENDER / PROXY FIX
-========================= */
+const server = http.createServer(app);
 
-app.set("trust proxy", 1);
-
-/* =========================
-   CACHE
-========================= */
-
-const cache = new NodeCache({
-    stdTTL: 900,
-    checkperiod: 120
-});
-
-/* =========================
-   BASIC MIDDLEWARE
-========================= */
-
-app.use(express.json());
-
-app.use(express.urlencoded({
-    extended: true
-}));
-
-app.use(compression());
+const io = new Server(server);
 
 app.use(cors());
 
-/* =========================
-   SECURITY
-========================= */
+app.use(express.json());
 
-app.use(
-    helmet({
-        crossOriginEmbedderPolicy: false,
+app.use(compression());
 
-        contentSecurityPolicy: {
-            directives: {
+app.use(helmet({
+  crossOriginEmbedderPolicy:false
+}));
 
-                defaultSrc: ["'self'"],
+app.use(morgan("dev"));
 
-                scriptSrc: [
-                    "'self'",
-                    "'unsafe-inline'",
-                    "https://cdnjs.cloudflare.com"
-                ],
+app.use(express.static(
+  path.join(__dirname, "public")
+));
 
-                styleSrc: [
-                    "'self'",
-                    "'unsafe-inline'",
-                    "https://cdnjs.cloudflare.com",
-                    "https://fonts.googleapis.com"
-                ],
+io.on("connection", socket => {
 
-                fontSrc: [
-                    "'self'",
-                    "https://fonts.gstatic.com",
-                    "data:"
-                ],
+  console.log("⚽ user connected");
 
-                imgSrc: [
-                    "'self'",
-                    "data:",
-                    "blob:",
-                    "https://image.tmdb.org",
-                    "https://i.imgur.com",
-                    "https://via.placeholder.com"
-                ],
-
-                frameSrc: [
-                    "'self'",
-                    "https://vidsrc.to",
-                    "https://vidsrc.me",
-                    "https://2embed.cc",
-                    "https://multiembed.mov",
-                    "https://superembed.stream"
-                ],
-
-                connectSrc: [
-                    "'self'",
-                    "https://api.themoviedb.org"
-                ]
-            }
-        }
-    })
-);
-
-/* =========================
-   RATE LIMITER
-========================= */
-
-const apiLimiter = rateLimit({
-
-    windowMs: 15 * 60 * 1000,
-
-    max: 150,
-
-    message: {
-        success: false,
-        error: "Too many requests. Please try again later."
-    },
-
-    standardHeaders: true,
-
-    legacyHeaders: false
-});
-
-app.use("/api/", apiLimiter);
-
-/* =========================
-   STATIC FILES
-========================= */
-
-app.use(express.static(path.join(__dirname, "public")));
-
-/* =========================
-   TMDB CONFIG
-========================= */
-
-const TMDB_URL = "https://api.themoviedb.org/3";
-
-const TMDB_KEY = process.env.TMDB_API_KEY;
-
-if (!TMDB_KEY) {
-    console.log("❌ Missing TMDB_API_KEY in .env");
-}
-
-/* =========================
-   TMDB FETCH HELPER
-========================= */
-
-async function fetchTMDB(endpoint, params = {}) {
-
-    try {
-
-        const cacheKey =
-            endpoint + JSON.stringify(params);
-
-        // CACHE HIT
-
-        if (cache.has(cacheKey)) {
-            return cache.get(cacheKey);
-        }
-
-        // API REQUEST
-
-        const response = await axios.get(
-            `${TMDB_URL}${endpoint}`,
-            {
-                params: {
-                    api_key: TMDB_KEY,
-                    ...params
-                }
-            }
-        );
-
-        // STORE CACHE
-
-        cache.set(cacheKey, response.data);
-
-        return response.data;
-
-    } catch (error) {
-
-        console.log("TMDB ERROR:", error.message);
-
-        throw error;
-    }
-}
-
-/* =========================
-   PAGE ROUTES
-========================= */
-
-app.get("/", (req, res) => {
-
-    res.sendFile(
-        path.join(__dirname, "public", "index.html")
-    );
+  socket.emit("connected", {
+    status:"live"
+  });
 
 });
 
-app.get("/movies", (req, res) => {
+app.get("/api/fixtures",
+fixtures.getFixtures);
 
-    res.sendFile(
-        path.join(__dirname, "public", "movies.html")
-    );
+app.get("/api/standings/:league",
+standings.getStandings);
 
-});
+app.get("*", (req,res)=>{
 
-app.get("/watch", (req, res) => {
-
-    res.sendFile(
-        path.join(__dirname, "public", "watch.html")
-    );
-
-});
-
-/* =========================
-   API ROUTES
-========================= */
-
-/* TRENDING */
-
-app.get("/api/trending", async (req, res) => {
-
-    try {
-
-        const data = await fetchTMDB(
-            "/trending/all/day"
-        );
-
-        res.json(data);
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-
-    }
+  res.sendFile(
+    path.join(__dirname,
+    "public/index.html")
+  );
 
 });
-
-/* POPULAR */
-
-app.get("/api/popular", async (req, res) => {
-
-    try {
-
-        const data = await fetchTMDB(
-            "/movie/popular"
-        );
-
-        res.json(data);
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-
-    }
-
-});
-
-/* TOP RATED */
-
-app.get("/api/toprated", async (req, res) => {
-
-    try {
-
-        const data = await fetchTMDB(
-            "/movie/top_rated"
-        );
-
-        res.json(data);
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-
-    }
-
-});
-
-/* MOVIE / TV DETAILS */
-
-app.get("/api/details/:id", async (req, res) => {
-
-    try {
-
-        const type = req.query.type || "movie";
-
-        const data = await fetchTMDB(
-
-            `/${type}/${req.params.id}`,
-
-            {
-                append_to_response:
-                    "credits,videos,recommendations,similar"
-            }
-
-        );
-
-        res.json(data);
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-
-    }
-
-});
-
-/* TV SEASONS */
-
-app.get("/api/tv/:id/season/:number", async (req, res) => {
-
-    try {
-
-        const data = await fetchTMDB(
-
-            `/tv/${req.params.id}/season/${req.params.number}`
-
-        );
-
-        res.json(data);
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-
-    }
-
-});
-
-/* SEARCH */
-
-app.get("/api/search", async (req, res) => {
-
-    try {
-
-        const query = req.query.q;
-
-        if (!query) {
-
-            return res.status(400).json({
-                success: false,
-                error: "Search query missing"
-            });
-
-        }
-
-        const data = await fetchTMDB(
-
-            "/search/multi",
-
-            {
-                query
-            }
-
-        );
-
-        res.json(data);
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-
-    }
-
-});
-
-/* =========================
-   404 API HANDLER
-========================= */
-
-app.use("/api/*", (req, res) => {
-
-    res.status(404).json({
-        success: false,
-        error: "API route not found"
-    });
-
-});
-
-/* =========================
-   FRONTEND FALLBACK
-========================= */
-
-app.get("*", (req, res) => {
-
-    res.sendFile(
-        path.join(__dirname, "public", "index.html")
-    );
-
-});
-
-/* =========================
-   SERVER START
-========================= */
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+server.listen(PORT, ()=>{
 
-    console.log(`
-========================================
-🎬 CYMOR MOVIE HUB RUNNING
-🌍 PORT: ${PORT}
-⚡ STATUS: ONLINE
-========================================
+  console.log(`
+=================================
+⚽ CYMOR FOOTBALL HUB
+🚀 PORT ${PORT}
+=================================
 `);
 
 });
