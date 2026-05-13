@@ -17,16 +17,12 @@ const fixtures = require("./engine/matches/fixtures");
 const standings = require("./engine/standings/standings");
 
 /* ========================
-   APP INIT
+   INIT
 ======================== */
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*"
-  }
-});
+const io = new Server(server);
 
 /* ========================
    MIDDLEWARE
@@ -47,10 +43,10 @@ app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "public")));
 
 /* ========================
-   SOCKET ENGINE (LIVE READY)
+   SOCKET (LIVE READY)
 ======================== */
 
-io.on("connection", socket => {
+io.on("connection", (socket) => {
   console.log("⚽ user connected");
 
   socket.emit("connected", {
@@ -59,43 +55,33 @@ io.on("connection", socket => {
 });
 
 /* ========================
-   FIXTURES ROUTE (LIVE FIX ENABLED)
+   EPL FIXTURES ROUTE
 ======================== */
 
-app.get("/api/fixtures", (req, res) => {
-  // 🔥 FIX: timezone-safe date handling (East Africa / Render fix)
-  const date =
-    req.query.date ||
-    new Date(Date.now() + 3 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-
-  // attach date to request so engine can use it
-  req.query.date = date;
-
-  return fixtures.getFixtures(req, res);
-});
+app.get("/api/fixtures", fixtures.getFixtures);
 
 /* ========================
-   STANDINGS ROUTE
+   STANDINGS
 ======================== */
 
-app.get("/api/standings/:league", standings.getStandings);
+app.get(
+  "/api/standings/:league",
+  standings.getStandings
+);
 
 /* ========================
-   HEALTH CHECK (RENDER SAFE)
+   HEALTH CHECK
 ======================== */
 
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    status: "Cymor Football Hub Running ⚽",
-    time: new Date().toISOString()
+    status: "Cymor EPL Hub Running ⚽"
   });
 });
 
 /* ========================
-   FRONTEND ROUTE
+   FRONTEND
 ======================== */
 
 app.get("*", (req, res) => {
@@ -105,7 +91,7 @@ app.get("*", (req, res) => {
 });
 
 /* ========================
-   START SERVER
+   START
 ======================== */
 
 const PORT = process.env.PORT || 3000;
@@ -113,9 +99,9 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`
 =================================
-⚽ CYMOR FOOTBALL HUB
+⚽ CYMOR EPL HUB
 🚀 PORT: ${PORT}
-🔥 STATUS: LIVE
+🔥 MODE: PREMIER LEAGUE ONLY
 =================================
 `);
 });
