@@ -10,7 +10,7 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 
-// Initialize Socket.IO for Live Analytics & Goal Alerts
+// 1. SOCKET.IO SETUP
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -18,40 +18,56 @@ const io = new Server(server, {
     }
 });
 
-// Middleware for Performance & Security
+// 2. HELMET & SECURITY CONFIG
+// We must explicitly allow the API-Football CDN domains so images aren't blocked
 app.use(helmet({
-    contentSecurityPolicy: false, // Allows external API & Image loads
+    contentSecurityPolicy: {
+        directives: {
+            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            "img-src": ["'self'", "data:", "https://media.api-sports.io", "https://images.unsplash.com"],
+            "script-src": ["'self'", "'unsafe-inline'", "https://cdn.socket.io"],
+            "connect-src": ["'self'", "https://api-football-v1.p.rapidapi.com", "wss://*.onrender.com"]
+        },
+    },
 }));
-app.use(compression()); // Shrinks responses for faster loading on mobile
+
+// 3. PERFORMANCE MIDDLEWARE
+app.use(compression()); // Essential for Render's limited bandwidth
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Attach Socket.IO to the Request object so API routes can trigger alerts
+// Attach Socket.IO to requests
 app.use((req, res, next) => {
     req.io = io;
     next();
 });
 
-// Import the Engine Routes
+// 4. API ROUTES
+// Ensure this path matches your folder structure exactly
 const footballRoutes = require('./engine/api/footballApi');
 app.use('/api', footballRoutes);
 
-// Socket.IO Connection Logic
+// 5. LIVE HUB SOCKET LOGIC
 io.on('connection', (socket) => {
-    console.log('⚽ A fan joined the Cymor Live Hub');
+    console.log('⚽ Fan connected to Cymor Live Hub');
     
     socket.on('join-match', (matchId) => {
         socket.join(`match-${matchId}`);
-        console.log(`User tracking match: ${matchId}`);
     });
 
     socket.on('disconnect', () => {
-        console.log('User disconnected');
+        console.log('Fan disconnected');
     });
 });
 
-// Fallback to index.html for SPA behavior
+// 6. ERROR HANDLING (Prevents server crashes)
+app.use((err, req, res, next) => {
+    console.error('SERVER_ERROR:', err.stack);
+    res.status(500).send({ error: 'Tactical Engine Malfunction' });
+});
+
+// 7. SPA FALLBACK
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -61,9 +77,9 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`
     -------------------------------------------
-    🚀 CYMOR FOOTBALL HUB IS LIVE
-    🏟️  Port: ${PORT}
-    💜  Focus: Premier League Elite
+    🚀 CYMOR FOOTBALL HUB: DEPLOYED
+    🏟️  Running on Port: ${PORT}
+    🛡️  Security: Custom CSP Active
     -------------------------------------------
     `);
 });
