@@ -1,85 +1,81 @@
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const compression = require('compression');
-const helmet = require('helmet');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
+const router = express.Router();
+const axios = require('axios');
+const NodeCache = require('node-cache');
+const myCache = new NodeCache({ stdTTL: 30 }); // Shorter cache (30s) for live score accuracy
 
-const app = express();
-const server = http.createServer(app);
+const API_BASE = "https://v3.football.api-sports.io";
+const HEADERS = {
+    'x-rapidapi-key': process.env.FOOTBALL_API_KEY,
+    'x-rapidapi-host': process.env.FOOTBALL_API_HOST
+};
 
-// 1. SOCKET.IO SETUP
-const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
+// 1. Fetch Premier League Fixtures (Live & Today's Schedule - EAT Sync)
+router.get('/epl-fixtures', async (req, res) => {
+    const cachedData = myCache.get("epl_fixtures_live");
+    if (cachedData) return res.json(cachedData);
+
+    try {
+        // Today's date in Nairobi/EAT timezone to ensure we don't miss late-night or early-morning games
+        const todayEAT = new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Nairobi' });
+
+        const response = await axios.get(`${API_BASE}/fixtures`, {
+            headers: HEADERS,
+            params: { 
+                league: '39', 
+                season: '2025', 
+                date: todayEAT,
+                timezone: 'Africa/Nairobi' // CRITICAL: This ensures "Live" status matches Kenya time
+            }
+        });
+
+        // Filter and Sort: Prioritize Live games
+        const matches = response.data.response || [];
+        const sortedMatches = matches.sort((a, b) => {
+            const statusA = a.fixture.status.short;
+            const statusB = b.fixture.status.short;
+            const liveStatuses = ['1H', 'HT', '2H', 'ET', 'P', 'BT'];
+            
+            // Push Live matches to the top
+            if (liveStatuses.includes(statusA) && !liveStatuses.includes(statusB)) return -1;
+            if (!liveStatuses.includes(statusA) && liveStatuses.includes(statusB)) return 1;
+            
+            // Otherwise sort by kickoff time
+            return new Date(a.fixture.date) - new Date(b.fixture.date);
+        });
+
+        myCache.set("epl_fixtures_live", sortedMatches);
+        res.json(sortedMatches);
+    } catch (err) {
+        console.error("EPL_FETCH_ERROR:", err.message);
+        res.status(500).json({ error: "Failed to load EPL fixtures" });
     }
 });
 
-// 2. HELMET & SECURITY CONFIG
-// We must explicitly allow the API-Football CDN domains so images aren't blocked
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-            "img-src": ["'self'", "data:", "https://media.api-sports.io", "https://images.unsplash.com"],
-            "script-src": ["'self'", "'unsafe-inline'", "https://cdn.socket.io"],
-            "connect-src": ["'self'", "https://api-football-v1.p.rapidapi.com", "wss://*.onrender.com"]
-        },
-    },
-}));
+// 2. Fetch Deep Match Details (Lineups, H2H, and Live Stats)
+router.get('/match-details/:id', async (req, res) => {
+    const matchId = req.params.id;
+    const h2hQuery = req.query.h2h;
 
-// 3. PERFORMANCE MIDDLEWARE
-app.use(compression()); // Essential for Render's limited bandwidth
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+    try {
+        // Parallel requests for tactical depth
+        const [lineupsRes, h2hRes, statsRes, eventsRes] = await Promise.all([
+            axios.get(`${API_BASE}/fixtures/lineups?fixture=${matchId}`, { headers: HEADERS }),
+            axios.get(`${API_BASE}/fixtures/headtohead?h2h=${h2hQuery}`, { headers: HEADERS }),
+            axios.get(`${API_BASE}/fixtures/statistics?fixture=${matchId}`, { headers: HEADERS }),
+            axios.get(`${API_BASE}/fixtures/events?fixture=${matchId}`, { headers: HEADERS })
+        ]);
 
-// Attach Socket.IO to requests
-app.use((req, res, next) => {
-    req.io = io;
-    next();
+        res.json({
+            lineups: lineupsRes.data.response,
+            h2h: h2hRes.data.response,
+            stats: statsRes.data.response,
+            events: eventsRes.data.response
+        });
+    } catch (err) {
+        console.error("DETAILS_FETCH_ERROR:", err.message);
+        res.status(500).json({ error: "Tactical data currently unavailable" });
+    }
 });
 
-// 4. API ROUTES
-// Ensure this path matches your folder structure exactly
-const footballRoutes = require('./engine/api/footballApi');
-app.use('/api', footballRoutes);
-
-// 5. LIVE HUB SOCKET LOGIC
-io.on('connection', (socket) => {
-    console.log('⚽ Fan connected to Cymor Live Hub');
-    
-    socket.on('join-match', (matchId) => {
-        socket.join(`match-${matchId}`);
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Fan disconnected');
-    });
-});
-
-// 6. ERROR HANDLING (Prevents server crashes)
-app.use((err, req, res, next) => {
-    console.error('SERVER_ERROR:', err.stack);
-    res.status(500).send({ error: 'Tactical Engine Malfunction' });
-});
-
-// 7. SPA FALLBACK
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, () => {
-    console.log(`
-    -------------------------------------------
-    🚀 CYMOR FOOTBALL HUB: DEPLOYED
-    🏟️  Running on Port: ${PORT}
-    🛡️  Security: Custom CSP Active
-    -------------------------------------------
-    `);
-});
+module.exports = router;
