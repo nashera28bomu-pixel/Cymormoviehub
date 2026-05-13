@@ -1,141 +1,395 @@
 /**
+ * =========================================
  * CYMOR MOVIE HUB - SCRIPT.JS
- * Core logic for Trending Hero, Dynamic Rows, and Navigation
+ * Netflix Style Frontend Logic
+ * =========================================
  */
 
-// 1. GLOBAL NAVIGATION - Attached to window for HTML onclick access
-window.openContent = function(id, type) {
+/* =========================================
+   GLOBAL NAVIGATION
+========================================= */
+
+window.openContent = function(id, type = "movie") {
+
     if (!id) return;
-    
-    // TMDB sometimes returns 'all' or undefined; fallback to 'movie'
-    let contentType = type;
-    if (!type || type === 'all') {
-        contentType = 'movie'; 
-    }
-    
-    console.log(`Navigating to ${contentType}: ${id}`);
-    window.location.href = `watch.html?id=${id}&type=${contentType}`;
+
+    window.location.href =
+        `/watch.html?id=${id}&type=${type}`;
+
 };
 
-// 2. CONFIGURATION & CONSTANTS
-const IMG = "https://image.tmdb.org/t/p/w500";
-const ORIGINAL = "https://image.tmdb.org/t/p/original";
-const HERO_EL = document.getElementById("hero");
-const HERO_CONTENT_EL = document.getElementById("heroContent");
+/* =========================================
+   CONFIG
+========================================= */
+
+const IMG =
+    "https://image.tmdb.org/t/p/w500";
+
+const ORIGINAL =
+    "https://image.tmdb.org/t/p/original";
+
+const HERO_EL =
+    document.getElementById("hero");
+
+const HERO_CONTENT_EL =
+    document.getElementById("heroContent");
 
 let trendingMovies = [];
+
 let currentHeroIndex = 0;
+
 let heroInterval;
 
-// 3. CORE DATA FETCHING
+/* =========================================
+   HOME INITIALIZATION
+========================================= */
+
 async function initHome() {
+
     try {
-        // Fetch trending items for the Hero Slider and Trending Row
-        const res = await fetch('/api/trending');
-        if (!res.ok) throw new Error("Failed to fetch trending data");
-        
+
+        // FETCH TRENDING
+
+        const res =
+            await fetch("/api/trending");
+
+        if (!res.ok) {
+            throw new Error(
+                "Failed to fetch trending movies"
+            );
+        }
+
         const data = await res.json();
-        
-        // Filter for items with backdrops to ensure the Hero looks good
-        trendingMovies = data.results.filter(m => m.backdrop_path); 
 
-        // Initial render
+        // FILTER ONLY GOOD HERO ITEMS
+
+        trendingMovies =
+            data.results.filter(
+                movie => movie.backdrop_path
+            );
+
+        // HERO
+
         updateHero();
-        renderMovies(data.results, "trending");
 
-        // Set up the auto-sliding Hero
+        // TRENDING ROW
+
+        renderMovies(
+            data.results,
+            "trending"
+        );
+
+        // START HERO AUTO SLIDER
+
         startHeroSlider();
 
-        // Fetch additional categorized rows
-        fetchSection('popular', 'popular');
-        fetchSection('toprated', 'toprated');
-        
-    } catch (err) {
-        console.error("Cymor Hub Load Error:", err);
+        // OTHER SECTIONS
+
+        fetchSection(
+            "popular",
+            "popular"
+        );
+
+        fetchSection(
+            "toprated",
+            "toprated"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "CYMOR LOAD ERROR:",
+            error
+        );
+
     }
+
 }
 
-// 4. HERO SECTION LOGIC
+/* =========================================
+   HERO SECTION
+========================================= */
+
 function updateHero() {
-    const movie = trendingMovies[currentHeroIndex];
-    if (!movie || !HERO_EL || !HERO_CONTENT_EL) return;
 
-    // Detect media type: trending API usually provides media_type, others don't
-    const type = movie.media_type || (movie.title ? 'movie' : 'tv');
-    const title = movie.title || movie.name || "Untitled Production";
-    const overview = movie.overview || "No description available for this title.";
+    const movie =
+        trendingMovies[currentHeroIndex];
 
-    // Smooth transition via background image
-    HERO_EL.style.backgroundImage = `url(${ORIGINAL + movie.backdrop_path})`;
-    
+    if (
+        !movie ||
+        !HERO_EL ||
+        !HERO_CONTENT_EL
+    ) return;
+
+    // DETECT TYPE
+
+    const type =
+        movie.media_type ||
+        (movie.title ? "movie" : "tv");
+
+    // TITLE
+
+    const title =
+        movie.title ||
+        movie.name ||
+        "Untitled";
+
+    // OVERVIEW
+
+    const overview =
+        movie.overview ||
+        "No description available.";
+
+    // BACKGROUND
+
+    HERO_EL.style.backgroundImage =
+        `url(${ORIGINAL + movie.backdrop_path})`;
+
+    // HERO HTML
+
     HERO_CONTENT_EL.innerHTML = `
-        <h1 class="animate-fade-in">${title}</h1>
-        <p class="animate-fade-in">${overview}</p>
+
+        <h1 class="animate-fade-in">
+            ${title}
+        </h1>
+
+        <p class="animate-fade-in">
+            ${overview}
+        </p>
+
         <div class="hero-btns">
-            <button class="watch-btn" onclick="openContent(${movie.id}, '${type}')">
-                <i class="fas fa-play"></i> Watch Now
+
+            <button class="watch-btn"
+            onclick="openContent(${movie.id}, '${type}')">
+
+                <i class="fas fa-play"></i>
+                Watch Now
+
             </button>
-            <button class="info-btn" onclick="openContent(${movie.id}, '${type}')">
-                <i class="fas fa-info-circle"></i> Details
+
+            <button class="info-btn"
+            onclick="openContent(${movie.id}, '${type}')">
+
+                <i class="fas fa-info-circle"></i>
+                Details
+
             </button>
+
         </div>
+
     `;
+
 }
+
+/* =========================================
+   HERO AUTO SLIDER
+========================================= */
 
 function startHeroSlider() {
-    if (heroInterval) clearInterval(heroInterval);
+
+    if (heroInterval) {
+        clearInterval(heroInterval);
+    }
+
     heroInterval = setInterval(() => {
-        currentHeroIndex = (currentHeroIndex + 1) % trendingMovies.length;
+
+        currentHeroIndex++;
+
+        if (
+            currentHeroIndex >=
+            trendingMovies.length
+        ) {
+
+            currentHeroIndex = 0;
+
+        }
+
         updateHero();
-    }, 8000); // 8 seconds per slide
+
+    }, 8000);
+
 }
 
-// 5. GRID RENDERING LOGIC
+/* =========================================
+   RENDER MOVIE ROWS
+========================================= */
+
 function renderMovies(movies, targetId) {
-    const container = document.getElementById(targetId);
+
+    const container =
+        document.getElementById(targetId);
+
     if (!container) return;
 
-    if (!movies || movies.length === 0) {
-        container.innerHTML = `<p class="muted">No content found in this section.</p>`;
+    // EMPTY STATE
+
+    if (
+        !movies ||
+        movies.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <p class="muted">
+                No content found.
+            </p>
+
+        `;
+
         return;
     }
 
-    container.innerHTML = movies.map(movie => {
-        const type = movie.media_type || (movie.title ? 'movie' : 'tv');
-        const rating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
-        const poster = movie.poster_path ? (IMG + movie.poster_path) : 'https://via.placeholder.com/500x750?text=No+Cover';
-        
-        return `
-            <div class="movie-card" onclick="openContent(${movie.id}, '${type}')">
-                <div class="rating-badge">★ ${rating}</div>
-                <img src="${poster}" alt="${movie.title || movie.name}" loading="lazy">
-            </div>
-        `;
-    }).join("");
+    // RENDER MOVIES
+
+    container.innerHTML =
+        movies.map(movie => {
+
+            const type =
+                movie.media_type ||
+                (movie.title ? "movie" : "tv");
+
+            const rating =
+                movie.vote_average
+                ? movie.vote_average.toFixed(1)
+                : "N/A";
+
+            const poster =
+                movie.poster_path
+                ? IMG + movie.poster_path
+                : "https://via.placeholder.com/500x750?text=No+Cover";
+
+            return `
+
+                <div class="movie-card"
+                onclick="openContent(${movie.id}, '${type}')">
+
+                    <div class="rating-badge">
+                        ★ ${rating}
+                    </div>
+
+                    <img
+                        src="${poster}"
+
+                        alt="${movie.title || movie.name}"
+
+                        loading="lazy"
+                    >
+
+                </div>
+
+            `;
+
+        }).join("");
+
 }
 
-async function fetchSection(endpoint, targetId) {
+/* =========================================
+   FETCH EXTRA SECTIONS
+========================================= */
+
+async function fetchSection(
+    endpoint,
+    targetId
+) {
+
     try {
-        const res = await fetch(`/api/${endpoint}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        renderMovies(data.results, targetId);
-    } catch (err) {
-        console.warn(`Section ${endpoint} failed to load:`, err);
-    }
-}
 
-// 6. SEARCH FUNCTIONALITY (Optional helper if search input exists)
-const searchInput = document.getElementById("searchInput");
-if (searchInput) {
-    searchInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter" && searchInput.value.trim() !== "") {
-            // You can redirect to a search results page or filter current view
-            console.log("Searching for:", searchInput.value);
-            // Example: window.location.href = `movies.html?search=${searchInput.value}`;
+        const res =
+            await fetch(`/api/${endpoint}`);
+
+        if (!res.ok) {
+            throw new Error(
+                `Failed to load ${endpoint}`
+            );
         }
-    });
+
+        const data =
+            await res.json();
+
+        renderMovies(
+            data.results,
+            targetId
+        );
+
+    } catch (error) {
+
+        console.warn(
+            `${endpoint} failed:`,
+            error
+        );
+
+    }
+
 }
 
-// 7. INITIALIZE
-document.addEventListener("DOMContentLoaded", initHome);
+/* =========================================
+   SEARCH
+========================================= */
+
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
+
+if (searchInput) {
+
+    searchInput.addEventListener(
+        "keypress",
+
+        async (e) => {
+
+            if (
+                e.key === "Enter" &&
+                searchInput.value.trim() !== ""
+            ) {
+
+                try {
+
+                    const query =
+                        searchInput.value.trim();
+
+                    const res =
+                        await fetch(
+                            `/api/search?q=${encodeURIComponent(query)}`
+                        );
+
+                    const data =
+                        await res.json();
+
+                    renderMovies(
+                        data.results,
+                        "trending"
+                    );
+
+                    // SCROLL TO RESULTS
+
+                    window.scrollTo({
+                        top: 500,
+                        behavior: "smooth"
+                    });
+
+                } catch (error) {
+
+                    console.log(
+                        "Search failed:",
+                        error
+                    );
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+
+/* =========================================
+   INITIALIZE APP
+========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initHome
+);
