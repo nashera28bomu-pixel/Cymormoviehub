@@ -6,26 +6,29 @@ async function loadFixtures() {
     const container = document.getElementById("matches");
     if (!container) return;
 
-    if (!data.data || data.data.length === 0) {
+    const fixtures = data.data?.all || [];
+
+    if (!fixtures.length) {
       container.innerHTML = `
         <div style="padding:20px;color:#fbbf24;">
-          No EPL fixtures found right now ⚽
+          No EPL fixtures found for today or tomorrow ⚽
         </div>
       `;
       return;
     }
 
-    container.innerHTML = data.data.map(match => {
+    container.innerHTML = fixtures.map(match => {
 
       const time = new Date(match.time);
       const now = new Date();
       const diff = Math.floor((time - now) / 60000);
 
-      const status = match.live
-        ? "LIVE 🔴"
-        : diff > 0
-          ? `Kickoff in ${diff} min`
-          : "Started";
+      const status =
+        match.live
+          ? "LIVE 🔴"
+          : diff > 0
+            ? `Kickoff in ${diff} min`
+            : "Started";
 
       return `
         <div class="fixture-card">
@@ -58,7 +61,7 @@ async function loadFixtures() {
     }).join("");
 
   } catch (err) {
-    console.error("Fixtures UI error:", err);
+    console.error("Fixtures error:", err);
   }
 }
 
