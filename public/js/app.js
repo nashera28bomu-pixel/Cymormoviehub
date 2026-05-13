@@ -23,29 +23,24 @@ function updateHero() {
     const club = EPL_CLUBS[clubIndex];
     const heroSection = document.getElementById('hero');
     const heroTitle = document.getElementById('hero-title');
-    const heroSubtitle = document.getElementById('hero-subtitle');
 
     if (!heroSection || !heroTitle) return;
 
-    // Apply the club badge as a contained background on the right
-    heroSection.style.backgroundImage = `linear-gradient(90deg, rgba(5,5,5,1) 30%, rgba(5,5,5,0.6) 100%), url('${CDN_TEAM}${club.id}.png')`;
-    heroSection.style.backgroundSize = "contain";
-    heroSection.style.backgroundRepeat = "no-repeat";
-    heroSection.style.backgroundPosition = "right center";
-    
+    // Use the transparent approach to fix logo visibility from 599079.jpg
+    heroSection.style.backgroundImage = `url('${CDN_TEAM}${club.id}.png')`;
     heroTitle.innerHTML = `<span style="color: #00ff85;">${club.name}</span>`;
-    if (heroSubtitle) heroSubtitle.innerText = "Real-time tactical analysis and live scores.";
 
     clubIndex = (clubIndex + 1) % EPL_CLUBS.length;
 }
 
-// 3. LOAD LIVE PREMIER LEAGUE FIXTURES
+// 3. LOAD LIVE PREMIER LEAGUE FIXTURES (EAT Synchronized)
 async function fetchEPLFixtures() {
     const grid = document.getElementById('fixtures-container');
     if (!grid) return;
     
     try {
-        const response = await fetch('/api/epl-fixtures');
+        // Cache-busting timestamp to ensure the live Man City score updates
+        const response = await fetch(`/api/epl-fixtures?t=${new Date().getTime()}`);
         const matches = await response.json();
 
         if (!matches || matches.length === 0) {
@@ -53,15 +48,33 @@ async function fetchEPLFixtures() {
             return;
         }
 
+        // Sort: Live matches first, then upcoming
+        matches.sort((a, b) => {
+            const liveStatuses = ['1H', '2H', 'HT', 'P', 'BT'];
+            const aLive = liveStatuses.includes(a.fixture.status.short);
+            const bLive = liveStatuses.includes(b.fixture.status.short);
+            return bLive - aLive;
+        });
+
         grid.innerHTML = matches.map(m => {
             const status = m.fixture.status.short;
-            const isLive = ['1H', '2H', 'HT'].includes(status);
+            const elapsed = m.fixture.status.elapsed;
+            const isLive = ['1H', '2H', 'HT', 'P'].includes(status);
+            
+            // Format time specifically for Nairobi/EAT
+            const matchTime = new Date(m.fixture.date).toLocaleTimeString('en-GB', {
+                hour: '2-digit', 
+                minute:'2-digit',
+                hour12: true 
+            });
             
             return `
                 <div class="match-card glass" onclick="openTacticalHub(${m.fixture.id}, '${m.teams.home.id}-${m.teams.away.id}')">
                     <div class="card-meta">
-                        <span class="${isLive ? 'live-badge' : 'time-badge'}">${status}</span>
-                        <span>${new Date(m.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        <span class="${isLive ? 'live-badge' : 'time-badge'}">
+                            ${isLive ? `LIVE ${elapsed}'` : status}
+                        </span>
+                        <span>${matchTime} EAT</span>
                     </div>
                     
                     <div class="card-teams">
@@ -70,7 +83,7 @@ async function fetchEPLFixtures() {
                             <p>${m.teams.home.name}</p>
                         </div>
                         <div class="vs-score">
-                            ${isLive || status === 'FT' ? `<h2>${m.goals.home} - ${m.goals.away}</h2>` : '<h3>VS</h3>'}
+                            ${isLive || status === 'FT' ? `<h2>${m.goals.home} - ${m.goals.away}</h2>` : '<h3 class="neon-text">VS</h3>'}
                         </div>
                         <div class="team">
                             <img src="${CDN_TEAM}${m.teams.away.id}.png" alt="${m.teams.away.name}" loading="lazy">
@@ -78,11 +91,12 @@ async function fetchEPLFixtures() {
                         </div>
                     </div>
                     
-                    ${status === 'NS' ? `<div class="tactical-preview">Tactical Reveal in 1hr</div>` : ''}
+                    ${isLive ? `<div class="live-indicator">Tracking Tactical Data...</div>` : ''}
                 </div>
             `;
         }).join('');
     } catch (err) {
+        console.error("Fetch Error:", err);
         grid.innerHTML = `<div class="error">Unable to sync with EPL data servers.</div>`;
     }
 }
@@ -103,30 +117,30 @@ async function openTacticalHub(matchId, h2hKey) {
         const lineup = data.lineups && data.lineups.length > 0 ? data.lineups[0] : null;
         
         dataPanel.innerHTML = `
-            <h2 style="color: #00ff85;">Tactical Blueprint</h2>
+            <h2 style="color: #00ff85; margin-bottom: 15px;">Tactical Blueprint</h2>
             <div class="lineup-container">
                 ${lineup ? `
-                    <h4>Formation: ${lineup.formation}</h4>
-                    <div class="pitch-preview">
-                        <p>Manager: ${lineup.coach.name}</p>
-                        <div class="starting-xi">
-                            ${lineup.startXI.map(p => `
-                                <div class="player-pill">
-                                    <img src="${CDN_PLAYER}${p.player.id}.png" onerror="this.src='https://media.api-sports.io/football/players/notfound.png'">
-                                    <span>${p.player.name}</span>
-                                </div>
-                            `).join('')}
-                        </div>
+                    <div class="formation-header">
+                        <span class="glass-tag">Formation: ${lineup.formation}</span>
+                        <span class="glass-tag">Coach: ${lineup.coach.name}</span>
                     </div>
-                ` : '<p>Lineups are hidden until 60 minutes before kickoff.</p>'}
+                    <div class="starting-xi">
+                        ${lineup.startXI.map(p => `
+                            <div class="player-pill">
+                                <img src="${CDN_PLAYER}${p.player.id}.png" onerror="this.src='https://media.api-sports.io/football/players/notfound.png'">
+                                <span>${p.player.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : '<p class="glass-msg">Tactical data will unlock 60 minutes before kickoff.</p>'}
             </div>
-            <hr style="border: 0.5px solid #333; margin: 20px 0;">
-            <h3>Past Meetings (H2H)</h3>
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 25px 0;">
+            <h3 style="margin-bottom: 15px;">Head-to-Head History</h3>
             <div class="h2h-list">
-                ${data.h2h ? data.h2h.slice(0, 5).map(h => `
-                    <div class="h2h-row">
+                ${data.h2h && data.h2h.length > 0 ? data.h2h.slice(0, 5).map(h => `
+                    <div class="h2h-row glass">
                         <span>${h.teams.home.name}</span>
-                        <strong>${h.goals.home} - ${h.goals.away}</strong>
+                        <span class="h2h-score">${h.goals.home} - ${h.goals.away}</span>
                         <span>${h.teams.away.name}</span>
                     </div>
                 `).join('') : '<p>No historical data found.</p>'}
@@ -139,18 +153,25 @@ async function openTacticalHub(matchId, h2hKey) {
 
 // 5. INITIALIZE HUB
 document.addEventListener('DOMContentLoaded', () => {
-    // Start Hero rotation (5 seconds per club)
-    setInterval(updateHero, 5000);
+    setInterval(updateHero, 8000);
     updateHero();
     
-    // Load Premier League fixtures
     fetchEPLFixtures();
+    
+    // Auto-refresh every minute to keep live scores accurate
+    setInterval(fetchEPLFixtures, 60000);
 
-    // Close Modal Logic
     const closeBtn = document.querySelector('.close-modal');
     if (closeBtn) {
         closeBtn.onclick = () => {
             document.getElementById('match-modal').style.display = 'none';
         };
+    }
+    
+    window.onclick = (event) => {
+        const modal = document.getElementById('match-modal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
     }
 });
