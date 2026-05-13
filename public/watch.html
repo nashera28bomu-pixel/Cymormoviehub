@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-  content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
   <title>Cymor Player</title>
 
-  <link rel="stylesheet" href="style.css">
-
+  <link rel="stylesheet" href="style.css"/>
   <link rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 </head>
 
 <body>
 
+<!-- ================= NAVBAR ================= -->
 <nav class="navbar">
   <div class="nav-container">
 
@@ -30,17 +29,14 @@
   </div>
 </nav>
 
+<!-- ================= PLAYER ================= -->
 <main class="player-container">
 
-  <!-- PLAYER -->
-
   <div class="video-wrapper">
-    <iframe id="videoPlayer"
-    allowfullscreen></iframe>
+    <iframe id="videoPlayer" allowfullscreen></iframe>
   </div>
 
-  <!-- TITLE -->
-
+  <!-- TITLE SECTION -->
   <div class="movie-detail-header">
 
     <h1 id="movieTitle">Loading...</h1>
@@ -52,12 +48,9 @@
         Streaming
       </button>
 
-      <button class="info-btn"
-      onclick="scrollToDownloads()">
-
+      <button class="info-btn" onclick="scrollToDownloads()">
         <i class="fas fa-download"></i>
         Download
-
       </button>
 
     </div>
@@ -65,17 +58,12 @@
   </div>
 
   <!-- OVERVIEW -->
-
-  <p id="movieOverview"
-  style="margin:20px 0; color:var(--muted);"></p>
+  <p id="movieOverview" style="margin:20px 0; color:var(--muted);"></p>
 
   <!-- DOWNLOADS -->
-
   <div id="downloads">
 
-    <h2 style="margin-bottom:20px;">
-      Download Quality
-    </h2>
+    <h2 style="margin-bottom:20px;">Download Quality</h2>
 
     <div class="download-grid">
 
@@ -88,58 +76,30 @@
 
   </div>
 
-  <!-- TABS -->
-
+  <!-- ================= TABS ================= -->
   <div class="tabs">
 
-    <div class="tab active"
-    onclick="switchTab('info', this)">
-      Related
-    </div>
-
-    <div class="tab"
-    onclick="switchTab('cast', this)">
-      Cast
-    </div>
-
-    <div id="episodeTab"
-    class="tab"
-    style="display:none;"
-    onclick="switchTab('episode', this)">
+    <button class="tab active" data-tab="related">Related</button>
+    <button class="tab" data-tab="cast">Cast</button>
+    <button class="tab" id="episodeTab" data-tab="episodes" style="display:none;">
       Episodes
-    </div>
+    </button>
 
   </div>
 
-  <!-- RELATED -->
+  <!-- ================= PANES ================= -->
 
-  <div id="infoPane"
-  class="pane active">
+  <section id="related" class="pane active">
+    <div class="movie-row" id="similarMovies"></div>
+  </section>
 
-    <div class="movie-row"
-    id="similarMovies"></div>
+  <section id="cast" class="pane">
+    <div class="cast-list" id="castList"></div>
+  </section>
 
-  </div>
-
-  <!-- CAST -->
-
-  <div id="castPane"
-  class="pane">
-
-    <div class="cast-list"
-    id="castList"></div>
-
-  </div>
-
-  <!-- EPISODES -->
-
-  <div id="episodePane"
-  class="pane">
-
-    <div class="episode-grid"
-    id="episodeGrid"></div>
-
-  </div>
+  <section id="episodes" class="pane">
+    <div class="episode-grid" id="episodeGrid"></div>
+  </section>
 
 </main>
 
