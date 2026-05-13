@@ -1,78 +1,95 @@
-const footballApi = require("../api/footballApi");
+const axios = require("axios");
 
-/**
- * Normalize fixture data into UI-friendly format
- */
+const BASE = "https://api.sportmonks.com/v3/football";
+
+const EPL_LEAGUE_ID = process.env.EPL_LEAGUE_ID || 8;
+
+/* =========================
+   FORMAT FIXTURE (CLEAN UI MODEL)
+========================= */
+
 function formatFixture(match) {
   const home = match.participants?.find(p => p.meta?.location === "home");
   const away = match.participants?.find(p => p.meta?.location === "away");
 
   return {
     id: match.id,
-    league: match.league?.name || "Unknown League",
+
+    league: match.league?.name || "Premier League",
+
     time: match.starting_at,
+
     status: match.state_id,
 
-    // LIVE LOGIC (basic now, upgraded later)
-    live: match.state_id === 2 || match.state_id === 3,
+    live: [2, 3].includes(match.state_id),
+
+    minute: match.time?.minute || null,
 
     home: {
-      name: home?.name || "Home",
-      logo: home?.image_path || ""
+      name: home?.name,
+      logo: home?.image_path
     },
 
     away: {
-      name: away?.name || "Away",
-      logo: away?.image_path || ""
+      name: away?.name,
+      logo: away?.image_path
     },
 
     score: match.scores || []
   };
 }
 
-/**
- * GET FIXTURES CONTROLLER
- * - Uses footballApi engine
- * - Handles empty responses safely
- * - Normalizes data for frontend
- */
+/* =========================
+   EPL FIXTURES ONLY (RELIABLE)
+========================= */
+
 exports.getFixtures = async (req, res) => {
   try {
+    const date =
+      req.query.date ||
+      new Date(Date.now() + 3 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0];
 
-    const query =
-      "/fixtures?include=participants;scores;league&live=all";
+    const response = await axios.get(
+      `${BASE}/fixtures/date/${date}`,
+      {
+        params: {
+          api_token: process.env.SPORTMONKS_API_KEY,
 
-    const data = await footballApi(query);
+          // 🔥 FORCE EPL ONLY
+          filters: `league_id:${EPL_LEAGUE_ID}`,
 
-    // ⚠️ IMPORTANT FIX: different APIs return different structures
-    const rawFixtures =
-      data?.data ||
-      data?.response ||
-      [];
+          include: "participants;scores;league;state"
+        }
+      }
+    );
 
-    if (!Array.isArray(rawFixtures)) {
-      return res.json({
-        success: true,
-        count: 0,
-        data: []
-      });
-    }
+    let fixtures = response.data?.data || [];
 
-    const fixtures = rawFixtures.map(formatFixture);
+    // 🧠 SAFETY FILTER (double guarantee EPL only)
+    fixtures = fixtures.filter(
+      f => f.league?.id == EPL_LEAGUE_ID
+    );
+
+    const mapped = fixtures.map(formatFixture);
 
     res.json({
       success: true,
-      count: fixtures.length,
-      data: fixtures
+      league: "Premier League",
+      count: mapped.length,
+      data: mapped
     });
 
   } catch (err) {
-    console.log("❌ FIXTURES ERROR:", err.message);
+    console.log(
+      "FIXTURES ERROR:",
+      err.response?.data || err.message
+    );
 
     res.status(500).json({
       success: false,
-      error: err.message,
-      data: []
+      error: err.message
     });
   }
 };
