@@ -9,6 +9,13 @@ const NodeCache = require("node-cache");
 require("dotenv").config();
 
 const app = express();
+
+/**
+ * RENDER FIX: Trust the proxy headers (X-Forwarded-For)
+ * This prevents the rate-limiter from crashing on Render.
+ */
+app.set('trust proxy', 1); 
+
 const cache = new NodeCache({ stdTTL: 900 }); // 15-minute cache
 
 // Middleware
@@ -30,7 +37,7 @@ app.use(helmet({
   },
 }));
 
-// Prevent API abuse
+// Prevent API abuse - now safe to use with 'trust proxy' set
 app.use("/api/", rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100
@@ -55,8 +62,6 @@ async function fetchTMDB(endpoint, params = {}) {
 }
 
 // --- PAGE ROUTES ---
-// These ensure that navigating to /movies or /watch actually loads your HTML files
-
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -94,7 +99,7 @@ app.get("/api/tv/:id/season/:number", async (req, res) => {
   }
 });
 
-// 3. Category Routes (Trending, Popular, Top Rated)
+// 3. Category Routes
 app.get("/api/trending", async (req, res) => {
   try {
     const data = await fetchTMDB("/trending/all/day");
