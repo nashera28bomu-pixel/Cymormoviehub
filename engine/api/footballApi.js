@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const NodeCache = require('node-cache');
-const myCache = new NodeCache({ stdTTL: 60 }); // Cache for 60 seconds to save API credits
+const myCache = new NodeCache({ stdTTL: 30 }); // Shorter cache (30s) for live score accuracy
 
 const API_BASE = "https://v3.football.api-sports.io";
 const HEADERS = {
@@ -10,19 +10,39 @@ const HEADERS = {
     'x-rapidapi-host': process.env.FOOTBALL_API_HOST
 };
 
-// 1. Fetch Premier League Fixtures (Live and Upcoming)
+// 1. Fetch Premier League Fixtures (Live & Today's Schedule)
 router.get('/epl-fixtures', async (req, res) => {
-    const cachedData = myCache.get("epl_fixtures");
+    const cachedData = myCache.get("epl_fixtures_live");
     if (cachedData) return res.json(cachedData);
 
     try {
+        // Today's date in YYYY-MM-DD format
+        const today = new Date().toISOString().split('T')[0];
+
         const response = await axios.get(`${API_BASE}/fixtures`, {
             headers: HEADERS,
-            params: { league: '39', season: '2025', next: '15' }
+            params: { 
+                league: '39', 
+                season: '2025', 
+                date: today // This ensures we see games happening TODAY, including LIVE ones
+            }
         });
-        myCache.set("epl_fixtures", response.data.response);
-        res.json(response.data.response);
+
+        // Sort: Live games first, then by time
+        const sortedMatches = response.data.response.sort((a, b) => {
+            const statusA = a.fixture.status.short;
+            const statusB = b.fixture.status.short;
+            const liveStatuses = ['1H', 'HT', '2H', 'ET', 'P'];
+            
+            if (liveStatuses.includes(statusA) && !liveStatuses.includes(statusB)) return -1;
+            if (!liveStatuses.includes(statusA) && liveStatuses.includes(statusB)) return 1;
+            return new Date(a.fixture.date) - new Date(b.fixture.date);
+        });
+
+        myCache.set("epl_fixtures_live", sortedMatches);
+        res.json(sortedMatches);
     } catch (err) {
+        console.error("EPL_FETCH_ERROR:", err.message);
         res.status(500).json({ error: "Failed to load EPL fixtures" });
     }
 });
@@ -30,10 +50,11 @@ router.get('/epl-fixtures', async (req, res) => {
 // 2. Fetch Deep Match Details (Lineups, H2H, and Live Stats)
 router.get('/match-details/:id', async (req, res) => {
     const matchId = req.params.id;
-    const h2hQuery = req.query.h2h; // Format: "teamAId-teamBId"
+    const h2hQuery = req.query.h2h;
 
     try {
-        const [lineups, h2h, stats, events] = await Promise.all([
+        // Parallel requests for speed
+        const [lineupsRes, h2hRes, statsRes, eventsRes] = await Promise.all([
             axios.get(`${API_BASE}/fixtures/lineups?fixture=${matchId}`, { headers: HEADERS }),
             axios.get(`${API_BASE}/fixtures/headtohead?h2h=${h2hQuery}`, { headers: HEADERS }),
             axios.get(`${API_BASE}/fixtures/statistics?fixture=${matchId}`, { headers: HEADERS }),
@@ -41,10 +62,10 @@ router.get('/match-details/:id', async (req, res) => {
         ]);
 
         res.json({
-            lineups: lineups.data.response,
-            h2h: h2h.data.response,
-            stats: stats.data.response,
-            events: events.data.response
+            lineups: lineupsRes.data.response,
+            h2h: h2hRes.data.response,
+            stats: statsRes.data.response,
+            events: eventsRes.data.response
         });
     } catch (err) {
         res.status(500).json({ error: "Tactical data currently unavailable" });
