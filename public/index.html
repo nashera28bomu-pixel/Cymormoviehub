@@ -4,29 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CYMOR FOOTBALL HUB | EPL Edition</title>
-    <link rel="stylesheet" href="css/style.css">
-    <!-- Google Fonts for that premium look -->
+    
+    <!-- FIX 1: Relative path for CSS -->
+    <link rel="stylesheet" href="./css/style.css">
+    
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Navbar with Fixed Glass Class -->
     <nav class="navbar glass">
         <div class="logo">CYMOR<span>FOOTBALL HUB</span></div>
         <div class="nav-menu">
-            <a href="#" class="active">Home</a>
-            <a href="#">Standings</a>
-            <a href="#">Fantasy</a>
+            <!-- Ensure these are styled in CSS -->
+            <a href="/" class="active">Home</a>
+            <a href="/standings">Standings</a>
+            <a href="/fantasy">Fantasy</a>
         </div>
     </nav>
 
     <!-- Netflix-Style Hero Overlay -->
-    <header id="hero" class="hero-overlay">
+    <!-- Added inline style for visibility in case BG image fails initially -->
+    <header id="hero" class="hero-overlay" style="background-color: #050505;">
         <div class="hero-content">
             <div class="hero-badge">PREMIER LEAGUE EXCLUSIVE</div>
-            <h1 id="hero-title">Loading Elite...</h1>
+            <h1 id="hero-title">Premier League Elite</h1>
             <p id="hero-subtitle">Real-time tactical analysis and live scores.</p>
             <div class="hero-actions">
-                <button class="btn-primary">Match Center</button>
-                <button class="btn-secondary">Player Stats</button>
+                <button class="btn-primary glass">Match Center</button>
+                <button class="btn-secondary glass">Player Stats</button>
             </div>
         </div>
         <div class="hero-bottom-fade"></div>
@@ -35,8 +41,9 @@
     <main class="content-wrapper">
         <section class="match-section">
             <h2 class="section-title">Premier League Fixtures</h2>
+            <!-- This is where app.js will inject the data -->
             <div id="fixtures-container" class="fixtures-grid">
-                <!-- Cards injected here -->
+                <div class="loader">Syncing with EPL Servers...</div>
             </div>
         </section>
     </main>
@@ -45,10 +52,13 @@
     <div id="match-modal" class="modal">
         <div class="modal-content glass">
             <span class="close-modal">&times;</span>
-            <div id="modal-data"></div>
+            <div id="modal-data">
+                <!-- Tactical data injected here -->
+            </div>
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <!-- FIX 2: Relative path for JS -->
+    <script src="./js/app.js"></script>
 </body>
 </html>
