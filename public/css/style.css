@@ -1,0 +1,127 @@
+/* --- TACTICAL HUB & MODAL STYLING --- */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 30px;
+    border-radius: 20px;
+    position: relative;
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.close-modal {
+    position: absolute;
+    right: 25px;
+    top: 20px;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--epl-green);
+}
+
+/* --- STARTING XI & PLAYER PILLS --- */
+
+.starting-xi {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.player-pill {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    padding: 5px 15px 5px 5px;
+    transition: all 0.3s ease;
+}
+
+.player-pill:hover {
+    background: var(--epl-green);
+    color: black;
+    transform: scale(1.05);
+}
+
+.player-pill img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    background: #111;
+    border: 1px solid var(--epl-green);
+}
+
+.player-pill span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- HEAD TO HEAD (H2H) --- */
+
+.h2h-list {
+    margin-top: 15px;
+}
+
+.h2h-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 0.9rem;
+}
+
+.h2h-row strong {
+    color: var(--epl-green);
+}
+
+/* --- EXTRA UI ELEMENTS --- */
+
+.live-badge {
+    background: var(--netflix-red);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.tactical-preview {
+    margin-top: 15px;
+    font-size: 0.75rem;
+    color: #888;
+    text-align: center;
+    font-style: italic;
+}
