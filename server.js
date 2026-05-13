@@ -1,107 +1,69 @@
-const express = require("express");
-const path = require("path");
-const http = require("http");
-const cors = require("cors");
-const helmet = require("helmet");
-const compression = require("compression");
-const morgan = require("morgan");
-const { Server } = require("socket.io");
-
-require("dotenv").config();
-
-/* ========================
-   ENGINE IMPORTS
-======================== */
-
-const fixtures = require("./engine/matches/fixtures");
-const standings = require("./engine/standings/standings");
-
-/* ========================
-   INIT
-======================== */
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const compression = require('compression');
+const helmet = require('helmet');
+const cors = require('cors');
+const path = require('path');
+require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
-/* ========================
-   MIDDLEWARE
-======================== */
+// Initialize Socket.IO for Live Analytics & Goal Alerts
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
+// Middleware for Performance & Security
+app.use(helmet({
+    contentSecurityPolicy: false, // Allows external API & Image loads
+}));
+app.use(compression()); // Shrinks responses for faster loading on mobile
 app.use(cors());
 app.use(express.json());
-app.use(compression());
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(
-  helmet({
-    crossOriginEmbedderPolicy: false
-  })
-);
-
-app.use(morgan("dev"));
-
-app.use(express.static(path.join(__dirname, "public")));
-
-/* ========================
-   SOCKET (LIVE READY)
-======================== */
-
-io.on("connection", (socket) => {
-  console.log("⚽ user connected");
-
-  socket.emit("connected", {
-    status: "live"
-  });
+// Attach Socket.IO to the Request object so API routes can trigger alerts
+app.use((req, res, next) => {
+    req.io = io;
+    next();
 });
 
-/* ========================
-   EPL FIXTURES ROUTE
-======================== */
+// Import the Engine Routes
+const footballRoutes = require('./engine/api/footballApi');
+app.use('/api', footballRoutes);
 
-app.get("/api/fixtures", fixtures.getFixtures);
+// Socket.IO Connection Logic
+io.on('connection', (socket) => {
+    console.log('⚽ A fan joined the Cymor Live Hub');
+    
+    socket.on('join-match', (matchId) => {
+        socket.join(`match-${matchId}`);
+        console.log(`User tracking match: ${matchId}`);
+    });
 
-/* ========================
-   STANDINGS
-======================== */
-
-app.get(
-  "/api/standings/:league",
-  standings.getStandings
-);
-
-/* ========================
-   HEALTH CHECK
-======================== */
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    status: "Cymor EPL Hub Running ⚽"
-  });
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
 });
 
-/* ========================
-   FRONTEND
-======================== */
-
-app.get("*", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "public/index.html")
-  );
+// Fallback to index.html for SPA behavior
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-/* ========================
-   START
-======================== */
 
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
-  console.log(`
-=================================
-⚽ CYMOR EPL HUB
-🚀 PORT: ${PORT}
-🔥 MODE: PREMIER LEAGUE ONLY
-=================================
-`);
+    console.log(`
+    -------------------------------------------
+    🚀 CYMOR FOOTBALL HUB IS LIVE
+    🏟️  Port: ${PORT}
+    💜  Focus: Premier League Elite
+    -------------------------------------------
+    `);
 });
