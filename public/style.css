@@ -23,6 +23,34 @@ body {
   line-height: 1.5;
 }
 
+/* --- CLICKABILITY FIXES --- */
+
+/* Ensures critical interactive elements are always at the front */
+.hero-btns, .movie-card, .view-all, .nav-links a {
+    position: relative !important;
+    z-index: 99 !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+/* Prevent the hero gradient from "stealing" clicks */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      rgba(3, 7, 18, 0.2) 0%,
+      rgba(3, 7, 18, 0.7) 50%,
+      var(--bg) 100%
+    ),
+    linear-gradient(to right, var(--bg) 0%, transparent 100%);
+    z-index: 1;
+    pointer-events: none; 
+}
+
 /* --- Layout & Navbar --- */
 
 .navbar {
@@ -91,6 +119,7 @@ body {
   top: 50%;
   transform: translateY(-50%);
   color: var(--muted);
+  z-index: 2;
 }
 
 #searchInput {
@@ -124,21 +153,6 @@ body {
   transition: background-image 1s ease-in-out;
 }
 
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    to bottom,
-    rgba(3, 7, 18, 0.2) 0%,
-    rgba(3, 7, 18, 0.7) 50%,
-    var(--bg) 100%
-  ),
-  linear-gradient(to right, var(--bg) 0%, transparent 100%);
-}
-
 .hero-content {
   position: relative;
   z-index: 2;
@@ -152,6 +166,7 @@ body {
   font-weight: 900;
   margin-bottom: 1rem;
   line-height: 1.1;
+  text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
 }
 
 .hero-content p {
@@ -174,7 +189,6 @@ body {
   padding: 12px 24px;
   border-radius: var(--radius);
   font-weight: 700;
-  cursor: pointer;
   transition: 0.3s;
   border: none;
 }
@@ -190,6 +204,11 @@ body {
   backdrop-filter: blur(5px);
 }
 
+.watch-btn:hover, .info-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
 /* --- Movie Rows & Cards --- */
 
 .movie-section {
@@ -201,6 +220,13 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+}
+
+.view-all {
+    text-decoration: none;
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: bold;
 }
 
 .movie-row {
@@ -216,12 +242,11 @@ body {
 }
 
 .movie-card {
-  position: relative;
   min-width: 200px;
   border-radius: var(--radius);
   background: var(--card);
-  cursor: pointer;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
 }
 
 .movie-card:hover {
@@ -275,50 +300,6 @@ body {
     border: none; 
 }
 
-.player-overlay {
-    position: absolute; 
-    top: 20px; 
-    left: 20px;
-    background: var(--accent); 
-    color: #000;
-    padding: 5px 12px; 
-    font-weight: 900; 
-    font-size: 0.7rem; 
-    border-radius: 4px;
-    z-index: 5;
-}
-
-.movie-detail-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 20px 0; 
-}
-
-.action-bar { 
-    display: flex; 
-    gap: 10px; 
-}
-
-.now-playing-btn { 
-    background: var(--accent); 
-    border: none; 
-    padding: 12px 25px; 
-    border-radius: 8px; 
-    font-weight: bold; 
-    cursor: pointer; 
-    color: var(--bg);
-}
-
-.download-primary { 
-    background: #333; 
-    color: white; 
-    border: none; 
-    padding: 12px 25px; 
-    border-radius: 8px; 
-    cursor: pointer; 
-}
-
 /* --- Tabs & Panes --- */
 
 .tabs {
@@ -355,53 +336,6 @@ body {
 .pane { display: none; }
 .pane.active { display: block; }
 
-/* --- Episode Grid & Cast --- */
-
-.episode-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); 
-    gap: 10px; 
-    padding: 20px 0; 
-}
-
-.ep-box { 
-    background: #1f2937; 
-    height: 60px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    font-weight: bold;
-    transition: 0.2s;
-}
-
-.ep-box:hover { 
-    background: var(--accent); 
-    color: #000; 
-}
-
-.cast-list { 
-    display: flex; 
-    gap: 15px; 
-    overflow-x: auto; 
-    padding: 20px 0; 
-}
-
-.cast-card { 
-    min-width: 100px; 
-    text-align: center; 
-    font-size: 0.8rem; 
-}
-
-.cast-card img { 
-    width: 100%; 
-    border-radius: 50%; 
-    aspect-ratio: 1/1; 
-    object-fit: cover; 
-    margin-bottom: 8px;
-}
-
 /* --- Mobile Responsiveness --- */
 
 @media (max-width: 768px) {
@@ -435,11 +369,5 @@ body {
 
   .hero-section {
     min-height: 60vh;
-  }
-
-  .movie-detail-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 15px;
   }
 }
