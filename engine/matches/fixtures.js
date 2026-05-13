@@ -1,11 +1,10 @@
 const axios = require("axios");
 
 const BASE = "https://api.sportmonks.com/v3/football";
-
 const EPL_LEAGUE_ID = process.env.EPL_LEAGUE_ID || 8;
 
 /* =========================
-   FORMAT FIXTURE (CLEAN UI MODEL)
+   FORMAT MATCH
 ========================= */
 
 function formatFixture(match) {
@@ -14,16 +13,11 @@ function formatFixture(match) {
 
   return {
     id: match.id,
-
     league: match.league?.name || "Premier League",
-
     time: match.starting_at,
-
     status: match.state_id,
 
     live: [2, 3].includes(match.state_id),
-
-    minute: match.time?.minute || null,
 
     home: {
       name: home?.name,
@@ -40,45 +34,71 @@ function formatFixture(match) {
 }
 
 /* =========================
-   EPL FIXTURES ONLY (RELIABLE)
+   FETCH ONE DAY
+========================= */
+
+async function fetchDay(date) {
+  const response = await axios.get(
+    `${BASE}/fixtures/date/${date}`,
+    {
+      params: {
+        api_token: process.env.SPORTMONKS_API_KEY,
+        filters: `league_id:${EPL_LEAGUE_ID}`,
+        include: "participants;scores;league"
+      }
+    }
+  );
+
+  return response.data?.data || [];
+}
+
+/* =========================
+   MAIN CONTROLLER (TODAY + TOMORROW)
 ========================= */
 
 exports.getFixtures = async (req, res) => {
   try {
-    const date =
+    const today =
       req.query.date ||
       new Date(Date.now() + 3 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0];
 
-    const response = await axios.get(
-      `${BASE}/fixtures/date/${date}`,
-      {
-        params: {
-          api_token: process.env.SPORTMONKS_API_KEY,
+    const tomorrowDate = new Date();
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
 
-          // 🔥 FORCE EPL ONLY
-          filters: `league_id:${EPL_LEAGUE_ID}`,
+    const tomorrow = tomorrowDate.toISOString().split("T")[0];
 
-          include: "participants;scores;league;state"
-        }
-      }
+    // 🔥 FETCH BOTH DAYS
+    const [todayData, tomorrowData] = await Promise.all([
+      fetchDay(today),
+      fetchDay(tomorrow)
+    ]);
+
+    let allMatches = [...todayData, ...tomorrowData];
+
+    // 🧠 DOUBLE SAFETY EPL FILTER
+    allMatches = allMatches.filter(
+      m => m.league?.id == EPL_LEAGUE_ID
     );
 
-    let fixtures = response.data?.data || [];
+    const fixtures = allMatches.map(formatFixture);
 
-    // 🧠 SAFETY FILTER (double guarantee EPL only)
-    fixtures = fixtures.filter(
-      f => f.league?.id == EPL_LEAGUE_ID
-    );
-
-    const mapped = fixtures.map(formatFixture);
+    const live = fixtures.filter(f => f.live);
+    const upcoming = fixtures.filter(f => !f.live);
 
     res.json({
       success: true,
       league: "Premier League",
-      count: mapped.length,
-      data: mapped
+      today,
+      tomorrow,
+      liveCount: live.length,
+      total: fixtures.length,
+      data: {
+        live,
+        upcoming,
+        all: fixtures
+      }
     });
 
   } catch (err) {
