@@ -18,7 +18,7 @@ body {
     line-height: 1.6;
 }
 
-/* 2. NAVBAR REWRITE (Fixes vertical stacking in 598134.jpg) */
+/* 2. NAVBAR REWRITE */
 .navbar {
     display: flex !important;
     justify-content: space-between !important;
@@ -43,13 +43,14 @@ body {
 
 .nav-menu a:hover, .nav-menu a.active { color: var(--epl-green) !important; }
 
-/* 3. UPDATED HERO OVERLAY (For Team Badges) */
+/* 3. UPDATED HERO OVERLAY (The Fix for 599079.jpg) */
 .hero-overlay {
     height: 70vh;
     width: 100%;
     background-color: var(--dark-base);
-    background-size: contain !important;
-    background-position: 90% center !important;
+    /* Increased size slightly for better visibility */
+    background-size: 40% !important; 
+    background-position: 85% center !important;
     background-repeat: no-repeat !important;
     position: relative;
     display: flex;
@@ -58,19 +59,30 @@ body {
     transition: background-image 0.8s ease-in-out;
 }
 
+/* Updated gradient: It's now more transparent so the badge shows through */
 .hero-overlay::before {
     content: '';
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(90deg, rgba(0,0,0,1) 30%, rgba(0,0,0,0.5) 100%);
+    background: linear-gradient(90deg, 
+        rgba(5, 5, 5, 1) 0%, 
+        rgba(5, 5, 5, 0.6) 50%, 
+        rgba(5, 5, 5, 0.2) 100%);
+    z-index: 1;
 }
 
-.hero-content { position: relative; z-index: 2; max-width: 600px; }
+.hero-content { 
+    position: relative; 
+    z-index: 2; 
+    max-width: 600px; 
+}
+
 #hero-title {
     font-size: clamp(2.5rem, 6vw, 4rem);
     font-weight: 900;
     margin-bottom: 10px;
-    text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+    color: var(--epl-green); /* Highlights the team name better */
+    text-shadow: 0px 4px 15px rgba(0,0,0,0.9);
 }
 
 /* 4. TACTICAL HUB & MODAL STYLING */
@@ -142,15 +154,7 @@ body {
     border: 1px solid var(--epl-green);
 }
 
-.player-pill span {
-    font-size: 0.85rem;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* 6. EXTRA UI ELEMENTS (Live Badges & Cards) */
+/* 6. EXTRA UI ELEMENTS */
 .glass {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
@@ -174,20 +178,28 @@ body {
     100% { opacity: 1; }
 }
 
-/* 7. MOBILE RESPONSIVENESS (Fixes 598134.jpg issues) */
+/* 7. MOBILE RESPONSIVENESS (Optimized for Portrait View) */
 @media (max-width: 768px) {
     .navbar { padding: 10px 5% !important; }
     .nav-menu a { margin-left: 10px !important; font-size: 0.75rem; }
     
     .hero-overlay {
-        background-position: center 15% !important;
-        background-size: 45% !important;
+        /* Move badge higher and make it visible behind text */
+        background-position: center 20% !important;
+        background-size: 60% !important;
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
-        padding-bottom: 40px;
+        padding-bottom: 60px;
         text-align: center;
     }
+
+    /* Change gradient for mobile to be bottom-heavy instead of left-heavy */
+    .hero-overlay::before {
+        background: linear-gradient(0deg, 
+            rgba(5, 5, 5, 1) 20%, 
+            rgba(5, 5, 5, 0.4) 100%);
+    }
     
-    #hero-title { font-size: 2.2rem !important; }
+    #hero-title { font-size: 2.5rem !important; }
 }
