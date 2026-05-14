@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMILEY CYMOR | PAIRING SITE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --cyber-red: #ff003c;
+            --dark-bg: #050505;
+            --glass: rgba(20, 20, 20, 0.8);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            background-image: radial-gradient(circle at 50% 50%, #1a0005 0%, #050505 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--cyber-red);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 0, 60, 0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+        }
+
+        .container::before {
+            content: "SYSTEM ONLINE";
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--cyber-red);
+            font-size: 10px;
+            padding: 2px 8px;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: var(--cyber-red);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+
+        p.motto {
+            font-style: italic;
+            font-size: 14px;
+            margin-bottom: 30px;
+            color: #888;
+        }
+
+        .description {
+            font-size: 13px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            color: #ccc;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 5px;
+            color: var(--cyber-red);
+            font-weight: bold;
+            text-align: center;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--cyber-red);
+            box-shadow: 0 0 10px rgba(255, 0, 60, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--cyber-red);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #cc0030;
+            letter-spacing: 1px;
+        }
+
+        #result-container {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .code-box {
+            background: #111;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px dashed var(--cyber-red);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #code-text {
+            color: #fff;
+            font-family: monospace;
+            font-size: 20px;
+            letter-spacing: 2px;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--cyber-red);
+            cursor: pointer;
+            width: auto;
+            padding: 5px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 10px;
+            color: #555;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Smiley Cymor Bot</h1>
+    <p class="motto">Always a winner 🏆</p>
+    
+    <div class="description">
+        Link your WhatsApp to the CymorTech Ecosystem. Enter your number below (e.g., 254113821327) to generate your secure pairing code.
+    </div>
+
+    <input type="text" id="phone" placeholder="Enter Number (No + sign)" maxlength="15">
+    <button onclick="getPairingCode()">Generate Code</button>
+
+    <div id="result-container">
+        <div class="code-box">
+            <span id="code-text">XXXX-XXXX</span>
+            <button class="copy-btn" onclick="copyCode()"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <p style="font-size: 11px; margin-top: 10px; color: #888;">Paste this code in Linked Devices > Link with Phone Number</p>
+    </div>
+
+    <div class="footer">
+        POWERED BY CYMOR<br>
+        © CYMORTECHSERVICES 2026
+    </div>
+</div>
+
+<script>
+    async function getPairingCode() {
+        const num = document.getElementById('phone').value;
+        const btn = document.querySelector('button');
+        const resContainer = document.getElementById('result-container');
+        
+        if (!num || num.length < 10) {
+            alert("Enter a valid number without the + sign.");
+            return;
+        }
+
+        btn.innerText = "REQUESTING...";
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(`/code?number=${num}`);
+            const data = await response.json();
+            
+            if (data.code) {
+                document.getElementById('code-text').innerText = data.code;
+                resContainer.style.display = 'block';
+                btn.innerText = "CODE GENERATED";
+            } else {
+                alert("Failed to get code. Ensure the bot is running.");
+                btn.disabled = false;
+                btn.innerText = "GENERATE CODE";
+            }
+        } catch (err) {
+            alert("Connection Error.");
+            btn.disabled = false;
+            btn.innerText = "GENERATE CODE";
+        }
+    }
+
+    function copyCode() {
+        const code = document.getElementById('code-text').innerText;
+        navigator.clipboard.writeText(code);
+        alert("Code copied to clipboard!");
+    }
+</script>
+
+</body>
+</html>
