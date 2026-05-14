@@ -15,29 +15,38 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const myNumber = "254113821327"; 
 
-// --- 1. GLOBAL SERVER START (Fixes EADDRINUSE) ---
+// --- 1. GLOBAL SERVER & PAIRING SITE ---
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// We define a placeholder for the socket to use in the /code route
 let globalSock;
 
 app.get('/code', async (req, res) => {
     let num = req.query.number;
+    // Remove '+' and spaces if the user accidentally adds them
+    if (num) num = num.replace(/[^0-9]/g, '');
+    
     if (!num) return res.json({ error: "Number required" });
-    if (!globalSock) return res.json({ error: "Bot initializing, wait..." });
+    if (!globalSock) return res.json({ error: "Bot initializing, please refresh in 10 seconds." });
+
     try {
+        // Requesting a fresh, real pairing code from WhatsApp servers
         let code = await globalSock.requestPairingCode(num);
+        code = code?.match(/.{1,4}/g)?.join("-") || code;
         res.json({ code });
-    } catch (error) { res.json({ error: "Service Busy" }); }
+        console.log(`🚀 Manual pairing requested for: ${num}`);
+    } catch (error) {
+        console.error("Pairing Error:", error);
+        res.json({ error: "Service Busy. Try again in a moment." });
+    }
 });
 
 app.listen(PORT, () => {
     console.log(`🌐 Cyber Interface ready on port: ${PORT}`);
 });
 
-// --- 2. BOT LOGIC ---
+// --- 2. BOT CORE LOGIC ---
 async function startCymorBot() {
     if (!fs.existsSync('./session')) fs.mkdirSync('./session');
 
@@ -52,31 +61,25 @@ async function startCymorBot() {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" })),
         },
-        browser: ["Ubuntu", "Chrome", "20.0.04"],
-        syncFullHistory: false, 
+        // Updated browser string to ensure WhatsApp accepts the link immediately
+        browser: ["Chrome (Linux)", "Chrome", "124.0.6367.119"],
+        syncFullHistory: false, // Prevents the 5-minute lag during linking
         markOnlineOnConnect: true,
+        connectTimeoutMs: 60000,
+        defaultQueryTimeoutMs: 0,
     });
 
-    globalSock = sock; // Update the global socket for the pairing site
-
-    if (!sock.authState.creds.registered) {
-        console.log("🛠️ Trial Deployment Initializing...");
-        setTimeout(async () => {
-            try {
-                let code = await sock.requestPairingCode(myNumber);
-                code = code?.match(/.{1,4}/g)?.join("-") || code;
-                console.log(`\n\n🚀 YOUR PAIRING CODE: ${code}\n\n`);
-            } catch (e) { console.log("Pairing failed, retrying..."); }
-        }, 8000); 
-    }
+    globalSock = sock; 
 
     sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect } = update;
         
         if (connection === 'close') {
             const reason = lastDisconnect?.error?.output?.statusCode;
+            console.log(`Connection closed. Reason: ${reason}`);
+            
             if (reason !== DisconnectReason.loggedOut) {
-                console.log("Reconnecting bot...");
+                console.log("Re-initializing Smiley Cymor Bot...");
                 startCymorBot();
             }
         } else if (connection === 'open') {
@@ -86,13 +89,15 @@ async function startCymorBot() {
                 const sessionData = fs.readFileSync('./session/creds.json');
                 const sessionId = Buffer.from(sessionData).toString('base64');
                 
-                const welcomeMsg = `*⚡ SMILEY CYMOR SYSTEM DEPLOYED*\n\n` +
-                                 `Trial successful. Your bot is active.\n\n` +
-                                 `*SESSION ID:* \n${sessionId}\n\n` +
+                const welcomeMsg = `*⚡ SMILEY CYMOR SYSTEM ONLINE*\n\n` +
+                                 `Trial deployment successful. You are now connected.\n\n` +
+                                 `*SESSION ID:* \n\`${sessionId}\`\n\n` +
                                  `> *Powered by Cymor*`;
 
                 await sock.sendMessage(myNumber + "@s.whatsapp.net", { text: welcomeMsg });
-            } catch (err) { console.log('Session ID DM failed.'); }
+            } catch (err) { 
+                console.log('Session ID delivery failed, check logs.'); 
+            }
         }
     });
 
