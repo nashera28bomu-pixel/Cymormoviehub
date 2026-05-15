@@ -1,34 +1,31 @@
 {
-  "name": "smiley-cymor-bot",
+  "name": "cymor4k",
   "version": "1.0.0",
-  "description": "WhatsApp bot with pairing site and utility commands hosted on Render.",
-  "main": "index.js",
+  "description": "CYMOR4K AI Video Enhancement Platform",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "keywords": [
-    "whatsapp",
-    "bot",
-    "baileys",
-    "render",
-    "smiley-cymor"
+    "ai",
+    "video",
+    "4k",
+    "upscaling",
+    "realesrgan",
+    "ffmpeg"
   ],
-  "author": "Simion Nashera",
-  "license": "ISC",
+  "author": "Cymor",
+  "license": "MIT",
   "dependencies": {
-    "@whiskeysockets/baileys": "^6.6.0",
-    "@adiwajshing/keyed-db": "^0.2.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "express": "^4.19.2",
-    "pino": "^9.1.0",
-    "qrcode-terminal": "^0.12.0",
-    "axios": "^1.6.8",
-    "yt-search": "^2.10.4",
-    "link-preview-js": "^3.0.5",
-    "fluent-ffmpeg": "^2.1.2",
-    "awesome-phonenumber": "^5.10.0"
+    "fluent-ffmpeg": "^2.1.3",
+    "fs-extra": "^11.2.0",
+    "multer": "^1.4.5-lts.1"
   },
   "engines": {
-    "node": ">=18.x"
+    "node": ">=18"
   }
 }
