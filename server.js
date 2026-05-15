@@ -25,13 +25,13 @@ app.use(express.static("public"));
 app.use("/outputs", express.static(path.join(__dirname, "outputs")));
 
 /* =========================
-   MEMORY SAFE UPLOAD LIMITS
+   FILE LIMIT (YOUR REQUEST)
 ========================= */
 
 const upload = multer({
     dest: "uploads/",
     limits: {
-        fileSize: 80 * 1024 * 1024 // 🔥 80MB max (Render-safe)
+        fileSize: 40 * 1024 * 1024 // 40MB max ✅
     },
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith("video/")) {
@@ -51,7 +51,20 @@ app.get("/ping", (req, res) => {
 });
 
 /* =========================
-   VIDEO ENHANCEMENT (OPTIMIZED)
+   REAL PROGRESS HELPER
+========================= */
+
+function parseTimeToSeconds(time) {
+    if (!time) return 0;
+    const parts = time.split(":");
+    if (parts.length !== 3) return 0;
+
+    const [h, m, s] = parts;
+    return (+h) * 3600 + (+m) * 60 + parseFloat(s);
+}
+
+/* =========================
+   ENHANCE ROUTE (REAL PROGRESS)
 ========================= */
 
 app.post("/enhance", upload.single("video"), async (req, res) => {
@@ -73,22 +86,35 @@ app.post("/enhance", upload.single("video"), async (req, res) => {
         const outputPath =
             path.join("outputs", outputName);
 
+        let totalDuration = 0;
+        let lastProgress = 0;
+
         /* =========================
-           LIGHTWEIGHT FFmpeg PIPELINE
+           FFPROBE (GET DURATION)
         ========================= */
 
-        ffmpeg(inputPath)
+        ffmpeg.ffprobe(inputPath, (err, metadata) => {
+
+            if (err) {
+                console.error(err);
+            } else {
+                totalDuration =
+                    metadata.format.duration || 0;
+            }
+
+        });
+
+        /* =========================
+           FFmpeg PROCESS (YOUR FAST PIPELINE)
+        ========================= */
+
+        const command = ffmpeg(inputPath)
 
             .videoFilters([
 
-                // SAFE upscale (no memory spike)
-                "scale=1280:-2:flags=lanczos",
-
-                // light enhancement only
-                "eq=contrast=1.08:brightness=0.02:saturation=1.08",
-
-                // mild sharpening (safe version)
-                "unsharp=3:3:0.6:3:3:0.0"
+                "scale=960:-2",
+                "eq=contrast=1.06:brightness=0.015:saturation=1.05",
+                "unsharp=3:3:0.5"
 
             ])
 
@@ -96,18 +122,21 @@ app.post("/enhance", upload.single("video"), async (req, res) => {
 
             .outputOptions([
 
-                "-preset veryfast", // 🔥 reduces RAM usage
-                "-crf 23", // 🔥 lighter encoding (important)
+                "-preset ultrafast",
+                "-crf 26",
                 "-movflags +faststart",
                 "-pix_fmt yuv420p",
-                "-threads 1" // 🔥 prevents Render overload crash
+                "-threads 1"
 
             ])
 
             .audioCodec("aac")
-            .audioBitrate("128k")
-
+            .audioBitrate("96k")
             .format("mp4")
+
+            /* =========================
+               REAL PROGRESS TRACKING
+            ========================= */
 
             .on("start", (cmd) => {
                 console.log("FFmpeg started");
@@ -115,16 +144,42 @@ app.post("/enhance", upload.single("video"), async (req, res) => {
             })
 
             .on("progress", (progress) => {
-                console.log("Progress:", progress.percent || 0);
+
+                let percent = 0;
+
+                if (progress.timemark && totalDuration) {
+
+                    const current =
+                        parseTimeToSeconds(progress.timemark);
+
+                    percent =
+                        (current / totalDuration) * 100;
+
+                } else if (progress.percent) {
+
+                    percent = progress.percent;
+
+                }
+
+                percent = Math.min(100, Math.max(lastProgress, percent));
+
+                lastProgress = percent;
+
+                console.log("Progress:", percent.toFixed(2), "%");
+
             })
 
             .on("end", async () => {
 
+                console.log("Enhancement finished");
+
                 await fs.remove(inputPath);
 
                 res.json({
+
                     success: true,
                     video: "/outputs/" + outputName
+
                 });
 
             })
@@ -136,8 +191,10 @@ app.post("/enhance", upload.single("video"), async (req, res) => {
                 await fs.remove(inputPath);
 
                 res.status(500).json({
+
                     success: false,
-                    error: "Processing failed (memory-safe mode)"
+                    error: "Video processing failed"
+
                 });
 
             })
@@ -150,7 +207,7 @@ app.post("/enhance", upload.single("video"), async (req, res) => {
 
         res.status(500).json({
             success: false,
-            error: "Server crash prevented"
+            error: "Server error"
         });
 
     }
@@ -158,7 +215,7 @@ app.post("/enhance", upload.single("video"), async (req, res) => {
 });
 
 /* =========================
-   AUTO CLEANUP (SAFE)
+   CLEANUP
 ========================= */
 
 setInterval(async () => {
@@ -175,10 +232,7 @@ setInterval(async () => {
 
             const stats = await fs.stat(filePath);
 
-            const age = now - stats.mtimeMs;
-
-            // delete after 30 mins (Render storage saving)
-            if (age > 30 * 60 * 1000) {
+            if (now - stats.mtimeMs > 30 * 60 * 1000) {
                 await fs.remove(filePath);
                 console.log("Deleted:", file);
             }
