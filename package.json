@@ -19,14 +19,16 @@
   ],
 
   "author": "Legendary Smiley Cymor",
-
   "license": "MIT",
 
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
     "build": "npm install",
-    "serve": "node server.js"
+    "serve": "node server.js",
+
+    "preinstall": "mkdir -p bin",
+    "postinstall": "curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o bin/yt-dlp && chmod +x bin/yt-dlp"
   },
 
   "dependencies": {
@@ -36,7 +38,8 @@
     "express-rate-limit": "^7.1.5",
     "ffmpeg-static": "^5.2.0",
     "fluent-ffmpeg": "^2.1.2",
-    "yt-search": "^2.11.1"
+    "yt-search": "^2.11.1",
+    "yt-dlp-exec": "^1.0.2"
   },
 
   "devDependencies": {
