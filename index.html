@@ -3,157 +3,213 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Cymor Music Downloader</title>
+  <title>Cymor Music Downloader | Elite Retrieval</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/727/727245.png">
 
   <style>
-    * {
-      font-family: 'Poppins', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
     body {
-      background: radial-gradient(circle at top left, rgba(59,130,246,0.18), transparent 30%),
-                  radial-gradient(circle at top right, rgba(168,85,247,0.15), transparent 25%), #020617;
+      background: radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+                  #020617;
+      color: #f8fafc;
       overflow-x: hidden;
     }
     .glass {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(18px);
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
     }
-    .glow { box-shadow: 0 0 25px rgba(59,130,246,0.35); }
-    .animate-float { animation: float 4s ease-in-out infinite; }
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-6px); }
+    .glass-dark {
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
+    .glow-blue { box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
+    .text-gradient {
+      background: linear-gradient(to right, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-card {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
     .scroll-hidden::-webkit-scrollbar { display: none; }
-    .page-section { transition: all 0.3s ease-in-out; }
   </style>
 </head>
 
-<body class="text-white min-h-screen pb-32">
+<body class="min-h-screen pb-36">
 
-  <header class="px-4 pt-6 pb-3 sticky top-0 z-50 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5">
+  <header class="px-6 pt-8 pb-4 sticky top-0 z-50 bg-[#020617]/70 backdrop-blur-md">
     <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center glow animate-float text-2xl font-black">🎵</div>
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center glow-blue text-xl shadow-2xl">
+          <span class="animate-bounce">🎵</span>
+        </div>
         <div>
-          <h1 class="text-xl font-extrabold tracking-wide uppercase">Cymor</h1>
-          <p class="text-xs text-blue-300 mt-0.5 font-bold tracking-widest">DOWNLOADER</p>
+          <h1 class="text-xl font-black tracking-tighter uppercase leading-none">Cymor</h1>
+          <p class="text-[10px] text-blue-400 font-bold tracking-[0.2em] mt-1">MUSIC DOWNLOADER</p>
         </div>
       </div>
-      <div class="glass rounded-2xl px-3 py-2 text-xs text-emerald-300 border border-emerald-400/20">● ONLINE</div>
+      <div class="flex flex-col items-end">
+        <span class="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SYSTEM ONLINE
+        </span>
+      </div>
     </div>
 
-    <div class="mt-5 flex gap-2">
-      <div class="flex-1 glass rounded-2xl px-4 py-3 flex items-center gap-3 border border-blue-500/20">
-        <span class="text-xl">🔎</span>
-        <input type="text" id="search-input" placeholder="Search music or paste link..." class="bg-transparent outline-none w-full text-sm placeholder:text-gray-400 text-white" />
+    <div class="mt-8 flex gap-3">
+      <div class="flex-1 glass-dark rounded-2xl px-5 py-4 flex items-center gap-4 border border-white/10 focus-within:border-blue-500/50 transition-all">
+        <span class="text-lg opacity-60">🔍</span>
+        <input type="text" id="search-input" placeholder="Artist, track, or URL..." class="bg-transparent outline-none w-full text-sm font-medium placeholder:text-gray-500" />
       </div>
-      <button id="search-btn" class="bg-gradient-to-r from-blue-500 to-purple-600 px-5 rounded-2xl font-semibold active:scale-95 transition-all glow cursor-pointer">Go</button>
+      <button id="search-btn" class="bg-blue-600 hover:bg-blue-500 px-6 rounded-2xl font-bold text-sm active:scale-90 transition-all shadow-lg shadow-blue-600/20">Go</button>
     </div>
   </header>
 
-  <section id="home-section" class="page-section px-4 mt-6">
-    <div class="glass rounded-[30px] p-5 relative overflow-hidden border border-blue-500/10">
-      <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
+  <section id="home-section" class="page-section px-6 mt-4">
+    <div class="hero-card rounded-[40px] p-8 relative overflow-hidden">
+      <div class="absolute top-0 right-0 p-6 opacity-10 text-8xl font-black">CYMOR</div>
+      
       <div class="relative z-10">
-        <div class="inline-flex items-center gap-2 bg-blue-500/15 text-blue-300 px-3 py-1 rounded-full text-xs border border-blue-500/20">⚡ Ultra Fast Engine</div>
-        <h2 class="mt-4 text-3xl font-black leading-tight">Elite <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Media Retrieval</span></h2>
-        <p class="text-sm text-gray-300 mt-3 leading-relaxed">The standard in high-fidelity music and video conversion. Fast, free, and secure.</p>
-        <div class="grid grid-cols-3 gap-3 mt-6">
-          <div class="glass rounded-2xl p-3 text-center">
-            <h3 class="font-bold text-lg text-blue-400">320k</h3>
-            <p class="text-[10px] text-gray-400">Audio</p>
+        <span class="text-[10px] font-black uppercase tracking-widest text-blue-400 mb-2 block">Premium Experience</span>
+        <h2 class="text-4xl font-black leading-tight mb-4">Elite <span class="text-gradient">Media Retrieval</span></h2>
+        <p class="text-xs text-gray-400 leading-loose max-w-[80%]">
+          High-fidelity conversion optimized for mobile devices. Seamless, secure, and purely professional.
+        </p>
+
+        <div class="mt-8 space-y-4">
+          <div class="flex items-center gap-4">
+            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs">🚀</div>
+            <div>
+              <h4 class="text-xs font-bold">Zero Latency</h4>
+              <p class="text-[10px] text-gray-500">Optimized Render-nodes for instant conversion.</p>
+            </div>
           </div>
-          <div class="glass rounded-2xl p-3 text-center">
-            <h3 class="font-bold text-lg text-purple-400">4K</h3>
-            <p class="text-[10px] text-gray-400">Video</p>
+          <div class="flex items-center gap-4">
+            <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-xs">💎</div>
+            <div>
+              <h4 class="text-xs font-bold">Ultra Fidelity</h4>
+              <p class="text-[10px] text-gray-500">True 320kbps Audio & 4K Video support.</p>
+            </div>
           </div>
-          <div class="glass rounded-2xl p-3 text-center">
-            <h3 class="font-bold text-lg text-emerald-400">PRO</h3>
-            <p class="text-[10px] text-gray-400">Stable</p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mt-8">
+          <div class="glass py-4 rounded-3xl text-center border-blue-500/20">
+            <p class="text-lg font-black text-blue-400">320k</p>
+            <p class="text-[9px] uppercase font-bold text-gray-500 mt-1">Audio</p>
+          </div>
+          <div class="glass py-4 rounded-3xl text-center border-purple-500/20">
+            <p class="text-lg font-black text-purple-400">4K</p>
+            <p class="text-[9px] uppercase font-bold text-gray-500 mt-1">Video</p>
+          </div>
+          <div class="glass py-4 rounded-3xl text-center border-emerald-500/20">
+            <p class="text-lg font-black text-emerald-400">PRO</p>
+            <p class="text-[9px] uppercase font-bold text-gray-500 mt-1">Access</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-12 text-center pb-10">
+        <div class="inline-block glass px-6 py-4 rounded-[28px] border-white/5">
+            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Development Vision</p>
+            <p class="text-xs italic text-gray-400 leading-relaxed">
+                "Big ups to <span class="text-blue-400 font-bold">Sister Joyce</span> for the spark that built this engine. ❤️"
+            </p>
+        </div>
+        <p class="mt-8 text-[9px] font-bold text-gray-700 tracking-widest uppercase">© 2026 CymorTechServices Elite</p>
+    </div>
+  </section>
+
+  <section id="preference-section" class="px-6 mt-6 hidden">
+    <div class="glass rounded-[32px] p-6 border-blue-500/10">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="font-black text-sm uppercase tracking-widest text-gray-400">Configuration</h2>
+        <span class="text-[10px] text-blue-400 font-bold">STEP 1/2</span>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <button id="mp3-btn" class="format-btn glass rounded-2xl py-4 border-blue-500/40 bg-blue-500/20 font-bold text-xs">🎧 MP3 AUDIO</button>
+        <button id="mp4-btn" class="format-btn glass rounded-2xl py-4 border-white/5 font-bold text-xs text-gray-500">🎬 MP4 VIDEO</button>
+      </div>
+
+      <div class="flex gap-3 overflow-x-auto scroll-hidden pb-2" id="quality-container">
+        <button class="quality-btn min-w-fit px-6 py-3 rounded-2xl glass text-[10px] font-black border-blue-500/40 bg-blue-500/20">128KBPS</button>
+        <button class="quality-btn min-w-fit px-6 py-3 rounded-2xl glass text-[10px] font-black border-white/5 text-gray-500">320KBPS</button>
+        <button class="quality-btn min-w-fit px-6 py-3 rounded-2xl glass text-[10px] font-black border-white/5 text-gray-500">720P</button>
+        <button class="quality-btn min-w-fit px-6 py-3 rounded-2xl glass text-[10px] font-black border-white/5 text-gray-500">1080P</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="music-section" class="page-section px-6 mt-6 hidden">
+    <div class="flex justify-between items-end mb-6 px-2">
+        <h2 class="font-black text-2xl">Results</h2>
+        <span class="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">Powered by CymorNode</span>
+    </div>
+    <div id="results-container" class="space-y-4">
+        </div>
+  </section>
+
+  <section id="videos-section" class="page-section px-6 mt-6 hidden">
+    <h2 class="font-black text-2xl mb-6">Vault</h2>
+    <div id="downloads-container" class="space-y-4">
+      <div class="glass rounded-[32px] p-12 text-center border-dashed border-white/10">
+        <p class="text-gray-600 text-xs font-bold uppercase tracking-widest">Vault is currently empty</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="more-section" class="page-section px-6 mt-6 hidden">
+    <h2 class="font-black text-2xl mb-6">Engine Info</h2>
+    <div class="space-y-4">
+      <div class="glass rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-6">
+          <span class="text-xs font-bold">Accelerator Mode</span>
+          <div class="w-10 h-5 bg-blue-600 rounded-full relative shadow-inner"><div class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div>
+        </div>
+        <div class="space-y-4 border-t border-white/5 pt-6">
+          <div>
+            <p class="text-[9px] text-gray-500 uppercase font-black tracking-[0.2em]">Lead Architect</p>
+            <p class="text-sm font-black text-gradient uppercase">Legendary Smiley Cymor</p>
+          </div>
+          <div>
+            <p class="text-[9px] text-gray-500 uppercase font-black tracking-[0.2em]">Division</p>
+            <p class="text-sm font-black text-white uppercase">CymorTechServices</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="preference-section" class="px-4 mt-6 hidden">
-    <div class="glass rounded-[28px] p-5 border border-white/10">
-      <h2 class="font-bold text-lg mb-4">Download Preferences</h2>
-      <div class="grid grid-cols-2 gap-3 mb-6">
-        <button id="mp3-btn" class="format-btn glass rounded-2xl py-3 border border-blue-500/40 bg-blue-500/20 font-semibold cursor-pointer">🎧 MP3</button>
-        <button id="mp4-btn" class="format-btn glass rounded-2xl py-3 border border-white/10 font-semibold cursor-pointer text-gray-400">🎬 MP4</button>
-      </div>
-      <div class="flex gap-2 overflow-x-auto scroll-hidden pb-2" id="quality-container">
-        <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-xs font-medium border border-blue-500/40 bg-blue-500/20">128kbps</button>
-        <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-xs font-medium border border-white/10 text-gray-400">320kbps</button>
-        <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-xs font-medium border border-white/10 text-gray-400">720p</button>
-        <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-xs font-medium border border-white/10 text-gray-400">1080p</button>
-      </div>
-    </div>
-  </section>
-
-  <section id="music-section" class="page-section px-4 mt-6 hidden">
-    <h2 class="font-bold text-lg mb-4">Search Results</h2>
-    <div id="results-container" class="space-y-4">
-      </div>
-  </section>
-
-  <section id="videos-section" class="page-section px-4 mt-6 hidden">
-    <h2 class="font-bold text-lg mb-4">Recent Downloads</h2>
-    <div id="downloads-container" class="space-y-4">
-      <div class="glass rounded-[28px] p-8 text-center border border-white/5">
-        <p class="text-gray-400 text-sm italic">No recent downloads found.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="more-section" class="page-section px-4 mt-6 hidden">
-    <h2 class="font-bold text-lg mb-4">Settings & Info</h2>
-    <div class="glass rounded-[28px] p-5 space-y-4">
-      <div class="flex items-center justify-between p-3 bg-white/5 rounded-2xl">
-        <span class="text-sm">Dark Mode</span>
-        <div class="w-10 h-5 bg-blue-600 rounded-full relative"><div class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div>
-      </div>
-      <div class="flex items-center justify-between p-3 bg-white/5 rounded-2xl">
-        <span class="text-sm">High Priority Downloads</span>
-        <div class="w-10 h-5 bg-gray-600 rounded-full relative"><div class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full"></div></div>
-      </div>
-      <hr class="border-white/5">
-      <div class="p-3">
-        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Developer</p>
-        <p class="text-sm font-bold text-blue-400">Legendary Smiley Cymor. Enjoy y'all-challenged by my sister Joyce❤️</p>
-      </div>
-    </div>
-  </section>
-
-  <nav class="fixed bottom-0 left-0 w-full bg-[#020617]/90 backdrop-blur-2xl border-t border-white/5 px-2 py-4 z-50">
-    <div id="bottom-nav" class="grid grid-cols-4 gap-2 max-w-md mx-auto">
-      <button class="nav-btn flex flex-col items-center gap-1 text-blue-400 cursor-pointer" data-target="home">
-        <span class="text-2xl">🏠</span>
-        <span class="text-[10px] font-bold uppercase">Home</span>
+  <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-[#020617]/80 backdrop-blur-3xl border border-white/10 rounded-[35px] p-3 z-[100] shadow-2xl">
+    <div id="bottom-nav" class="grid grid-cols-4 items-center">
+      <button class="nav-btn flex flex-col items-center gap-1.5 text-blue-500 transition-all" data-target="home">
+        <span class="text-xl">🏠</span>
+        <span class="text-[8px] font-black uppercase tracking-tighter">Home</span>
       </button>
-      <button class="nav-btn flex flex-col items-center gap-1 text-gray-400 cursor-pointer" data-target="music">
-        <span class="text-2xl">🎵</span>
-        <span class="text-[10px] font-bold uppercase">Music</span>
+      <button class="nav-btn flex flex-col items-center gap-1.5 text-gray-600" data-target="music">
+        <span class="text-xl">🎵</span>
+        <span class="text-[8px] font-black uppercase tracking-tighter">Search</span>
       </button>
-      <button class="nav-btn flex flex-col items-center gap-1 text-gray-400 cursor-pointer" data-target="videos">
-        <span class="text-2xl">🎬</span>
-        <span class="text-[10px] font-bold uppercase">Videos</span>
+      <button class="nav-btn flex flex-col items-center gap-1.5 text-gray-600" data-target="videos">
+        <span class="text-xl">🎬</span>
+        <span class="text-[8px] font-black uppercase tracking-tighter">Vault</span>
       </button>
-      <button class="nav-btn flex flex-col items-center gap-1 text-gray-400 cursor-pointer" data-target="more">
-        <span class="text-2xl">⚙️</span>
-        <span class="text-[10px] font-bold uppercase">More</span>
+      <button class="nav-btn flex flex-col items-center gap-1.5 text-gray-600" data-target="more">
+        <span class="text-xl">⚙️</span>
+        <span class="text-[8px] font-black uppercase tracking-tighter">System</span>
       </button>
     </div>
   </nav>
@@ -170,9 +226,9 @@
 
         // Update Nav UI
         navBtns.forEach(b => {
-          b.classList.replace('text-blue-400', 'text-gray-400');
+          b.classList.replace('text-blue-500', 'text-gray-600');
         });
-        btn.classList.replace('text-gray-400', 'text-blue-400');
+        btn.classList.replace('text-gray-600', 'text-blue-500');
 
         // Update Section Visibility
         sections.forEach(s => s.classList.add('hidden'));
@@ -182,22 +238,22 @@
             activeSection.classList.remove('hidden');
         }
 
-        // Special logic: If user clicks Music but hasn't searched, redirect to Home search
+        // Special logic: Music check
         if (target === 'music' && document.getElementById('results-container').children.length === 0) {
-            alert("Search for a song first!");
-            document.querySelector('[data-target="home"]').click();
+            // Silence alert for cleaner UX, just show the empty search state
         }
       });
     });
 
-    // Simple listener to auto-show results section when search is triggered from script.js
+    // Handle search-to-music transition
     document.getElementById('search-btn').addEventListener('click', () => {
-        setTimeout(() => {
+        const checkInterval = setInterval(() => {
             if (document.getElementById('results-container').children.length > 0) {
                 document.querySelector('[data-target="music"]').click();
                 document.getElementById('preference-section').classList.remove('hidden');
+                clearInterval(checkInterval);
             }
-        }, 1000);
+        }, 500);
     });
   </script>
 </body>
