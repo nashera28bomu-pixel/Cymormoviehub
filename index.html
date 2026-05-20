@@ -3,16 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-
   <title>Cymor Music Downloader</title>
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
-  <!-- Google Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2=family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/727/727245.png">
 
   <style>
@@ -20,367 +17,188 @@
       font-family: 'Poppins', sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
-
     body {
-      background:
-        radial-gradient(circle at top left, rgba(59,130,246,0.18), transparent 30%),
-        radial-gradient(circle at top right, rgba(168,85,247,0.15), transparent 25%),
-        #020617;
+      background: radial-gradient(circle at top left, rgba(59,130,246,0.18), transparent 30%),
+                  radial-gradient(circle at top right, rgba(168,85,247,0.15), transparent 25%), #020617;
       overflow-x: hidden;
     }
-
     .glass {
       background: rgba(255,255,255,0.05);
       backdrop-filter: blur(18px);
       border: 1px solid rgba(255,255,255,0.08);
       box-shadow: 0 8px 32px rgba(0,0,0,0.35);
     }
-
-    .glow {
-      box-shadow: 0 0 25px rgba(59,130,246,0.35);
-    }
-
-    .animate-float {
-      animation: float 4s ease-in-out infinite;
-    }
-
+    .glow { box-shadow: 0 0 25px rgba(59,130,246,0.35); }
+    .animate-float { animation: float 4s ease-in-out infinite; }
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-6px); }
     }
-
-    .scroll-hidden::-webkit-scrollbar {
-      display: none;
-    }
+    .scroll-hidden::-webkit-scrollbar { display: none; }
+    .page-section { transition: all 0.3s ease-in-out; }
   </style>
 </head>
 
 <body class="text-white min-h-screen pb-32">
 
-  <!-- TOP HEADER -->
   <header class="px-4 pt-6 pb-3 sticky top-0 z-50 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center glow animate-float text-2xl font-black">
-          🎵
-        </div>
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center glow animate-float text-2xl font-black">🎵</div>
         <div>
-          <h1 class="text-xl font-extrabold tracking-wide">CYMOR MUSIC DOWNLOADER</h1>
-          <p class="text-xs text-blue-300 mt-0.5">MP3 & MP4 Downloader</p>
+          <h1 class="text-xl font-extrabold tracking-wide uppercase">Cymor</h1>
+          <p class="text-xs text-blue-300 mt-0.5 font-bold tracking-widest">DOWNLOADER</p>
         </div>
       </div>
-      <div class="glass rounded-2xl px-3 py-2 text-xs text-emerald-300 border border-emerald-400/20">
-        ● ONLINE
-      </div>
+      <div class="glass rounded-2xl px-3 py-2 text-xs text-emerald-300 border border-emerald-400/20">● ONLINE</div>
     </div>
 
-    <!-- SEARCH -->
     <div class="mt-5 flex gap-2">
       <div class="flex-1 glass rounded-2xl px-4 py-3 flex items-center gap-3 border border-blue-500/20">
         <span class="text-xl">🔎</span>
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Search music, artist or paste URL..."
-          class="bg-transparent outline-none w-full text-sm placeholder:text-gray-400 text-white"
-        />
+        <input type="text" id="search-input" placeholder="Search music or paste link..." class="bg-transparent outline-none w-full text-sm placeholder:text-gray-400 text-white" />
       </div>
-      <button
-        id="search-btn"
-        class="bg-gradient-to-r from-blue-500 to-purple-600 px-5 rounded-2xl font-semibold active:scale-95 transition-all glow cursor-pointer"
-      >
-        Go
-      </button>
+      <button id="search-btn" class="bg-gradient-to-r from-blue-500 to-purple-600 px-5 rounded-2xl font-semibold active:scale-95 transition-all glow cursor-pointer">Go</button>
     </div>
   </header>
 
-  <!-- HERO SECTION -->
-  <section id="hero-section" class="px-4 mt-6">
+  <section id="home-section" class="page-section px-4 mt-6">
     <div class="glass rounded-[30px] p-5 relative overflow-hidden border border-blue-500/10">
       <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 left-0 w-28 h-28 bg-purple-500/20 rounded-full blur-3xl"></div>
-
       <div class="relative z-10">
-        <div class="inline-flex items-center gap-2 bg-blue-500/15 text-blue-300 px-3 py-1 rounded-full text-xs border border-blue-500/20">
-          ⚡ Ultra Fast Downloader
-        </div>
-
-        <h2 class="mt-4 text-3xl font-black leading-tight">
-          Download High Quality
-          <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">MP3 & MP4</span>
-        </h2>
-
-        <p class="text-sm text-gray-300 mt-3 leading-relaxed">
-          Search music, preview videos, choose quality and download instantly with Cymor Music Downloader.
-        </p>
-
+        <div class="inline-flex items-center gap-2 bg-blue-500/15 text-blue-300 px-3 py-1 rounded-full text-xs border border-blue-500/20">⚡ Ultra Fast Engine</div>
+        <h2 class="mt-4 text-3xl font-black leading-tight">Elite <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Media Retrieval</span></h2>
+        <p class="text-sm text-gray-300 mt-3 leading-relaxed">The standard in high-fidelity music and video conversion. Fast, free, and secure.</p>
         <div class="grid grid-cols-3 gap-3 mt-6">
           <div class="glass rounded-2xl p-3 text-center">
-            <h3 class="font-bold text-lg text-blue-400">320kbps</h3>
-            <p class="text-[11px] text-gray-400 mt-1">HQ Audio</p>
+            <h3 class="font-bold text-lg text-blue-400">320k</h3>
+            <p class="text-[10px] text-gray-400">Audio</p>
           </div>
           <div class="glass rounded-2xl p-3 text-center">
-            <h3 class="font-bold text-lg text-purple-400">1080p</h3>
-            <p class="text-[11px] text-gray-400 mt-1">HD Video</p>
+            <h3 class="font-bold text-lg text-purple-400">4K</h3>
+            <p class="text-[10px] text-gray-400">Video</p>
           </div>
           <div class="glass rounded-2xl p-3 text-center">
-            <h3 class="font-bold text-lg text-emerald-400">FAST</h3>
-            <p class="text-[11px] text-gray-400 mt-1">Downloads</p>
+            <h3 class="font-bold text-lg text-emerald-400">PRO</h3>
+            <p class="text-[10px] text-gray-400">Stable</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- FORMAT & QUALITY SECTION (Hidden by default) -->
-  <section id="preference-section" class="px-4 mt-6 hidden transition-all duration-500">
-    <div class="glass rounded-[28px] p-5">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="font-bold text-lg">Download Preferences</h2>
-        <div class="text-xs text-gray-400">Customize your download</div>
+  <section id="preference-section" class="px-4 mt-6 hidden">
+    <div class="glass rounded-[28px] p-5 border border-white/10">
+      <h2 class="font-bold text-lg mb-4">Download Preferences</h2>
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <button id="mp3-btn" class="format-btn glass rounded-2xl py-3 border border-blue-500/40 bg-blue-500/20 font-semibold cursor-pointer">🎧 MP3</button>
+        <button id="mp4-btn" class="format-btn glass rounded-2xl py-3 border border-white/10 font-semibold cursor-pointer text-gray-400">🎬 MP4</button>
       </div>
-
-      <!-- FORMAT -->
-      <div>
-        <p class="text-sm text-gray-300 mb-3">Choose Format</p>
-        <div class="grid grid-cols-2 gap-3">
-          <button id="mp3-btn" class="format-btn glass rounded-2xl py-4 border border-blue-500/20 bg-gradient-to-r from-blue-500 to-cyan-500 font-semibold cursor-pointer">
-            🎧 MP3 Audio
-          </button>
-          <button id="mp4-btn" class="format-btn glass rounded-2xl py-4 border border-white/10 font-semibold cursor-pointer text-gray-400">
-            🎬 MP4 Video
-          </button>
-        </div>
-      </div>
-
-      <!-- QUALITY -->
-      <div class="mt-6">
-        <p class="text-sm text-gray-300 mb-3">Select Quality</p>
-        <div class="flex gap-2 overflow-x-auto scroll-hidden pb-2">
-          <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-sm font-medium border-none bg-gradient-to-r from-blue-500 to-purple-600 text-white cursor-pointer">
-            128kbps
-          </button>
-          <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-sm font-medium border border-white/10 text-gray-400 cursor-pointer">
-            192kbps
-          </button>
-          <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-sm font-medium border border-white/10 text-gray-400 cursor-pointer">
-            320kbps
-          </button>
-          <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-sm font-medium border border-white/10 text-gray-400 cursor-pointer">
-            480p
-          </button>
-          <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-sm font-medium border border-white/10 text-gray-400 cursor-pointer">
-            720p
-          </button>
-          <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-sm font-medium border border-white/10 text-gray-400 cursor-pointer">
-            1080p
-          </button>
-        </div>
+      <div class="flex gap-2 overflow-x-auto scroll-hidden pb-2" id="quality-container">
+        <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-xs font-medium border border-blue-500/40 bg-blue-500/20">128kbps</button>
+        <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-xs font-medium border border-white/10 text-gray-400">320kbps</button>
+        <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-xs font-medium border border-white/10 text-gray-400">720p</button>
+        <button class="quality-btn min-w-fit px-4 py-2 rounded-xl glass text-xs font-medium border border-white/10 text-gray-400">1080p</button>
       </div>
     </div>
   </section>
 
-  <!-- DOWNLOAD STATUS (Hidden by default) -->
-  <section id="status-section" class="px-4 mt-6 hidden transition-all duration-500">
-    <div class="glass rounded-[28px] p-5 border border-emerald-500/10">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h2 class="font-bold text-lg">Download Status</h2>
-          <p class="text-xs text-gray-400 mt-1">Live processing monitor</p>
-        </div>
-        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-2xl">
-          ⬇️
-        </div>
-      </div>
-
-      <div class="bg-black/30 rounded-2xl p-4 border border-white/5">
-        <div class="flex items-center justify-between text-sm mb-3">
-          <span class="text-gray-300">Preparing Download...</span>
-          <span class="text-emerald-400 font-semibold">68%</span>
-        </div>
-
-        <div class="w-full h-3 rounded-full bg-white/5 overflow-hidden">
-          <div class="h-full w-[68%] bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full"></div>
-        </div>
-
-        <div class="mt-4 grid grid-cols-3 gap-2 text-center">
-          <div class="glass rounded-xl py-2">
-            <p class="text-xs text-gray-400">Speed</p>
-            <h3 class="font-bold text-sm mt-1">8MB/s</h3>
-          </div>
-          <div class="glass rounded-xl py-2">
-            <p class="text-xs text-gray-400">Format</p>
-            <h3 id="status-format" class="font-bold text-sm mt-1">MP3</h3>
-          </div>
-          <div class="glass rounded-xl py-2">
-            <p class="text-xs text-gray-400">Quality</p>
-            <h3 id="status-quality" class="font-bold text-sm mt-1">128kbps</h3>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- RESULTS (Hidden by default) -->
-  <section id="results-section" class="px-4 mt-6 hidden">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="font-bold text-lg">Search Results</h2>
-      <button class="text-xs text-blue-400 cursor-pointer">View All</button>
-    </div>
-
+  <section id="music-section" class="page-section px-4 mt-6 hidden">
+    <h2 class="font-bold text-lg mb-4">Search Results</h2>
     <div id="results-container" class="space-y-4">
-      <!-- SAMPLE CARD -->
-      <div class="glass rounded-[28px] p-3 flex gap-3 border border-white/5 hover:border-blue-500/20 transition-all duration-300">
-        <div class="relative flex-shrink-0">
-          <img src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" class="w-28 h-28 object-cover rounded-2xl" alt="Thumbnail"/>
-          <div class="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded-lg text-[10px]">3:45</div>
-        </div>
+      </div>
+  </section>
 
-        <div class="flex-1 min-w-0 flex flex-col justify-between">
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <h3 class="font-bold text-sm line-clamp-2 leading-snug break-words">
-                Example Song Title — Artist Name Official Music Video
-              </h3>
-              <p class="text-xs text-gray-400 mt-1">12M views • YouTube</p>
-            </div>
-            <button class="glass rounded-xl w-10 h-10 flex items-center justify-center text-lg flex-shrink-0 cursor-pointer active:scale-95 transition-all">
-              ▶️
-            </button>
-          </div>
-
-          <div class="flex gap-2 mt-3">
-            <button class="flex-1 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl py-2 text-sm font-semibold active:scale-95 transition-all cursor-pointer">
-              🎧 MP3
-            </button>
-            <button class="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl py-2 text-sm font-semibold active:scale-95 transition-all cursor-pointer">
-              🎬 MP4
-            </button>
-          </div>
-        </div>
+  <section id="videos-section" class="page-section px-4 mt-6 hidden">
+    <h2 class="font-bold text-lg mb-4">Recent Downloads</h2>
+    <div id="downloads-container" class="space-y-4">
+      <div class="glass rounded-[28px] p-8 text-center border border-white/5">
+        <p class="text-gray-400 text-sm italic">No recent downloads found.</p>
       </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
-  <footer class="px-4 mt-8 mb-24">
-    <div class="glass rounded-[28px] p-5 text-center border border-purple-500/10">
-      <div class="w-16 h-16 rounded-3xl bg-gradient-to-r from-blue-500 to-purple-600 mx-auto flex items-center justify-center text-3xl glow">👑</div>
-      <h2 class="mt-4 text-xl font-black">Legendary Smiley Cymor</h2>
-      <p class="text-sm text-gray-400 mt-2 leading-relaxed">CEO of CymorTechServices</p>
-      <div class="mt-4 inline-flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/5 text-xs text-blue-300">
-        ⚡ Built With Vision & Innovation. Challenged by my sister Joyce😂
+  <section id="more-section" class="page-section px-4 mt-6 hidden">
+    <h2 class="font-bold text-lg mb-4">Settings & Info</h2>
+    <div class="glass rounded-[28px] p-5 space-y-4">
+      <div class="flex items-center justify-between p-3 bg-white/5 rounded-2xl">
+        <span class="text-sm">Dark Mode</span>
+        <div class="w-10 h-5 bg-blue-600 rounded-full relative"><div class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div>
+      </div>
+      <div class="flex items-center justify-between p-3 bg-white/5 rounded-2xl">
+        <span class="text-sm">High Priority Downloads</span>
+        <div class="w-10 h-5 bg-gray-600 rounded-full relative"><div class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full"></div></div>
+      </div>
+      <hr class="border-white/5">
+      <div class="p-3">
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Developer</p>
+        <p class="text-sm font-bold text-blue-400">Legendary Smiley Cymor. Enjoy y'all-challenged by my sister Joyce❤️</p>
       </div>
     </div>
-  </footer>
+  </section>
 
-  <!-- BOTTOM NAVIGATION -->
-  <nav class="fixed bottom-0 left-0 w-full bg-[#020617]/90 backdrop-blur-2xl border-t border-white/5 px-2 py-3 z-50">
+  <nav class="fixed bottom-0 left-0 w-full bg-[#020617]/90 backdrop-blur-2xl border-t border-white/5 px-2 py-4 z-50">
     <div id="bottom-nav" class="grid grid-cols-4 gap-2 max-w-md mx-auto">
       <button class="nav-btn flex flex-col items-center gap-1 text-blue-400 cursor-pointer" data-target="home">
         <span class="text-2xl">🏠</span>
-        <span class="text-[11px] font-medium">Home</span>
+        <span class="text-[10px] font-bold uppercase">Home</span>
       </button>
       <button class="nav-btn flex flex-col items-center gap-1 text-gray-400 cursor-pointer" data-target="music">
         <span class="text-2xl">🎵</span>
-        <span class="text-[11px] font-medium">Music</span>
+        <span class="text-[10px] font-bold uppercase">Music</span>
       </button>
       <button class="nav-btn flex flex-col items-center gap-1 text-gray-400 cursor-pointer" data-target="videos">
         <span class="text-2xl">🎬</span>
-        <span class="text-[11px] font-medium">Videos</span>
+        <span class="text-[10px] font-bold uppercase">Videos</span>
       </button>
       <button class="nav-btn flex flex-col items-center gap-1 text-gray-400 cursor-pointer" data-target="more">
         <span class="text-2xl">⚙️</span>
-        <span class="text-[11px] font-medium">More</span>
+        <span class="text-[10px] font-bold uppercase">More</span>
       </button>
     </div>
   </nav>
 
-  <!-- JAVASCRIPT LOGIC -->
+  <script src="script.js"></script>
+
   <script>
-    // DOM Elements
-    const searchInput = document.getElementById('search-input');
-    const searchBtn = document.getElementById('search-btn');
-    const preferenceSection = document.getElementById('preference-section');
-    const statusSection = document.getElementById('status-section');
-    const resultsSection = document.getElementById('results-section');
-    const heroSection = document.getElementById('hero-section');
-    
-    const statusFormat = document.getElementById('status-format');
-    const statusQuality = document.getElementById('status-quality');
-
-    // SEARCH FUNCTIONALITY
-    searchBtn.addEventListener('click', () => {
-      const query = searchInput.value.trim();
-      if (query === '') {
-        alert('Please enter a song title or paste a URL.');
-        return;
-      }
-      
-      // Reveal hidden panels once search executes
-      preferenceSection.classList.remove('hidden');
-      statusSection.classList.remove('hidden');
-      resultsSection.classList.remove('hidden');
-    });
-
-    // Handle Enter Key inside search bar
-    searchInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        searchBtn.click();
-      }
-    });
-
-    // FORMAT TOGGLE LOGIC
-    const formatBtns = document.querySelectorAll('.format-btn');
-    formatBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        formatBtns.forEach(b => {
-          b.className = "format-btn glass rounded-2xl py-4 border border-white/10 font-semibold cursor-pointer text-gray-400";
-        });
-        
-        btn.className = "format-btn glass rounded-2xl py-4 border border-blue-500/20 bg-gradient-to-r from-blue-500 to-cyan-500 font-semibold cursor-pointer text-white";
-        
-        // Update Live Monitor text string
-        statusFormat.textContent = btn.id === 'mp3-btn' ? 'MP3' : 'MP4';
-      });
-    });
-
-    // QUALITY TOGGLE LOGIC
-    const qualityBtns = document.querySelectorAll('.quality-btn');
-    qualityBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        qualityBtns.forEach(b => {
-          b.className = "quality-btn min-w-fit px-4 py-2 rounded-xl glass text-sm font-medium border border-white/10 text-gray-400 cursor-pointer";
-        });
-
-        btn.className = "quality-btn min-w-fit px-4 py-2 rounded-xl glass text-sm font-medium border-none bg-gradient-to-r from-blue-500 to-purple-600 text-white cursor-pointer";
-        
-        // Update Live Monitor text string
-        statusQuality.textContent = btn.textContent.trim();
-      });
-    });
-
-    // BOTTOM NAVIGATION INTERACTION
     const navBtns = document.querySelectorAll('.nav-btn');
+    const sections = document.querySelectorAll('.page-section');
+
     navBtns.forEach(btn => {
       btn.addEventListener('click', () => {
-        navBtns.forEach(b => {
-          b.classList.remove('text-blue-400');
-          b.classList.add('text-gray-400');
-        });
-        btn.classList.remove('text-gray-400');
-        btn.classList.add('text-blue-400');
-
-        // Optional Section Routing logic based on navigation selection
         const target = btn.getAttribute('data-target');
-        if (target === 'home') {
-          heroSection.style.display = 'block';
-        } else {
-          // You can handle separate view logic for Music, Videos, and Settings screens here
+
+        // Update Nav UI
+        navBtns.forEach(b => {
+          b.classList.replace('text-blue-400', 'text-gray-400');
+        });
+        btn.classList.replace('text-gray-400', 'text-blue-400');
+
+        // Update Section Visibility
+        sections.forEach(s => s.classList.add('hidden'));
+        
+        const activeSection = document.getElementById(`${target}-section`);
+        if (activeSection) {
+            activeSection.classList.remove('hidden');
+        }
+
+        // Special logic: If user clicks Music but hasn't searched, redirect to Home search
+        if (target === 'music' && document.getElementById('results-container').children.length === 0) {
+            alert("Search for a song first!");
+            document.querySelector('[data-target="home"]').click();
         }
       });
     });
-  </script>
 
+    // Simple listener to auto-show results section when search is triggered from script.js
+    document.getElementById('search-btn').addEventListener('click', () => {
+        setTimeout(() => {
+            if (document.getElementById('results-container').children.length > 0) {
+                document.querySelector('[data-target="music"]').click();
+                document.getElementById('preference-section').classList.remove('hidden');
+            }
+        }, 1000);
+    });
+  </script>
 </body>
 </html>
