@@ -1,254 +1,389 @@
-const express = require("express");
-const multer = require("multer");
-const ffmpeg = require("fluent-ffmpeg");
-const fs = require("fs-extra");
-const path = require("path");
-const cors = require("cors");
+/**
+ * =========================================================
+ * 🎵 CYMOR MUSIC DOWNLOADER — ELITE SERVER ENGINE
+ * =========================================================
+ * Creator:
+ * Legendary Smiley Cymor
+ * CEO of CymorTechServices
+ * =========================================================
+ */
+
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const ytSearch = require('yt-search');
+const ytdl = require('@distube/ytdl-core');
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('ffmpeg-static');
+const rateLimit = require('express-rate-limit');
+
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
-/* =========================
-   FOLDERS
-========================= */
+/* =========================================================
+   SECURITY + PERFORMANCE
+========================================================= */
 
-fs.ensureDirSync("uploads");
-fs.ensureDirSync("outputs");
+// Rate Limiter
+const apiLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 20,
+    message: {
+        success: false,
+        message: 'Too many requests. Please slow down.'
+    }
+});
 
-/* =========================
-   MIDDLEWARE
-========================= */
+/* =========================================================
+   MIDDLEWARES
+========================================================= */
 
 app.use(cors());
+
 app.use(express.json());
-app.use(express.static("public"));
-app.use("/outputs", express.static(path.join(__dirname, "outputs")));
 
-/* =========================
-   FILE LIMIT (YOUR REQUEST)
-========================= */
+app.use(express.urlencoded({ extended: true }));
 
-const upload = multer({
-    dest: "uploads/",
-    limits: {
-        fileSize: 40 * 1024 * 1024 // 40MB max ✅
-    },
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith("video/")) {
-            cb(null, true);
-        } else {
-            cb(new Error("Only video files allowed"));
-        }
+app.use('/api/', apiLimiter);
+
+app.use(express.static(path.join(__dirname, '/')));
+
+/* =========================================================
+   GLOBAL STATUS
+========================================================= */
+
+const APP_INFO = {
+    app: 'Cymor Music Downloader',
+    creator: 'Legendary Smiley Cymor',
+    company: 'CymorTechServices',
+    version: '2.0.0',
+    status: 'ONLINE'
+};
+
+/* =========================================================
+   HOME STATUS ROUTE
+========================================================= */
+
+app.get('/api/status', (req, res) => {
+    res.json({
+        success: true,
+        ...APP_INFO,
+        uptime: process.uptime(),
+        timestamp: Date.now()
+    });
+});
+
+/* =========================================================
+   SEARCH ROUTE
+========================================================= */
+
+app.get('/api/search', async (req, res) => {
+
+    const query = req.query.q;
+
+    if (!query) {
+        return res.status(400).json({
+            success: false,
+            message: 'Search query is required'
+        });
     }
-});
-
-/* =========================
-   HEALTH CHECK
-========================= */
-
-app.get("/ping", (req, res) => {
-    res.json({ status: "ok", message: "CYMOR4K running" });
-});
-
-/* =========================
-   REAL PROGRESS HELPER
-========================= */
-
-function parseTimeToSeconds(time) {
-    if (!time) return 0;
-    const parts = time.split(":");
-    if (parts.length !== 3) return 0;
-
-    const [h, m, s] = parts;
-    return (+h) * 3600 + (+m) * 60 + parseFloat(s);
-}
-
-/* =========================
-   ENHANCE ROUTE (REAL PROGRESS)
-========================= */
-
-app.post("/enhance", upload.single("video"), async (req, res) => {
 
     try {
 
-        if (!req.file) {
+        const results = await ytSearch(query);
+
+        const videos = results.videos
+            .slice(0, 12)
+            .map(video => ({
+
+                id: video.videoId,
+
+                title: video.title,
+
+                duration: video.timestamp,
+
+                views: video.views,
+
+                ago: video.ago,
+
+                author: video.author?.name || 'Unknown Artist',
+
+                thumbnail: video.thumbnail,
+
+                url: video.url
+
+            }));
+
+        return res.json({
+            success: true,
+            total: videos.length,
+            creator: APP_INFO.creator,
+            results: videos
+        });
+
+    } catch (error) {
+
+        console.error('SEARCH ERROR:', error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to search videos'
+        });
+    }
+});
+
+/* =========================================================
+   VIDEO INFO ROUTE
+========================================================= */
+
+app.get('/api/info/:id', async (req, res) => {
+
+    try {
+
+        const videoId = req.params.id;
+
+        const videoURL = `https://www.youtube.com/watch?v=${videoId}`;
+
+        const info = await ytdl.getInfo(videoURL);
+
+        const details = info.videoDetails;
+
+        return res.json({
+
+            success: true,
+
+            data: {
+
+                id: details.videoId,
+
+                title: details.title,
+
+                lengthSeconds: details.lengthSeconds,
+
+                views: details.viewCount,
+
+                author: details.author.name,
+
+                thumbnail: details.thumbnails[details.thumbnails.length - 1]?.url,
+
+                publishDate: details.publishDate
+
+            }
+
+        });
+
+    } catch (error) {
+
+        console.error('INFO ERROR:', error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to fetch video info'
+        });
+    }
+});
+
+/* =========================================================
+   DOWNLOAD ROUTE
+========================================================= */
+
+app.get('/api/download', async (req, res) => {
+
+    const videoId = req.query.id;
+
+    const format = req.query.format || 'mp3';
+
+    const quality = req.query.quality || '320';
+
+    if (!videoId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Video ID is required'
+        });
+    }
+
+    const videoURL = `https://www.youtube.com/watch?v=${videoId}`;
+
+    try {
+
+        const info = await ytdl.getInfo(videoURL);
+
+        const rawTitle = info.videoDetails.title;
+
+        const safeTitle = rawTitle
+            .replace(/[^\w\s]/gi, '')
+            .replace(/\s+/g, '_')
+            .substring(0, 80);
+
+        /* =========================================================
+           MP3 DOWNLOAD
+        ========================================================= */
+
+        if (format === 'mp3') {
+
+            const audioFormat = ytdl.chooseFormat(info.formats, {
+                filter: 'audioonly',
+                quality: 'highestaudio'
+            });
+
+            res.setHeader(
+                'Content-Disposition',
+                `attachment; filename=\"${safeTitle}.mp3\"`
+            );
+
+            res.setHeader('Content-Type', 'audio/mpeg');
+
+            const audioStream = ytdl(videoURL, {
+                format: audioFormat,
+                highWaterMark: 1 << 25
+            });
+
+            ffmpeg(audioStream)
+
+                .audioBitrate(Number(quality))
+
+                .audioChannels(2)
+
+                .audioFrequency(44100)
+
+                .format('mp3')
+
+                .on('start', () => {
+                    console.log(`🎧 MP3 Download Started: ${safeTitle}`);
+                })
+
+                .on('end', () => {
+                    console.log(`✅ MP3 Download Finished: ${safeTitle}`);
+                })
+
+                .on('error', error => {
+
+                    console.error('FFMPEG AUDIO ERROR:', error.message);
+
+                    if (!res.headersSent) {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Audio conversion failed'
+                        });
+                    }
+                })
+
+                .pipe(res, { end: true });
+
+        }
+
+        /* =========================================================
+           MP4 DOWNLOAD
+        ========================================================= */
+
+        else if (format === 'mp4') {
+
+            /**
+             * Safer quality system
+             * Avoids server crashes
+             */
+
+            let selectedQuality = '18';
+
+            if (quality === '720') {
+                selectedQuality = '22';
+            }
+
+            const videoFormat = ytdl.chooseFormat(info.formats, {
+                quality: selectedQuality
+            });
+
+            res.setHeader(
+                'Content-Disposition',
+                `attachment; filename=\"${safeTitle}.mp4\"`
+            );
+
+            res.setHeader('Content-Type', 'video/mp4');
+
+            ytdl(videoURL, {
+                format: videoFormat,
+                highWaterMark: 1 << 25
+            })
+
+            .on('start', () => {
+                console.log(`🎬 MP4 Download Started: ${safeTitle}`);
+            })
+
+            .on('end', () => {
+                console.log(`✅ MP4 Download Finished: ${safeTitle}`);
+            })
+
+            .on('error', error => {
+
+                console.error('VIDEO STREAM ERROR:', error.message);
+
+                if (!res.headersSent) {
+                    res.status(500).json({
+                        success: false,
+                        message: 'Video stream failed'
+                    });
+                }
+            })
+
+            .pipe(res);
+
+        }
+
+        /* =========================================================
+           INVALID FORMAT
+        ========================================================= */
+
+        else {
+
             return res.status(400).json({
                 success: false,
-                error: "No video uploaded"
+                message: 'Invalid format. Use mp3 or mp4'
             });
+
         }
 
-        const inputPath = req.file.path;
+    } catch (error) {
 
-        const outputName =
-            "cymor4k_" + Date.now() + ".mp4";
+        console.error('DOWNLOAD ERROR:', error.message);
 
-        const outputPath =
-            path.join("outputs", outputName);
-
-        let totalDuration = 0;
-        let lastProgress = 0;
-
-        /* =========================
-           FFPROBE (GET DURATION)
-        ========================= */
-
-        ffmpeg.ffprobe(inputPath, (err, metadata) => {
-
-            if (err) {
-                console.error(err);
-            } else {
-                totalDuration =
-                    metadata.format.duration || 0;
-            }
-
-        });
-
-        /* =========================
-           FFmpeg PROCESS (YOUR FAST PIPELINE)
-        ========================= */
-
-        const command = ffmpeg(inputPath)
-
-            .videoFilters([
-
-                "scale=960:-2",
-                "eq=contrast=1.06:brightness=0.015:saturation=1.05",
-                "unsharp=3:3:0.5"
-
-            ])
-
-            .videoCodec("libx264")
-
-            .outputOptions([
-
-                "-preset ultrafast",
-                "-crf 26",
-                "-movflags +faststart",
-                "-pix_fmt yuv420p",
-                "-threads 1"
-
-            ])
-
-            .audioCodec("aac")
-            .audioBitrate("96k")
-            .format("mp4")
-
-            /* =========================
-               REAL PROGRESS TRACKING
-            ========================= */
-
-            .on("start", (cmd) => {
-                console.log("FFmpeg started");
-                console.log(cmd);
-            })
-
-            .on("progress", (progress) => {
-
-                let percent = 0;
-
-                if (progress.timemark && totalDuration) {
-
-                    const current =
-                        parseTimeToSeconds(progress.timemark);
-
-                    percent =
-                        (current / totalDuration) * 100;
-
-                } else if (progress.percent) {
-
-                    percent = progress.percent;
-
-                }
-
-                percent = Math.min(100, Math.max(lastProgress, percent));
-
-                lastProgress = percent;
-
-                console.log("Progress:", percent.toFixed(2), "%");
-
-            })
-
-            .on("end", async () => {
-
-                console.log("Enhancement finished");
-
-                await fs.remove(inputPath);
-
-                res.json({
-
-                    success: true,
-                    video: "/outputs/" + outputName
-
-                });
-
-            })
-
-            .on("error", async (err) => {
-
-                console.error(err);
-
-                await fs.remove(inputPath);
-
-                res.status(500).json({
-
-                    success: false,
-                    error: "Video processing failed"
-
-                });
-
-            })
-
-            .save(outputPath);
-
-    } catch (err) {
-
-        console.error(err);
-
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
-            error: "Server error"
+            message: 'Download processing failed'
         });
-
     }
+});
+
+/* =========================================================
+   404 HANDLER
+========================================================= */
+
+app.use((req, res) => {
+
+    res.status(404).json({
+        success: false,
+        message: 'Endpoint not found'
+    });
 
 });
 
-/* =========================
-   CLEANUP
-========================= */
-
-setInterval(async () => {
-
-    try {
-
-        const files = await fs.readdir("outputs");
-
-        const now = Date.now();
-
-        for (const file of files) {
-
-            const filePath = path.join("outputs", file);
-
-            const stats = await fs.stat(filePath);
-
-            if (now - stats.mtimeMs > 30 * 60 * 1000) {
-                await fs.remove(filePath);
-                console.log("Deleted:", file);
-            }
-
-        }
-
-    } catch (err) {
-        console.error(err);
-    }
-
-}, 15 * 60 * 1000);
-
-/* =========================
-   START SERVER
-========================= */
+/* =========================================================
+   SERVER START
+========================================================= */
 
 app.listen(PORT, () => {
-    console.log(`CYMOR4K running on port ${PORT}`);
+
+    console.log(`
+=========================================================
+🎵 CYMOR MUSIC DOWNLOADER
+=========================================================
+🚀 STATUS   : ONLINE
+🌍 PORT     : ${PORT}
+👑 CREATOR  : Legendary Smiley Cymor
+🏢 COMPANY  : CymorTechServices
+=========================================================
+    `);
+
 });
