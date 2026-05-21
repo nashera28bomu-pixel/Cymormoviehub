@@ -6,18 +6,19 @@
  * CEO of CymorTechServices
  * =========================================================
  */
-const APP_NAME = "Cymor Music Downloader";
 
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const ytSearch = require('yt-search');
 const rateLimit = require('express-rate-limit');
-const { exec } = require('youtube-dl-exec'); // Cleaner execution for Render
+const { exec } = require('youtube-dl-exec'); 
 const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+// FIX: Defining the missing variable that caused the "Exited with status 1" error
+const APP_NAME = "Legendary Smiley Cymor"; 
 
 /* =========================================================
    MEMORY LAYERS (SPOTIFY STYLE CORE)
@@ -30,7 +31,7 @@ const JOBS = new Map();
 ========================================================= */
 const limiter = rateLimit({
     windowMs: 60 * 1000,
-    max: 60, // Increased for search-heavy usage
+    max: 60, 
     message: { success: false, message: 'Elite Engine busy. Please wait.' }
 });
 
@@ -49,7 +50,7 @@ app.get('/api/status', (req, res) => {
         name: "Cymor Spotify Engine",
         version: "5.1.0",
         engine: "SPOTIFY-LEVEL STREAM CORE",
-        creator: "Legendary Smiley Cymor",
+        creator: APP_NAME,
         uptime: process.uptime(),
         activeJobs: JOBS.size
     });
@@ -78,7 +79,7 @@ app.get('/api/search', async (req, res) => {
     }
 });
 
-// 3. Elite Download Engine (The Fix)
+// 3. Elite Download Engine
 app.get('/api/download', async (req, res) => {
     const { id, format = 'mp3' } = req.query;
 
@@ -87,7 +88,6 @@ app.get('/api/download', async (req, res) => {
     const videoURL = `https://www.youtube.com/watch?v=${id}`;
     
     try {
-        // Fetching fresh metadata to get the clean title
         const search = await ytSearch({ videoId: id });
         const safeTitle = (search.title || 'Cymor_Download')
             .replace(/[^\w\s]/g, '')
@@ -99,8 +99,6 @@ app.get('/api/download', async (req, res) => {
             res.setHeader('Content-Type', 'audio/mpeg');
             res.setHeader('Content-Disposition', `attachment; filename="${safeTitle}.mp3"`);
 
-            // Using youtube-dl-exec (Render compatible)
-            // It automatically finds the binary if installed via npm or buildpack
             const stream = exec(videoURL, {
                 extractAudio: true,
                 audioFormat: 'mp3',
