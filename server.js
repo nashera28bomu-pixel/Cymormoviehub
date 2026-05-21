@@ -6,6 +6,7 @@
  * CEO of CymorTechServices
  * =========================================================
  */
+const APP_NAME = "Cymor Music Downloader";
 
 const express = require('express');
 const cors = require('cors');
