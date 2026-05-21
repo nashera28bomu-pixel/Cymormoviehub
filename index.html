@@ -17,21 +17,26 @@ body { background: #000000; color: #ffffff; overflow-x: hidden; }
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.glass-dark {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(20px);
+}
+
 .action-card {
-  background: #f1f5f9; /* Off-white like screenshot */
+  background: #f1f5f9; 
   color: #1e293b;
   transition: transform 0.2s;
 }
 
 .action-card:active { transform: scale(0.96); }
 
-.feature-pill {
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    color: #60a5fa;
-}
-
 .hidden { display: none; }
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.animate-slideUp { animation: slideUp 0.3s ease-out; }
 </style>
 </head>
 
@@ -55,14 +60,14 @@ body { background: #000000; color: #ffffff; overflow-x: hidden; }
 
 <main class="px-6 space-y-4">
     
-    <button onclick="document.getElementById('search-input').focus()" class="w-full action-card py-4 px-6 rounded-full flex items-center gap-4 shadow-lg">
+    <button onclick="document.getElementById('search-input').focus()" class="w-full action-card py-4 px-6 rounded-full flex items-center gap-4 shadow-lg active:scale-95 transition-transform">
         <div class="w-8 h-8 flex items-center justify-center text-yellow-600">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
         <span class="font-bold text-lg">Search Music Online</span>
     </button>
 
-    <button class="w-full bg-[#f0f9ff] py-4 px-6 rounded-full flex items-center gap-4 border border-blue-100">
+    <button onclick="showToast('Browsing Engine Integrated', 'success')" class="w-full bg-[#f0f9ff] py-4 px-6 rounded-full flex items-center gap-4 border border-blue-100 active:scale-95 transition-transform">
         <div class="w-8 h-8 flex items-center justify-center text-cyan-500">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
         </div>
@@ -70,11 +75,11 @@ body { background: #000000; color: #ffffff; overflow-x: hidden; }
     </button>
 
     <div class="grid grid-cols-2 gap-4">
-        <div class="bg-[#fff1f2] p-6 rounded-[32px] text-center border border-red-500/10">
+        <div onclick="togglePrivacyModal(true)" class="bg-[#fff1f2] p-6 rounded-[32px] text-center border border-red-500/10 active:scale-95 transition-transform cursor-pointer">
             <div class="bg-red-500/10 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2">🛡️</div>
             <p class="font-bold text-red-500">Privacy Policy</p>
         </div>
-        <div class="bg-[#fff7ed] p-6 rounded-[32px] text-center border border-orange-500/10">
+        <div onclick="window.open('https://github.com/nashera28bomu-pixel', '_blank')" class="bg-[#fff7ed] p-6 rounded-[32px] text-center border border-orange-500/10 active:scale-95 transition-transform cursor-pointer">
             <div class="bg-orange-500/10 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2">⭐</div>
             <p class="font-bold text-orange-500">Rate App</p>
         </div>
@@ -99,43 +104,68 @@ body { background: #000000; color: #ffffff; overflow-x: hidden; }
     </section>
 
     <div id="search-container" class="mt-4 flex gap-2">
-        <input id="search-input" class="flex-1 px-4 py-3 rounded-xl glass outline-none text-sm" placeholder="Type here to search..." />
-        <button id="search-btn" class="px-5 py-3 rounded-xl bg-blue-600 font-bold text-sm">Go</button>
+        <input id="search-input" class="flex-1 px-4 py-3 rounded-xl glass outline-none text-sm border border-white/10 focus:border-yellow-500/50 transition-colors" placeholder="Search tracks or paste link..." />
+        <button id="search-btn" class="px-5 py-3 rounded-xl bg-yellow-500 text-black font-black text-sm active:scale-95 transition-transform">Go</button>
     </div>
 
     <div id="results-container" class="space-y-3"></div>
 </main>
 
 <footer class="mt-12 px-6 text-center space-y-4 pb-10">
-  <div class="glass rounded-2xl p-5">
-    <p class="text-xs text-gray-400">This site was built by the legendary</p>
-    <p class="text-sm font-black text-blue-400 mt-1">Smiley Cymor — CEO of CymorTechServices</p>
-    <p class="text-[10px] text-gray-500 mt-3">Special credits to Joyce ❤️ for inspiration and support</p>
+  <div class="glass rounded-2xl p-5 border border-white/5">
+    <p class="text-xs text-gray-400 font-medium">Built by the legendary</p>
+    <p class="text-sm font-black text-yellow-500 mt-1 uppercase tracking-wider">
+      Smiley Cymor — CEO of CymorTechServices
+    </p>
+    <p class="text-[10px] text-gray-500 mt-3 italic">
+      Special credits to Joyce ❤️ for inspiration and support
+    </p>
   </div>
-  <p class="text-[9px] text-gray-600 uppercase tracking-widest">© CYMORTECHSERVICES 2026</p>
+  <p class="text-[9px] text-gray-700 uppercase tracking-[0.3em] font-bold">© CYMORTECHSERVICES 2026</p>
 </footer>
+
+<div id="privacy-modal" class="fixed inset-0 z-[20000] hidden">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-md" onclick="togglePrivacyModal(false)"></div>
+    <div class="absolute bottom-0 left-0 right-0 glass-dark rounded-t-[40px] p-8 max-h-[85vh] overflow-y-auto animate-slideUp border-t border-white/20">
+        <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-6"></div>
+        <h2 class="text-2xl font-black mb-4 text-yellow-500">Privacy Policy</h2>
+        <div class="space-y-4 text-sm text-gray-300 leading-relaxed pb-10">
+            <p><strong class="text-white">1. Data Collection:</strong> Cymor Music Downloader does not store personal information, account passwords, or browsing history. All searches are processed in real-time through our Elite Media Engine.</p>
+            <p><strong class="text-white">2. Usage:</strong> This tool is intended for personal use and archival purposes. Users are responsible for complying with the terms of service of the content providers.</p>
+            <p><strong class="text-white">3. Cookies:</strong> We use local storage only to save your download history on your own device. No tracking cookies are sent to our servers.</p>
+            <p><strong class="text-white">4. Security:</strong> All streams are encrypted and processed through the CymorTechServices secure backend to ensure your IP address remains private.</p>
+            <button onclick="togglePrivacyModal(false)" class="w-full bg-white text-black font-bold py-4 rounded-2xl mt-6">I Understand</button>
+        </div>
+    </div>
+</div>
 
 <nav class="fixed bottom-0 left-0 right-0 glass-dark bg-black/80 backdrop-blur-xl border-t border-white/10 px-8 py-4">
     <div class="flex justify-between items-center max-w-md mx-auto">
-        <div class="flex flex-col items-center gap-1 text-yellow-500">
+        <div onclick="window.location.reload()" class="flex flex-col items-center gap-1 text-yellow-500 cursor-pointer">
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
             <span class="text-[10px] font-bold">Home</span>
         </div>
-        <div class="flex flex-col items-center gap-1 text-gray-500">
+        <div onclick="document.getElementById('search-input').focus()" class="flex flex-col items-center gap-1 text-gray-500 cursor-pointer">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             <span class="text-[10px] font-bold">Search</span>
         </div>
-        <div class="flex flex-col items-center gap-1 text-gray-500">
+        <div class="flex flex-col items-center gap-1 text-gray-500 cursor-pointer">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             <span class="text-[10px] font-bold">Vault</span>
-        </div>
-        <div class="flex flex-col items-center gap-1 text-gray-500">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            <span class="text-[10px] font-bold">More</span>
         </div>
     </div>
 </nav>
 
+<script>
+function togglePrivacyModal(show) {
+    const modal = document.getElementById('privacy-modal');
+    if (show) {
+        modal.classList.remove('hidden');
+    } else {
+        modal.classList.add('hidden');
+    }
+}
+</script>
 <script src="script.js"></script>
 </body>
 </html>
