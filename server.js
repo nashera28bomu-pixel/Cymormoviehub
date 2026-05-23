@@ -1,6 +1,6 @@
 /**
  * =========================================================
- * 🎵 CYMOR SPOTIFY-LEVEL ENGINE v5.2 (STABLE RENDER BUILD)
+ * 🎵 CYMOR ENGINE v6.0 (RENDER STABLE CORE)
  * =========================================================
  */
 
@@ -9,7 +9,7 @@ const cors = require('cors');
 const path = require('path');
 const ytSearch = require('yt-search');
 const rateLimit = require('express-rate-limit');
-const youtubedl = require('youtube-dl-exec');
+const { spawn } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,23 +17,16 @@ const PORT = process.env.PORT || 3000;
 const APP_NAME = "Legendary Smiley Cymor";
 
 /* =========================================================
-   CORE MEMORY
-========================================================= */
-const JOBS = new Map();
-
-/* =========================================================
    MIDDLEWARE
 ========================================================= */
-const limiter = rateLimit({
-    windowMs: 60 * 1000,
-    max: 60,
-    message: { success: false, message: 'Server busy, try again.' }
-});
-
 app.use(cors());
 app.use(express.json());
-app.use(limiter);
 app.use(express.static(path.join(__dirname, '/')));
+
+app.use(rateLimit({
+    windowMs: 60 * 1000,
+    max: 60
+}));
 
 /* =========================================================
    STATUS
@@ -41,134 +34,100 @@ app.use(express.static(path.join(__dirname, '/')));
 app.get('/api/status', (req, res) => {
     res.json({
         success: true,
-        name: "Cymor Music Engine",
-        version: "5.2.0",
+        name: "Cymor Engine v6",
         creator: APP_NAME,
-        uptime: process.uptime(),
-        activeJobs: JOBS.size
+        uptime: process.uptime()
     });
 });
 
 /* =========================================================
-   SEARCH ENGINE
+   SEARCH
 ========================================================= */
 app.get('/api/search', async (req, res) => {
     const q = req.query.q;
     if (!q) return res.status(400).json({ success: false });
 
     try {
-        const result = await ytSearch(q);
+        const r = await ytSearch(q);
 
-        const videos = result.videos.slice(0, 20).map(v => ({
-            id: v.videoId,
-            title: v.title,
-            duration: v.timestamp,
-            views: v.views,
-            author: v.author?.name,
-            thumbnail: v.thumbnail
-        }));
-
-        res.json({ success: true, results: videos });
+        res.json({
+            success: true,
+            results: r.videos.slice(0, 20).map(v => ({
+                id: v.videoId,
+                title: v.title,
+                thumbnail: v.thumbnail,
+                duration: v.timestamp,
+                author: v.author?.name
+            }))
+        });
 
     } catch (err) {
-        console.error("Search error:", err);
         res.status(500).json({ success: false });
     }
 });
 
 /* =========================================================
-   DOWNLOAD ENGINE (FIXED & RENDER SAFE)
+   DOWNLOAD ENGINE (FIXED CORE)
 ========================================================= */
-app.get('/api/download', async (req, res) => {
+app.get('/api/download', (req, res) => {
     const { id, format = 'mp3' } = req.query;
 
     if (!id) {
-        return res.status(400).json({ success: false, message: "Video ID required" });
+        return res.status(400).json({ success: false, message: "Missing ID" });
     }
 
     const url = `https://www.youtube.com/watch?v=${id}`;
 
-    try {
-        // safer metadata fetch
-        const meta = await ytSearch(url);
-        const video = meta.videos?.[0];
+    res.setHeader('Access-Control-Allow-Origin', '*');
 
-        const title = (video?.title || 'Cymor_Download')
-            .replace(/[^\w\s]/g, '')
-            .replace(/\s+/g, '_');
+    if (format === 'mp3') {
+        res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Content-Disposition', `attachment; filename="cymor.mp3"`);
 
-        console.log(`🚀 Download starting: ${title}`);
+        const ytdlp = spawn('yt-dlp', [
+            url,
+            '-x',
+            '--audio-format', 'mp3',
+            '-o', '-'
+        ]);
 
-        if (format === 'mp3') {
-            res.setHeader('Content-Type', 'audio/mpeg');
-            res.setHeader('Content-Disposition', `attachment; filename="${title}.mp3"`);
+        ytdlp.stdout.pipe(res);
 
-            const stream = youtubedl(
-                url,
-                {
-                    extractAudio: true,
-                    audioFormat: 'mp3',
-                    output: '-',
-                    noCheckCertificates: true,
-                    noWarnings: true,
-                    preferFreeFormats: true
-                },
-                { stdio: ['ignore', 'pipe', 'pipe'] }
-            );
+        ytdlp.on('error', (err) => {
+            console.error("MP3 error:", err);
+            res.status(500).end("Download failed");
+        });
 
-            stream.stdout.pipe(res);
+    } else {
+        res.setHeader('Content-Type', 'video/mp4');
+        res.setHeader('Content-Disposition', `attachment; filename="cymor.mp4"`);
 
-            stream.on('error', (err) => {
-                console.error("MP3 Error:", err);
-                if (!res.headersSent) {
-                    res.status(500).send("Download failed");
-                }
-            });
+        const ytdlp = spawn('yt-dlp', [
+            url,
+            '-f', 'mp4',
+            '-o', '-'
+        ]);
 
-        } else if (format === 'mp4') {
-            res.setHeader('Content-Type', 'video/mp4');
-            res.setHeader('Content-Disposition', `attachment; filename="${title}.mp4"`);
+        ytdlp.stdout.pipe(res);
 
-            const stream = youtubedl(
-                url,
-                {
-                    format: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-                    output: '-',
-                    noCheckCertificates: true,
-                    noWarnings: true
-                },
-                { stdio: ['ignore', 'pipe', 'pipe'] }
-            );
-
-            stream.stdout.pipe(res);
-
-            stream.on('error', (err) => {
-                console.error("MP4 Error:", err);
-                if (!res.headersSent) {
-                    res.status(500).send("Download failed");
-                }
-            });
-        }
-
-    } catch (err) {
-        console.error("Engine failure:", err);
-        if (!res.headersSent) {
-            res.status(500).json({ success: false, error: "Engine crashed" });
-        }
+        ytdlp.on('error', (err) => {
+            console.error("MP4 error:", err);
+            res.status(500).end("Download failed");
+        });
     }
 });
 
 /* =========================================================
-   SERVER START
+   START SERVER
 ========================================================= */
 app.listen(PORT, () => {
     console.log(`
-=========================================================
-🎧 CYMOR ENGINE v5.2 STABLE
-=========================================================
-🚀 STATUS  : ONLINE
-👑 CREATOR : ${APP_NAME}
-🌍 PORT    : ${PORT}
-=========================================================
+========================================
+🎧 CYMOR ENGINE v6 STABLE
+========================================
+🚀 STATUS : ONLINE
+👑 CREATOR: ${APP_NAME}
+🌍 PORT   : ${PORT}
+========================================
     `);
 });
