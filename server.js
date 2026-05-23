@@ -1,6 +1,6 @@
 /**
  * =========================================================
- * 🎵 CYMOR ENGINE v6.0 (RENDER STABLE CORE)
+ * 🎵 CYMOR ENGINE v6.1 (RENDER FIXED CORE)
  * =========================================================
  */
 
@@ -10,6 +10,7 @@ const path = require('path');
 const ytSearch = require('yt-search');
 const rateLimit = require('express-rate-limit');
 const { spawn } = require('child_process');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,12 +30,19 @@ app.use(rateLimit({
 }));
 
 /* =========================================================
+   CHECK yt-dlp PATH (CRITICAL FIX)
+========================================================= */
+const YTDLP_PATH = fs.existsSync(path.join(__dirname, 'yt-dlp'))
+    ? path.join(__dirname, 'yt-dlp')
+    : 'yt-dlp'; // fallback if globally installed
+
+/* =========================================================
    STATUS
 ========================================================= */
 app.get('/api/status', (req, res) => {
     res.json({
         success: true,
-        name: "Cymor Engine v6",
+        name: "Cymor Engine v6.1",
         creator: APP_NAME,
         uptime: process.uptime()
     });
@@ -62,29 +70,34 @@ app.get('/api/search', async (req, res) => {
         });
 
     } catch (err) {
+        console.error("Search error:", err);
         res.status(500).json({ success: false });
     }
 });
 
 /* =========================================================
-   DOWNLOAD ENGINE (FIXED CORE)
+   DOWNLOAD ENGINE (FIXED + SAFE SPAWN)
 ========================================================= */
 app.get('/api/download', (req, res) => {
     const { id, format = 'mp3' } = req.query;
 
     if (!id) {
-        return res.status(400).json({ success: false, message: "Missing ID" });
+        return res.status(400).json({
+            success: false,
+            message: "Missing video ID"
+        });
     }
 
     const url = `https://www.youtube.com/watch?v=${id}`;
 
     res.setHeader('Access-Control-Allow-Origin', '*');
 
+    // ===================== MP3 =====================
     if (format === 'mp3') {
         res.setHeader('Content-Type', 'audio/mpeg');
         res.setHeader('Content-Disposition', `attachment; filename="cymor.mp3"`);
 
-        const ytdlp = spawn('yt-dlp', [
+        const ytdlp = spawn(YTDLP_PATH, [
             url,
             '-x',
             '--audio-format', 'mp3',
@@ -94,15 +107,22 @@ app.get('/api/download', (req, res) => {
         ytdlp.stdout.pipe(res);
 
         ytdlp.on('error', (err) => {
-            console.error("MP3 error:", err);
-            res.status(500).end("Download failed");
+            console.error("MP3 spawn error:", err);
+            if (!res.headersSent) {
+                res.status(500).end("Download failed (yt-dlp not found)");
+            }
         });
 
+        ytdlp.stderr.on('data', (data) => {
+            console.error("yt-dlp MP3:", data.toString());
+        });
+
+    // ===================== MP4 =====================
     } else {
         res.setHeader('Content-Type', 'video/mp4');
         res.setHeader('Content-Disposition', `attachment; filename="cymor.mp4"`);
 
-        const ytdlp = spawn('yt-dlp', [
+        const ytdlp = spawn(YTDLP_PATH, [
             url,
             '-f', 'mp4',
             '-o', '-'
@@ -111,8 +131,14 @@ app.get('/api/download', (req, res) => {
         ytdlp.stdout.pipe(res);
 
         ytdlp.on('error', (err) => {
-            console.error("MP4 error:", err);
-            res.status(500).end("Download failed");
+            console.error("MP4 spawn error:", err);
+            if (!res.headersSent) {
+                res.status(500).end("Download failed (yt-dlp not found)");
+            }
+        });
+
+        ytdlp.stderr.on('data', (data) => {
+            console.error("yt-dlp MP4:", data.toString());
         });
     }
 });
@@ -123,7 +149,7 @@ app.get('/api/download', (req, res) => {
 app.listen(PORT, () => {
     console.log(`
 ========================================
-🎧 CYMOR ENGINE v6 STABLE
+🎧 CYMOR ENGINE v6.1 STABLE FIX
 ========================================
 🚀 STATUS : ONLINE
 👑 CREATOR: ${APP_NAME}
