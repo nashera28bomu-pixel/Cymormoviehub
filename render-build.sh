@@ -1,9 +1,73 @@
 #!/usr/bin/env bash
 
-apt-get update
+# =========================================================
+# 🎵 CYMOR ENGINE BUILD SCRIPT v8.0 SUPREME
+# =========================================================
+# ✅ Render optimized
+# ✅ ffmpeg installer
+# ✅ Latest yt-dlp updater
+# ✅ Better permissions
+# ✅ Cleaner logs
+# ✅ Safer builds
+# =========================================================
 
-apt-get install -y ffmpeg python3 python3-pip
+echo "=========================================="
+echo "🚀 CYMOR BUILD STARTING..."
+echo "=========================================="
 
-pip3 install yt-dlp
+# =========================================================
+# UPDATE SYSTEM
+# =========================================================
 
-chmod +x yt-dlp || true
+apt-get update -y
+
+# =========================================================
+# INSTALL REQUIRED PACKAGES
+# =========================================================
+
+apt-get install -y \
+    ffmpeg \
+    python3 \
+    python3-pip \
+    curl
+
+# =========================================================
+# INSTALL LATEST yt-dlp
+# =========================================================
+
+pip3 install --upgrade yt-dlp
+
+# =========================================================
+# VERIFY INSTALLATIONS
+# =========================================================
+
+echo "=========================================="
+echo "✅ VERIFYING INSTALLATIONS..."
+echo "=========================================="
+
+python3 --version
+
+pip3 --version
+
+ffmpeg -version | head -n 1
+
+yt-dlp --version
+
+# =========================================================
+# FIX PERMISSIONS
+# =========================================================
+
+chmod -R 755 .
+
+# =========================================================
+# BUILD COMPLETE
+# =========================================================
+
+echo "=========================================="
+echo "🎧 CYMOR ENGINE BUILD COMPLETE"
+echo "=========================================="
+echo "✅ ffmpeg installed"
+echo "✅ yt-dlp updated"
+echo "✅ permissions fixed"
+echo "🚀 READY FOR DEPLOYMENT"
+echo "=========================================="
