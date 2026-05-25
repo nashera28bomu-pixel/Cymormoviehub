@@ -18,23 +18,37 @@ body {
   margin: 0;
   background: #000;
   color: white;
+  overflow-x: hidden;
 }
 
-/* ================= GLASS ================= */
+/* ================= COLORS FROM SCREENSHOT ================= */
+:root {
+    --primary-yellow: #facc15;
+    --accent-orange: #ff5722;
+    --soft-pink: #fff1f1;
+    --glass-white: rgba(235, 245, 255, 0.9);
+}
+
+/* ================= GLASS & UI ================= */
 .glass {
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,0.08);
 }
 
+.search-pill {
+    background: var(--glass-white);
+    color: #444;
+}
+
 /* ================= OVERLAY ================= */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.96);
+  background: rgba(0,0,0,0.98);
   z-index: 9999;
   transform: translateY(100%);
-  transition: 0.4s ease;
+  transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
 }
@@ -59,256 +73,157 @@ body {
   display: flex;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255,255,255,0.2);
-  border-top: 3px solid #facc15;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ================= SEARCH ================= */
-.search-bar {
-  position: fixed;
-  bottom: 90px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 92%;
-  max-width: 500px;
-  display: flex;
-  gap: 10px;
-  z-index: 10001;
-}
-
-input {
-  flex: 1;
-  padding: 14px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: white;
-  outline: none;
-}
-
-button {
-  background: #facc15;
-  color: black;
-  font-weight: bold;
-  padding: 14px 16px;
-  border-radius: 14px;
-}
-
-/* ================= RESULTS ================= */
-#results-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-}
-
-/* ================= QUALITY ================= */
-.quality-btns {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.qbtn {
-  flex: 1;
-  font-size: 10px;
-  padding: 6px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.08);
-  text-align: center;
-}
-
 /* ================= NAV ================= */
 nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,0.1);
+  background: #0a0a0a;
+  border-top: 1px solid rgba(255,255,255,0.05);
   display: flex;
   justify-content: space-around;
-  padding: 12px;
+  padding: 15px 10px 25px;
+  z-index: 100;
 }
 
-/* ================= FOOTER ================= */
-.footer {
-  text-align: center;
-  padding: 30px 20px 100px;
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 10px;
+    color: #888;
 }
+
+.nav-item.active { color: var(--primary-yellow); }
+
+/* ================= CUSTOM CARDS ================= */
+.action-card {
+    border-radius: 24px;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #ff5722;
+    font-weight: 700;
+}
+
 </style>
 </head>
 
 <body>
 
-<!-- ================= LOADER ================= -->
 <div id="loader" class="loader">
-  <div class="spinner"></div>
-  <p style="margin-top:12px;font-size:12px;color:gray;">Searching Cymor Engine...</p>
+  <div class="w-10 h-10 border-3 border-white/20 border-t-[#facc15] rounded-full animate-spin"></div>
+  <p class="mt-4 text-xs text-gray-400">Booting Cymor Engine...</p>
 </div>
 
-<!-- ================= SEARCH OVERLAY ================= -->
 <div id="overlay" class="overlay">
-
-  <div style="padding:30px;text-align:center;">
-    <h1 style="font-size:20px;font-weight:800;">Cymor Music</h1>
-    <p style="font-size:12px;color:gray;">Elite Media Engine</p>
+  <div class="p-6 flex justify-between items-center">
+    <div>
+        <h1 class="text-xl font-black">Search Result</h1>
+        <p class="text-[10px] text-gray-500 uppercase tracking-widest">Cymor Engine v9.0</p>
+    </div>
+    <button onclick="document.getElementById('overlay').classList.remove('active')" class="bg-white/10 p-2 rounded-full">✕</button>
   </div>
 
-  <div id="results-container"></div>
+  <div id="results-container" class="px-4 pb-32"></div>
 
-  <div class="search-bar">
-    <input id="search-input" placeholder="Search music or paste link..." />
-    <button id="search-btn">Go</button>
-  </div>
-
-</div>
-
-<!-- ================= HOME ================= -->
-<div style="text-align:center;padding:50px 20px;">
-
-  <div style="width:80px;height:80px;background:#facc15;border-radius:50%;margin:auto;display:flex;align-items:center;justify-content:center;color:black;font-weight:bold;">
-    🎧
-  </div>
-
-  <h1 style="margin-top:15px;font-size:26px;font-weight:900;">
-    Cymor Music Downloader
-  </h1>
-
-  <p style="color:gray;font-size:13px;">
-    Download MP3 & MP4 instantly
-  </p>
-
-  <button onclick="openSearch()" style="margin-top:25px;width:80%;max-width:300px;">
-    Search Music
-  </button>
-
-</div>
-
-<!-- ================= WHY CYMOR ================= -->
-<section style="padding:20px;">
-  <h2 style="font-weight:800;margin-bottom:10px;">Why Cymor Music?</h2>
-
-  <div class="glass" style="padding:12px;border-radius:16px;margin-bottom:10px;">
-    🚀 Ultra Fast Streaming
-  </div>
-
-  <div class="glass" style="padding:12px;border-radius:16px;margin-bottom:10px;">
-    💎 Studio Quality Audio (320kbps)
-  </div>
-
-  <div class="glass" style="padding:12px;border-radius:16px;">
-    🎥 HD MP4 Downloads (720p / 1080p)
-  </div>
-</section>
-
-<!-- ================= PRIVACY MODAL ================= -->
-<div id="privacy-modal" class="hidden fixed inset-0 bg-black/90 z-[20000] p-6">
-  <div class="glass p-5 rounded-2xl">
-    <h2 style="color:#facc15;font-weight:800;">Privacy Policy</h2>
-
-    <p style="font-size:12px;color:gray;margin-top:10px;">
-      Cymor does not store personal data. Only local history is saved on your device.
-    </p>
-
-    <button onclick="togglePrivacyModal(false)" style="margin-top:20px;width:100%;">
-      I Understand
-    </button>
+  <div class="fixed bottom-24 left-0 right-0 px-4">
+    <div class="search-pill flex items-center p-1 rounded-full shadow-2xl">
+        <span class="px-4">🔍</span>
+        <input id="search-input" class="flex-1 bg-transparent py-3 outline-none text-black font-medium" placeholder="Search music or video..." />
+        <button id="search-btn" class="bg-black text-white px-6 py-2.5 rounded-full">Search</button>
+    </div>
   </div>
 </div>
 
-<!-- ================= FOOTER ================= -->
-<div class="footer">
+<main class="p-6 pb-32">
+    
+    <div class="flex flex-col items-center mt-10 mb-10">
+        <div class="w-24 h-24 bg-[#facc15] rounded-[30%] flex items-center justify-center shadow-2xl shadow-yellow-500/20">
+            <div class="bg-white p-3 rounded-lg shadow-inner">
+                <span class="text-3xl">📥</span>
+            </div>
+        </div>
+        <h1 class="text-4xl font-black mt-4 tracking-tighter">Download</h1>
+        <h2 class="text-4xl font-black tracking-tighter">Video MP4</h2>
+    </div>
 
-  <div class="glass" style="padding:20px;border-radius:20px;">
-    <p style="font-size:11px;color:gray;">Built by the legendary</p>
+    <div onclick="openSearch()" class="search-pill flex items-center p-4 rounded-2xl mb-4 cursor-pointer">
+        <span class="mr-3 opacity-50">🔍</span>
+        <span class="text-gray-500 font-medium">Search Video Online</span>
+    </div>
 
-    <p style="font-size:14px;font-weight:900;color:#facc15;margin-top:5px;">
-      Smiley Cymor — C.E.O of CymorTechServices
-    </p>
+    <div class="bg-[#ff5722] p-5 rounded-2xl mb-6 flex items-center gap-4 relative overflow-hidden">
+        <div class="bg-white/20 p-3 rounded-xl">
+            <span class="text-2xl">👑</span>
+        </div>
+        <div>
+            <h3 class="font-bold text-white leading-tight">Legendary Smiley Cymor</h3>
+            <p class="text-[10px] text-white/80 uppercase font-black">C.E.O CymorTechServices</p>
+            <p class="text-[9px] text-white/70 mt-1">Inspired by Joyce ❤️</p>
+        </div>
+        <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl">💎</div>
+    </div>
 
-    <p style="font-size:10px;color:gray;margin-top:10px;">
-      Big ups to Joyce ❤️ for inspiration and support
-    </p>
-  </div>
-
-  <p style="font-size:9px;color:#444;margin-top:15px;">
-    © CYMORTECHSERVICES 2026
-  </p>
-
-</div>
-
-<!-- ================= BOTTOM NAV ================= -->
-<nav>
-  <div onclick="window.location.reload()">🏠</div>
-  <div onclick="openSearch()">🔍</div>
-  <div onclick="togglePrivacyModal(true)">🛡️</div>
-  <div onclick="window.open('https://github.com', '_blank')">⭐</div>
-</nav>
-
-<!-- ================= SCRIPT ================= -->
-<script>
-const overlay = document.getElementById('overlay');
-const loader = document.getElementById('loader');
-
-function openSearch() {
-  overlay.classList.add('active');
-  setTimeout(() => document.getElementById('search-input').focus(), 300);
-}
-
-function togglePrivacyModal(show) {
-  document.getElementById('privacy-modal').classList.toggle('hidden', !show);
-}
-
-/* SEARCH */
-document.getElementById('search-btn').onclick = async function() {
-
-  const q = document.getElementById('search-input').value;
-
-  loader.classList.add('active');
-
-  const res = await fetch(`/api/search?q=${q}`);
-  const data = await res.json();
-
-  loader.classList.remove('active');
-
-  document.getElementById('results-container').innerHTML =
-    data.results.map(v => `
-      <div class="glass" style="margin:10px;padding:10px;border-radius:14px;">
-
-        <img src="${v.thumbnail}" style="width:60px;height:60px;border-radius:10px;" />
-
-        <p style="font-size:12px;font-weight:bold;">${v.title}</p>
-
-        <div class="quality-btns">
-          <div class="qbtn">128K</div>
-          <div class="qbtn">320K</div>
-          <div class="qbtn">1080P</div>
+    <div class="grid grid-cols-2 gap-4">
+        <div onclick="togglePrivacyModal(true)" class="action-card bg-[#fff1f1]">
+            <div class="bg-[#ff5722]/10 p-3 rounded-2xl mb-2 text-2xl">🛡️</div>
+            <span class="text-xs">Privacy Policy</span>
         </div>
 
-        <button onclick="window.location='/api/download?id=${v.id}&format=mp3'"
-          style="margin-top:8px;width:100%;">
-          Download MP3
-        </button>
+        <div onclick="window.open('https://github.com', '_blank')" class="action-card bg-[#fff1f1]">
+            <div class="bg-[#ff5722]/10 p-3 rounded-2xl mb-2 text-2xl">⭐</div>
+            <span class="text-xs">Rate App</span>
+        </div>
+    </div>
 
-        <button onclick="window.location='/api/download?id=${v.id}&format=mp4'"
-          style="margin-top:6px;width:100%;background:#f59e0b;">
-          Download MP4
-        </button>
+    <div class="mt-10">
+        <h3 class="font-bold text-lg mb-4 flex items-center">
+            <span class="mr-2">📂</span> Recent Downloads
+        </h3>
+        <div id="downloads-container" class="space-y-3">
+            <p class="text-[10px] text-gray-500 text-center py-10 glass rounded-2xl">No recent downloads found.</p>
+        </div>
+    </div>
 
-      </div>
-    `).join('');
-};
-</script>
+</main>
+
+<div id="privacy-modal" class="hidden fixed inset-0 bg-black/95 z-[20000] flex items-center justify-center p-8">
+  <div class="glass p-8 rounded-[40px] text-center border-white/10">
+    <div class="text-4xl mb-4">🛡️</div>
+    <h2 class="text-[#facc15] font-black text-xl mb-4 tracking-tight">Privacy Policy</h2>
+    <p class="text-xs text-gray-400 leading-relaxed mb-8">
+        Cymor Music Downloader respects your privacy. We do not store personal data on our servers. All your download history and preferences are kept locally on your browser's storage.
+    </p>
+    <button onclick="togglePrivacyModal(false)" class="bg-[#ff5722] text-white w-full py-4 rounded-2xl font-bold">I Understand</button>
+  </div>
+</div>
+
+<nav>
+  <div class="nav-item active" onclick="window.location.reload()">
+      <span class="text-xl">🏠</span>
+      <span>Home</span>
+  </div>
+  <div class="nav-item" onclick="openSearch()">
+      <span class="text-xl">📥</span>
+      <span>Download</span>
+  </div>
+  <div class="nav-item" onclick="openSearch()">
+      <span class="text-xl">🎬</span>
+      <span>Videos</span>
+  </div>
+  <div class="nav-item" onclick="openSearch()">
+      <span class="text-xl">🎵</span>
+      <span>Audio</span>
+  </div>
+  <div class="nav-item" onclick="togglePrivacyModal(true)">
+      <span class="text-xl">☰</span>
+      <span>More</span>
+  </div>
+</nav>
 
 <script src="script.js"></script>
 </body>
