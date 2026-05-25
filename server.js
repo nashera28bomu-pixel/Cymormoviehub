@@ -1,10 +1,10 @@
 /**
  * =========================================================
- * 🎵 CYMOR ENGINE v9.0 PIPED CORE (Render Optimized)
+ * 🎵 CYMOR ENGINE v10.0 ULTRA CORE (Render Optimized)
  * =========================================================
- * 🚀 FIXED: Proxy-piping for all media (No 403 Forbidden)
- * 🚀 FIXED: Multi-instance failover for Piped API
- * 🚀 FIXED: Browser headers for stable streaming
+ * 🚀 FIXED: Instance Rotation with Mobile Spoofing
+ * 🚀 FIXED: Header-forwarding to bypass Bot Detection
+ * 🚀 FIXED: Auto-fallback for failed streaming links
  * =========================================================
  */
 
@@ -20,12 +20,13 @@ const PORT = process.env.PORT || 3000;
 
 const APP_NAME = 'Legendary Smiley Cymor';
 
-// List of stable Piped instances for failover
+// Updated stable instance list as of May 2026
 const PIPED_INSTANCES = [
-    'https://pipedapi.kavin.rocks',
-    'https://api.piped.victr.me',
-    'https://pipedapi.drgns.space',
-    'https://pipedapi.astre.me'
+    'https://piped-api.garudalinux.org',
+    'https://api.piped.projectsegfau.lt',
+    'https://pipedapi.tokyo.privacydev.net',
+    'https://pipedapi.adminforge.de',
+    'https://pipedapi.kavin.rocks'
 ];
 
 /* =========================================================
@@ -39,7 +40,7 @@ app.use(express.static(path.join(__dirname, '/')));
 app.use(
     rateLimit({
         windowMs: 60 * 1000,
-        max: 150, // Slightly increased for search-heavy users
+        max: 200, 
         message: { success: false, message: 'Too many requests' }
     })
 );
@@ -56,24 +57,35 @@ function sanitizeFileName(name = 'cymor-media') {
 }
 
 /**
- * Rotates through Piped instances to find a working stream
+ * Advanced Piped Fetcher with Mobile Headers
+ * Spoofs a real Android device to bypass Render IP blocks
  */
 async function getPipedStream(id) {
+    let lastError = null;
+    
+    // Attempt every instance in the list
     for (let baseUrl of PIPED_INSTANCES) {
         try {
-            const { data } = await axios.get(`${baseUrl}/streams/${id}`, { timeout: 4000 });
+            console.log(`📡 Cymor Engine: Probing ${baseUrl}...`);
+            const { data } = await axios.get(`${baseUrl}/streams/${id}`, { 
+                timeout: 5000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
+                    'Accept': 'application/json'
+                }
+            });
             
-            // Prefer audio-only for MP3, video for MP4
-            // We'll let the downloader route decide which one to grab from this object
-            if (data.audioStreams || data.videoStreams) {
+            if (data && (data.audioStreams?.length > 0 || data.videoStreams?.length > 0)) {
+                console.log(`✅ Success: Instance ${baseUrl} responded.`);
                 return data;
             }
         } catch (err) {
-            console.log(`⚠️ Instance ${baseUrl} failed, trying next...`);
-            continue;
+            lastError = err.message;
+            console.warn(`⚠️ Instance ${baseUrl} failed: ${err.message}`);
+            continue; 
         }
     }
-    throw new Error('All streaming instances are currently busy.');
+    throw new Error(`All streaming instances are currently busy. Last error: ${lastError}`);
 }
 
 /* =========================================================
@@ -83,10 +95,10 @@ async function getPipedStream(id) {
 app.get('/api/status', (req, res) => {
     res.json({
         success: true,
-        name: 'Cymor Engine v9.0 Piped Core',
+        name: 'Cymor Engine v10.0 Ultra',
         creator: APP_NAME,
-        uptime: process.uptime(),
-        backend: 'Piped Multi-Instance Proxy'
+        backend: 'Piped Distributed Proxy',
+        status: 'Online'
     });
 });
 
@@ -102,36 +114,33 @@ app.get('/api/search', async (req, res) => {
             thumbnail: v.thumbnail,
             duration: v.timestamp,
             views: v.views,
-            author: v.author?.name || 'Unknown'
+            author: v.author?.name || 'YouTube'
         }));
 
-        res.json({ success: true, source: 'yt-search', results: videos });
+        res.json({ success: true, results: videos });
     } catch (err) {
-        res.status(500).json({ success: false, message: 'Search failed' });
+        res.status(500).json({ success: false, message: 'Search engine busy' });
     }
 });
 
 /* =========================================================
-   STREAMING ENGINE (The Core Fix)
+   DOWNLOAD & PREVIEW PROXY
 ========================================================= */
 
 app.get('/api/download', async (req, res) => {
     const { id, format = 'mp3' } = req.query;
 
-    if (!id) return res.status(400).send('ID Required');
-
     try {
         const streamData = await getPipedStream(id);
         let streamUrl;
 
-        // Logic to select the best stream based on format
         if (format === 'mp4') {
-            // Get high quality video
-            streamUrl = streamData.videoStreams.find(s => s.quality === '720p' || s.quality === '360p')?.url 
+            // Select 720p or 360p video
+            streamUrl = streamData.videoStreams.find(s => s.quality === '720p') ?.url 
                         || streamData.videoStreams[0].url;
             res.setHeader('Content-Type', 'video/mp4');
         } else {
-            // Get best audio
+            // Select highest bitrate audio
             streamUrl = streamData.audioStreams.reduce((prev, curr) => (prev.bitrate > curr.bitrate) ? prev : curr).url;
             res.setHeader('Content-Type', 'audio/mpeg');
         }
@@ -139,14 +148,13 @@ app.get('/api/download', async (req, res) => {
         const fileName = sanitizeFileName(`cymor-${id}`);
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}.${format}"`);
 
-        // PROXY THE STREAM
-        // This is critical. We request it with a User-Agent so YouTube doesn't block Render.
+        // PIPE THE DATA
         const response = await axios({
             method: 'get',
             url: streamUrl,
             responseType: 'stream',
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36',
                 'Referer': 'https://piped.video/'
             }
         });
@@ -154,12 +162,11 @@ app.get('/api/download', async (req, res) => {
         response.data.pipe(res);
 
     } catch (err) {
-        console.error('Download Error:', err.message);
-        res.status(500).send('The streaming link expired or was blocked. Please try again.');
+        console.error('Download Logic Failure:', err.message);
+        res.status(500).send(`Cymor Error: ${err.message}. Try again in 5 seconds.`);
     }
 });
 
-// Preview uses the same logic but shorter
 app.get('/api/preview', async (req, res) => {
     const { id } = req.query;
     try {
@@ -171,7 +178,7 @@ app.get('/api/preview', async (req, res) => {
             method: 'get',
             url: streamUrl,
             responseType: 'stream',
-            headers: { 'User-Agent': 'Mozilla/5.0' }
+            headers: { 'User-Agent': 'Mozilla/5.0 (Linux; Android 10)' }
         });
         response.data.pipe(res);
     } catch (err) {
@@ -188,5 +195,11 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 CYMOR v9.0 ONLINE | PORT ${PORT} | RENDER MODE`);
+    console.log(`
+==================================================
+🎵 CYMOR ENGINE v10.0 ULTRA ONLINE
+🌍 PORT   : ${PORT}
+🔗 MODE   : Multi-Instance Fallback Enabled
+==================================================
+    `);
 });
