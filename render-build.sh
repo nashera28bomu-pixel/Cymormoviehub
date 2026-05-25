@@ -1,57 +1,23 @@
 #!/usr/bin/env bash
 
 # =========================================================
-# 🎵 CYMOR ENGINE BUILD SCRIPT v8.0 SUPREME
+# 🎵 CYMOR ENGINE BUILD SCRIPT v9.0 PIPED CORE
 # =========================================================
-# ✅ Render optimized
-# ✅ ffmpeg installer
-# ✅ Latest yt-dlp updater
-# ✅ Better permissions
-# ✅ Cleaner logs
-# ✅ Safer builds
+# 🚀 No yt-dlp
+# 🚀 No ffmpeg
+# 🚀 Lightweight Render build
+# 🚀 Fast deployment
 # =========================================================
 
 echo "=========================================="
-echo "🚀 CYMOR BUILD STARTING..."
+echo "🚀 CYMOR BUILD STARTING (PIPED CORE)..."
 echo "=========================================="
 
 # =========================================================
-# UPDATE SYSTEM
+# INSTALL NODE DEPENDENCIES
 # =========================================================
 
-apt-get update -y
-
-# =========================================================
-# INSTALL REQUIRED PACKAGES
-# =========================================================
-
-apt-get install -y \
-    ffmpeg \
-    python3 \
-    python3-pip \
-    curl
-
-# =========================================================
-# INSTALL LATEST yt-dlp
-# =========================================================
-
-pip3 install --upgrade yt-dlp
-
-# =========================================================
-# VERIFY INSTALLATIONS
-# =========================================================
-
-echo "=========================================="
-echo "✅ VERIFYING INSTALLATIONS..."
-echo "=========================================="
-
-python3 --version
-
-pip3 --version
-
-ffmpeg -version | head -n 1
-
-yt-dlp --version
+npm install
 
 # =========================================================
 # FIX PERMISSIONS
@@ -66,8 +32,6 @@ chmod -R 755 .
 echo "=========================================="
 echo "🎧 CYMOR ENGINE BUILD COMPLETE"
 echo "=========================================="
-echo "✅ ffmpeg installed"
-echo "✅ yt-dlp updated"
-echo "✅ permissions fixed"
-echo "🚀 READY FOR DEPLOYMENT"
+echo "✅ Dependencies installed"
+echo "🚀 Ready for deployment"
 echo "=========================================="
