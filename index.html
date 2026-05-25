@@ -4,168 +4,312 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Cymor Music Downloader</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
-* { font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
-body { background: #000000; color: #ffffff; overflow-x: hidden; }
+* {
+  font-family: 'Poppins', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
 
+body {
+  margin: 0;
+  background: #000;
+  color: white;
+}
+
+/* ================= GLASS ================= */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.8);
+/* ================= OVERLAY ================= */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.96);
+  z-index: 9999;
+  transform: translateY(100%);
+  transition: 0.4s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.overlay.active {
+  transform: translateY(0);
+}
+
+/* ================= LOADER ================= */
+.loader {
+  position: fixed;
+  inset: 0;
+  background: black;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 10000;
+}
+
+.loader.active {
+  display: flex;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top: 3px solid #facc15;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ================= SEARCH ================= */
+.search-bar {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
+  max-width: 500px;
+  display: flex;
+  gap: 10px;
+  z-index: 10001;
+}
+
+input {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  outline: none;
+}
+
+button {
+  background: #facc15;
+  color: black;
+  font-weight: bold;
+  padding: 14px 16px;
+  border-radius: 14px;
+}
+
+/* ================= RESULTS ================= */
+#results-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* ================= QUALITY ================= */
+.quality-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.qbtn {
+  flex: 1;
+  font-size: 10px;
+  padding: 6px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+  text-align: center;
+}
+
+/* ================= NAV ================= */
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.8);
   backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-around;
+  padding: 12px;
 }
 
-.action-card {
-  background: #f1f5f9; 
-  color: #1e293b;
-  transition: transform 0.2s;
+/* ================= FOOTER ================= */
+.footer {
+  text-align: center;
+  padding: 30px 20px 100px;
 }
-
-.action-card:active { transform: scale(0.96); }
-
-.hidden { display: none; }
-
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-.animate-slideUp { animation: slideUp 0.3s ease-out; }
 </style>
 </head>
 
-<body class="pb-32">
+<body>
 
-<header class="px-6 pt-12 pb-8 text-center">
-    <div class="relative inline-block mb-6">
-        <div class="w-24 h-24 bg-gradient-to-tr from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(234,179,8,0.3)] mx-auto">
-            <svg class="w-12 h-12 text-black" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14V9l5 3.5L11 16z"/>
-            </svg>
-        </div>
-        <div class="absolute -bottom-2 -right-2 bg-yellow-500 text-black p-1 rounded-md">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-        </div>
-    </div>
-    
-    <h1 class="text-3xl font-black tracking-tight">Cymor Music</h1>
-    <p class="text-gray-400 text-sm mt-1">Download Video & Audio MP4/MP3</p>
-</header>
-
-<main class="px-6 space-y-4">
-    
-    <button onclick="document.getElementById('search-input').focus()" class="w-full action-card py-4 px-6 rounded-full flex items-center gap-4 shadow-lg active:scale-95 transition-transform">
-        <div class="w-8 h-8 flex items-center justify-center text-yellow-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        </div>
-        <span class="font-bold text-lg">Search Music Online</span>
-    </button>
-
-    <button onclick="showToast('Browsing Engine Integrated', 'success')" class="w-full bg-[#f0f9ff] py-4 px-6 rounded-full flex items-center gap-4 border border-blue-100 active:scale-95 transition-transform">
-        <div class="w-8 h-8 flex items-center justify-center text-cyan-500">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
-        </div>
-        <span class="font-bold text-lg text-slate-700">Browse Web Engine</span>
-    </button>
-
-    <div class="grid grid-cols-2 gap-4">
-        <div onclick="togglePrivacyModal(true)" class="bg-[#fff1f2] p-6 rounded-[32px] text-center border border-red-500/10 active:scale-95 transition-transform cursor-pointer">
-            <div class="bg-red-500/10 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2">🛡️</div>
-            <p class="font-bold text-red-500">Privacy Policy</p>
-        </div>
-        <div onclick="window.open('https://github.com/nashera28bomu-pixel', '_blank')" class="bg-[#fff7ed] p-6 rounded-[32px] text-center border border-orange-500/10 active:scale-95 transition-transform cursor-pointer">
-            <div class="bg-orange-500/10 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2">⭐</div>
-            <p class="font-bold text-orange-500">Rate App</p>
-        </div>
-    </div>
-
-    <section class="pt-8 pb-4">
-        <h2 class="text-xl font-bold mb-4 px-2">Why Cymor Music?</h2>
-        <div class="space-y-3">
-            <div class="glass p-4 rounded-2xl">
-                <h3 class="text-blue-400 font-bold text-sm">🚀 Ultra Fast Streaming</h3>
-                <p class="text-gray-400 text-xs mt-1">Direct server-side processing ensures zero buffering and instant download links.</p>
-            </div>
-            <div class="glass p-4 rounded-2xl">
-                <h3 class="text-emerald-400 font-bold text-sm">💎 Studio Quality Audio</h3>
-                <p class="text-gray-400 text-xs mt-1">Get crystal clear 320kbps MP3s directly extracted from the high-res source.</p>
-            </div>
-            <div class="glass p-4 rounded-2xl">
-                <h3 class="text-purple-400 font-bold text-sm">🎥 HD Video Downloads</h3>
-                <p class="text-gray-400 text-xs mt-1">Download your favorite music videos in 720p and 1080p MP4 formats effortlessly.</p>
-            </div>
-        </div>
-    </section>
-
-    <div id="search-container" class="mt-4 flex gap-2">
-        <input id="search-input" class="flex-1 px-4 py-3 rounded-xl glass outline-none text-sm border border-white/10 focus:border-yellow-500/50 transition-colors" placeholder="Search tracks or paste link..." />
-        <button id="search-btn" class="px-5 py-3 rounded-xl bg-yellow-500 text-black font-black text-sm active:scale-95 transition-transform">Go</button>
-    </div>
-
-    <div id="results-container" class="space-y-3"></div>
-</main>
-
-<footer class="mt-12 px-6 text-center space-y-4 pb-10">
-  <div class="glass rounded-2xl p-5 border border-white/5">
-    <p class="text-xs text-gray-400 font-medium">Built by the legendary</p>
-    <p class="text-sm font-black text-yellow-500 mt-1 uppercase tracking-wider">
-      Smiley Cymor — CEO of CymorTechServices
-    </p>
-    <p class="text-[10px] text-gray-500 mt-3 italic">
-      Special credits to Joyce ❤️ for inspiration and support
-    </p>
-  </div>
-  <p class="text-[9px] text-gray-700 uppercase tracking-[0.3em] font-bold">© CYMORTECHSERVICES 2026</p>
-</footer>
-
-<div id="privacy-modal" class="fixed inset-0 z-[20000] hidden">
-    <div class="absolute inset-0 bg-black/90 backdrop-blur-md" onclick="togglePrivacyModal(false)"></div>
-    <div class="absolute bottom-0 left-0 right-0 glass-dark rounded-t-[40px] p-8 max-h-[85vh] overflow-y-auto animate-slideUp border-t border-white/20">
-        <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-6"></div>
-        <h2 class="text-2xl font-black mb-4 text-yellow-500">Privacy Policy</h2>
-        <div class="space-y-4 text-sm text-gray-300 leading-relaxed pb-10">
-            <p><strong class="text-white">1. Data Collection:</strong> Cymor Music Downloader does not store personal information, account passwords, or browsing history. All searches are processed in real-time through our Elite Media Engine.</p>
-            <p><strong class="text-white">2. Usage:</strong> This tool is intended for personal use and archival purposes. Users are responsible for complying with the terms of service of the content providers.</p>
-            <p><strong class="text-white">3. Cookies:</strong> We use local storage only to save your download history on your own device. No tracking cookies are sent to our servers.</p>
-            <p><strong class="text-white">4. Security:</strong> All streams are encrypted and processed through the CymorTechServices secure backend to ensure your IP address remains private.</p>
-            <button onclick="togglePrivacyModal(false)" class="w-full bg-white text-black font-bold py-4 rounded-2xl mt-6">I Understand</button>
-        </div>
-    </div>
+<!-- ================= LOADER ================= -->
+<div id="loader" class="loader">
+  <div class="spinner"></div>
+  <p style="margin-top:12px;font-size:12px;color:gray;">Searching Cymor Engine...</p>
 </div>
 
-<nav class="fixed bottom-0 left-0 right-0 glass-dark bg-black/80 backdrop-blur-xl border-t border-white/10 px-8 py-4">
-    <div class="flex justify-between items-center max-w-md mx-auto">
-        <div onclick="window.location.reload()" class="flex flex-col items-center gap-1 text-yellow-500 cursor-pointer">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
-            <span class="text-[10px] font-bold">Home</span>
-        </div>
-        <div onclick="document.getElementById('search-input').focus()" class="flex flex-col items-center gap-1 text-gray-500 cursor-pointer">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <span class="text-[10px] font-bold">Search</span>
-        </div>
-        <div class="flex flex-col items-center gap-1 text-gray-500 cursor-pointer">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <span class="text-[10px] font-bold">Vault</span>
-        </div>
-    </div>
+<!-- ================= SEARCH OVERLAY ================= -->
+<div id="overlay" class="overlay">
+
+  <div style="padding:30px;text-align:center;">
+    <h1 style="font-size:20px;font-weight:800;">Cymor Music</h1>
+    <p style="font-size:12px;color:gray;">Elite Media Engine</p>
+  </div>
+
+  <div id="results-container"></div>
+
+  <div class="search-bar">
+    <input id="search-input" placeholder="Search music or paste link..." />
+    <button id="search-btn">Go</button>
+  </div>
+
+</div>
+
+<!-- ================= HOME ================= -->
+<div style="text-align:center;padding:50px 20px;">
+
+  <div style="width:80px;height:80px;background:#facc15;border-radius:50%;margin:auto;display:flex;align-items:center;justify-content:center;color:black;font-weight:bold;">
+    🎧
+  </div>
+
+  <h1 style="margin-top:15px;font-size:26px;font-weight:900;">
+    Cymor Music Downloader
+  </h1>
+
+  <p style="color:gray;font-size:13px;">
+    Download MP3 & MP4 instantly
+  </p>
+
+  <button onclick="openSearch()" style="margin-top:25px;width:80%;max-width:300px;">
+    Search Music
+  </button>
+
+</div>
+
+<!-- ================= WHY CYMOR ================= -->
+<section style="padding:20px;">
+  <h2 style="font-weight:800;margin-bottom:10px;">Why Cymor Music?</h2>
+
+  <div class="glass" style="padding:12px;border-radius:16px;margin-bottom:10px;">
+    🚀 Ultra Fast Streaming
+  </div>
+
+  <div class="glass" style="padding:12px;border-radius:16px;margin-bottom:10px;">
+    💎 Studio Quality Audio (320kbps)
+  </div>
+
+  <div class="glass" style="padding:12px;border-radius:16px;">
+    🎥 HD MP4 Downloads (720p / 1080p)
+  </div>
+</section>
+
+<!-- ================= PRIVACY MODAL ================= -->
+<div id="privacy-modal" class="hidden fixed inset-0 bg-black/90 z-[20000] p-6">
+  <div class="glass p-5 rounded-2xl">
+    <h2 style="color:#facc15;font-weight:800;">Privacy Policy</h2>
+
+    <p style="font-size:12px;color:gray;margin-top:10px;">
+      Cymor does not store personal data. Only local history is saved on your device.
+    </p>
+
+    <button onclick="togglePrivacyModal(false)" style="margin-top:20px;width:100%;">
+      I Understand
+    </button>
+  </div>
+</div>
+
+<!-- ================= FOOTER ================= -->
+<div class="footer">
+
+  <div class="glass" style="padding:20px;border-radius:20px;">
+    <p style="font-size:11px;color:gray;">Built by the legendary</p>
+
+    <p style="font-size:14px;font-weight:900;color:#facc15;margin-top:5px;">
+      Smiley Cymor — C.E.O of CymorTechServices
+    </p>
+
+    <p style="font-size:10px;color:gray;margin-top:10px;">
+      Big ups to Joyce ❤️ for inspiration and support
+    </p>
+  </div>
+
+  <p style="font-size:9px;color:#444;margin-top:15px;">
+    © CYMORTECHSERVICES 2026
+  </p>
+
+</div>
+
+<!-- ================= BOTTOM NAV ================= -->
+<nav>
+  <div onclick="window.location.reload()">🏠</div>
+  <div onclick="openSearch()">🔍</div>
+  <div onclick="togglePrivacyModal(true)">🛡️</div>
+  <div onclick="window.open('https://github.com', '_blank')">⭐</div>
 </nav>
 
+<!-- ================= SCRIPT ================= -->
 <script>
-function togglePrivacyModal(show) {
-    const modal = document.getElementById('privacy-modal');
-    if (show) {
-        modal.classList.remove('hidden');
-    } else {
-        modal.classList.add('hidden');
-    }
+const overlay = document.getElementById('overlay');
+const loader = document.getElementById('loader');
+
+function openSearch() {
+  overlay.classList.add('active');
+  setTimeout(() => document.getElementById('search-input').focus(), 300);
 }
+
+function togglePrivacyModal(show) {
+  document.getElementById('privacy-modal').classList.toggle('hidden', !show);
+}
+
+/* SEARCH */
+document.getElementById('search-btn').onclick = async function() {
+
+  const q = document.getElementById('search-input').value;
+
+  loader.classList.add('active');
+
+  const res = await fetch(`/api/search?q=${q}`);
+  const data = await res.json();
+
+  loader.classList.remove('active');
+
+  document.getElementById('results-container').innerHTML =
+    data.results.map(v => `
+      <div class="glass" style="margin:10px;padding:10px;border-radius:14px;">
+
+        <img src="${v.thumbnail}" style="width:60px;height:60px;border-radius:10px;" />
+
+        <p style="font-size:12px;font-weight:bold;">${v.title}</p>
+
+        <div class="quality-btns">
+          <div class="qbtn">128K</div>
+          <div class="qbtn">320K</div>
+          <div class="qbtn">1080P</div>
+        </div>
+
+        <button onclick="window.location='/api/download?id=${v.id}&format=mp3'"
+          style="margin-top:8px;width:100%;">
+          Download MP3
+        </button>
+
+        <button onclick="window.location='/api/download?id=${v.id}&format=mp4'"
+          style="margin-top:6px;width:100%;background:#f59e0b;">
+          Download MP4
+        </button>
+
+      </div>
+    `).join('');
+};
 </script>
+
 <script src="script.js"></script>
 </body>
 </html>
