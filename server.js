@@ -53,11 +53,7 @@ app.use(
    yt-dlp PATH DETECTION
 ========================================================= */
 
-const LOCAL_YTDLP = path.join(__dirname, 'yt-dlp');
-
-const YTDLP_PATH = fs.existsSync(LOCAL_YTDLP)
-    ? LOCAL_YTDLP
-    : 'yt-dlp';
+const YTDLP_PATH = 'yt-dlp';
 
 console.log('🎯 yt-dlp Path:', YTDLP_PATH);
 
