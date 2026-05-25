@@ -1,6 +1,16 @@
 /**
  * =========================================================
- * 🎵 CYMOR ENGINE v6.1 (RENDER FIXED CORE)
+ * 🎵 CYMOR ENGINE v7.0 ULTRA
+ * =========================================================
+ * ✅ Fixed yt-dlp spawn errors
+ * ✅ Added custom preview endpoint
+ * ✅ Added MP3 quality support
+ * ✅ Added MP4 quality support
+ * ✅ Better Render compatibility
+ * ✅ Better error handling
+ * ✅ Safer streaming
+ * ✅ Elite logging system
+ * ✅ Thumbnail + metadata optimization
  * =========================================================
  */
 
@@ -13,147 +23,400 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
-const APP_NAME = "Legendary Smiley Cymor";
+const APP_NAME = 'Legendary Smiley Cymor';
 
 /* =========================================================
    MIDDLEWARE
 ========================================================= */
+
 app.use(cors());
+
 app.use(express.json());
+
 app.use(express.static(path.join(__dirname, '/')));
 
-app.use(rateLimit({
-    windowMs: 60 * 1000,
-    max: 60
-}));
+app.use(
+    rateLimit({
+        windowMs: 60 * 1000,
+        max: 100,
+        message: {
+            success: false,
+            message: 'Too many requests'
+        }
+    })
+);
 
 /* =========================================================
-   CHECK yt-dlp PATH (CRITICAL FIX)
+   yt-dlp PATH DETECTION
 ========================================================= */
-const YTDLP_PATH = fs.existsSync(path.join(__dirname, 'yt-dlp'))
-    ? path.join(__dirname, 'yt-dlp')
-    : 'yt-dlp'; // fallback if globally installed
+
+const LOCAL_YTDLP = path.join(__dirname, 'yt-dlp');
+
+const YTDLP_PATH = fs.existsSync(LOCAL_YTDLP)
+    ? LOCAL_YTDLP
+    : 'yt-dlp';
+
+console.log('🎯 yt-dlp Path:', YTDLP_PATH);
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function sanitizeFileName(name = 'cymor-media') {
+
+    return name
+        .replace(/[^\w\s]/gi, '')
+        .replace(/\s+/g, '_')
+        .substring(0, 80);
+}
+
+function streamError(res, err, type = 'Download') {
+
+    console.error(`❌ ${type} Error:`, err);
+
+    if (!res.headersSent) {
+
+        return res.status(500).json({
+            success: false,
+            message: `${type} failed`
+        });
+    }
+
+    res.end();
+}
 
 /* =========================================================
    STATUS
 ========================================================= */
+
 app.get('/api/status', (req, res) => {
+
     res.json({
         success: true,
-        name: "Cymor Engine v6.1",
+        name: 'Cymor Engine v7.0 Ultra',
         creator: APP_NAME,
-        uptime: process.uptime()
+        uptime: process.uptime(),
+        yt_dlp: YTDLP_PATH
     });
 });
 
 /* =========================================================
-   SEARCH
+   SEARCH ENGINE
 ========================================================= */
+
 app.get('/api/search', async (req, res) => {
+
     const q = req.query.q;
-    if (!q) return res.status(400).json({ success: false });
+
+    if (!q) {
+
+        return res.status(400).json({
+            success: false,
+            message: 'Search query missing'
+        });
+    }
 
     try {
-        const r = await ytSearch(q);
+
+        const results = await ytSearch(q);
+
+        const videos = results.videos
+            .slice(0, 20)
+            .map(video => ({
+
+                id: video.videoId,
+
+                title: video.title,
+
+                thumbnail:
+                    video.thumbnail ||
+                    `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`,
+
+                duration: video.timestamp,
+
+                views: video.views,
+
+                author: video.author?.name || 'Unknown Artist'
+            }));
 
         res.json({
             success: true,
-            results: r.videos.slice(0, 20).map(v => ({
-                id: v.videoId,
-                title: v.title,
-                thumbnail: v.thumbnail,
-                duration: v.timestamp,
-                author: v.author?.name
-            }))
+            total: videos.length,
+            results: videos
         });
 
     } catch (err) {
-        console.error("Search error:", err);
-        res.status(500).json({ success: false });
+
+        console.error('❌ Search Error:', err);
+
+        res.status(500).json({
+            success: false,
+            message: 'Search failed'
+        });
     }
 });
 
 /* =========================================================
-   DOWNLOAD ENGINE (FIXED + SAFE SPAWN)
+   AUDIO PREVIEW
 ========================================================= */
-app.get('/api/download', (req, res) => {
-    const { id, format = 'mp3' } = req.query;
+
+app.get('/api/preview', (req, res) => {
+
+    const { id } = req.query;
 
     if (!id) {
+
         return res.status(400).json({
             success: false,
-            message: "Missing video ID"
+            message: 'Missing video ID'
         });
     }
 
-    const url = `https://www.youtube.com/watch?v=${id}`;
+    const url =
+        `https://www.youtube.com/watch?v=${id}`;
 
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'audio/mpeg');
 
-    // ===================== MP3 =====================
+    res.setHeader('Accept-Ranges', 'bytes');
+
+    /*
+        30 SECOND AUDIO PREVIEW
+    */
+
+    const ytdlp = spawn(YTDLP_PATH, [
+
+        url,
+
+        '-f',
+        'bestaudio',
+
+        '--extract-audio',
+
+        '--audio-format',
+        'mp3',
+
+        '--audio-quality',
+        '128K',
+
+        '--download-sections',
+        '*0-30',
+
+        '-o',
+        '-'
+    ]);
+
+    ytdlp.stdout.pipe(res);
+
+    ytdlp.stderr.on('data', data => {
+
+        console.log(
+            '🎧 Preview:',
+            data.toString()
+        );
+    });
+
+    ytdlp.on('error', err => {
+
+        streamError(res, err, 'Preview');
+    });
+
+    ytdlp.on('close', () => {
+
+        res.end();
+    });
+});
+
+/* =========================================================
+   DOWNLOAD ENGINE
+========================================================= */
+
+app.get('/api/download', (req, res) => {
+
+    const {
+        id,
+        format = 'mp3',
+        quality = '320'
+    } = req.query;
+
+    if (!id) {
+
+        return res.status(400).json({
+            success: false,
+            message: 'Video ID missing'
+        });
+    }
+
+    const url =
+        `https://www.youtube.com/watch?v=${id}`;
+
+    const safeName =
+        sanitizeFileName(`cymor-${id}`);
+
+    console.log(`
+===================================
+🎧 DOWNLOAD STARTED
+===================================
+🆔 ID      : ${id}
+🎵 FORMAT  : ${format}
+⚡ QUALITY : ${quality}
+===================================
+    `);
+
+    /* =====================================================
+       MP3 DOWNLOAD
+    ===================================================== */
+
     if (format === 'mp3') {
-        res.setHeader('Content-Type', 'audio/mpeg');
-        res.setHeader('Content-Disposition', `attachment; filename="cymor.mp3"`);
+
+        res.setHeader(
+            'Content-Type',
+            'audio/mpeg'
+        );
+
+        res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="${safeName}.mp3"`
+        );
 
         const ytdlp = spawn(YTDLP_PATH, [
+
             url,
-            '-x',
-            '--audio-format', 'mp3',
-            '-o', '-'
+
+            '-f',
+            'bestaudio',
+
+            '--extract-audio',
+
+            '--audio-format',
+            'mp3',
+
+            '--audio-quality',
+            quality === '128'
+                ? '128K'
+                : '320K',
+
+            '-o',
+            '-'
         ]);
 
         ytdlp.stdout.pipe(res);
 
-        ytdlp.on('error', (err) => {
-            console.error("MP3 spawn error:", err);
-            if (!res.headersSent) {
-                res.status(500).end("Download failed (yt-dlp not found)");
-            }
+        ytdlp.stderr.on('data', data => {
+
+            console.log(
+                '🎵 MP3:',
+                data.toString()
+            );
         });
 
-        ytdlp.stderr.on('data', (data) => {
-            console.error("yt-dlp MP3:", data.toString());
+        ytdlp.on('error', err => {
+
+            streamError(res, err, 'MP3');
         });
 
-    // ===================== MP4 =====================
+        ytdlp.on('close', () => {
+
+            res.end();
+        });
+
+    /* =====================================================
+       MP4 DOWNLOAD
+    ===================================================== */
+
     } else {
-        res.setHeader('Content-Type', 'video/mp4');
-        res.setHeader('Content-Disposition', `attachment; filename="cymor.mp4"`);
+
+        let formatSelector =
+            'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4';
+
+        /*
+            QUALITY CONTROL
+        */
+
+        if (quality === '720') {
+
+            formatSelector =
+                'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/mp4';
+
+        } else if (quality === '1080') {
+
+            formatSelector =
+                'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/mp4';
+        }
+
+        res.setHeader(
+            'Content-Type',
+            'video/mp4'
+        );
+
+        res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="${safeName}.mp4"`
+        );
 
         const ytdlp = spawn(YTDLP_PATH, [
+
             url,
-            '-f', 'mp4',
-            '-o', '-'
+
+            '-f',
+            formatSelector,
+
+            '--merge-output-format',
+            'mp4',
+
+            '-o',
+            '-'
         ]);
 
         ytdlp.stdout.pipe(res);
 
-        ytdlp.on('error', (err) => {
-            console.error("MP4 spawn error:", err);
-            if (!res.headersSent) {
-                res.status(500).end("Download failed (yt-dlp not found)");
-            }
+        ytdlp.stderr.on('data', data => {
+
+            console.log(
+                '🎬 MP4:',
+                data.toString()
+            );
         });
 
-        ytdlp.stderr.on('data', (data) => {
-            console.error("yt-dlp MP4:", data.toString());
+        ytdlp.on('error', err => {
+
+            streamError(res, err, 'MP4');
+        });
+
+        ytdlp.on('close', () => {
+
+            res.end();
         });
     }
+});
+
+/* =========================================================
+   FRONTEND ROUTING
+========================================================= */
+
+app.get('*', (req, res) => {
+
+    res.sendFile(
+        path.join(__dirname, 'index.html')
+    );
 });
 
 /* =========================================================
    START SERVER
 ========================================================= */
+
 app.listen(PORT, () => {
+
     console.log(`
-========================================
-🎧 CYMOR ENGINE v6.1 STABLE FIX
-========================================
-🚀 STATUS : ONLINE
-👑 CREATOR: ${APP_NAME}
-🌍 PORT   : ${PORT}
-========================================
+==================================================
+🎧 CYMOR ENGINE v7.0 ULTRA
+==================================================
+🚀 STATUS      : ONLINE
+👑 CREATOR     : ${APP_NAME}
+🌍 PORT        : ${PORT}
+🎯 yt-dlp PATH : ${YTDLP_PATH}
+==================================================
     `);
 });
