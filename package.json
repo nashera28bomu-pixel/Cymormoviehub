@@ -1,7 +1,7 @@
 {
   "name": "cymor-music-downloader",
-  "version": "5.1.0",
-  "description": "Elite Spotify-Level Media Engine built by Legendary Smiley Cymor",
+  "version": "9.0.0",
+  "description": "Cymor Elite Media Engine (Piped + Invidious Core)",
   "main": "server.js",
   "keywords": [
     "cymor",
@@ -9,11 +9,13 @@
     "downloader",
     "mp3",
     "mp4",
-    "spotify-style",
+    "streaming",
+    "piped",
+    "invidious",
     "cymortechservices",
     "legendary-smiley"
   ],
-  "author": "Legendary Smiley Cymor",
+  "author": "Legendary Smiley Cymor - C.E.O CymorTechServices",
   "license": "MIT",
   "scripts": {
     "start": "node server.js",
@@ -21,12 +23,11 @@
     "build": "npm install"
   },
   "dependencies": {
+    "axios": "^1.6.8",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "express-rate-limit": "^7.1.5",
-    "yt-search": "^2.11.1",
-    "youtube-dl-exec": "^3.0.0",
-    "crypto": "^1.0.1"
+    "yt-search": "^2.11.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
