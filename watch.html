@@ -24,14 +24,16 @@
             border: 1px solid rgba(255,255,255,0.08);
         }
 
+        /* 16:9 Aspect Ratio Container */
         .video-container {
             position: relative;
             padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
             border-radius: 1.5rem;
-            background: black;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            background: #000;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .video-container iframe {
@@ -41,45 +43,38 @@
             border: 0;
         }
 
-        .skeleton {
-            background: linear-gradient(90deg, #131a26 25%, #1f2937 50%, #131a26 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-
-        @keyframes shimmer {
-            0%   { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .movie-card {
-            position: relative;
-            overflow: hidden;
-            border-radius: 1.2rem;
-            cursor: pointer;
-            transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
-            height: 300px;
-        }
-        .movie-card:hover { transform: scale(1.05); z-index: 10; }
-
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 10px; }
-
+        /* Ambient Glow Background */
         .bg-blur {
             position: fixed;
             inset: 0;
             z-index: -1;
             background-size: cover;
             background-position: center;
-            filter: blur(100px) brightness(0.15);
-            transform: scale(1.2);
+            filter: blur(80px) brightness(0.2);
+            transform: scale(1.1);
+            transition: background-image 0.8s ease;
         }
 
         .server-btn.active {
-            background: rgba(6,182,212,0.25);
-            border-color: rgba(6,182,212,0.6);
+            background: rgba(6,182,212,0.2);
+            border-color: rgba(6,182,212,0.5);
             color: #22d3ee;
+            box-shadow: 0 0 15px rgba(6,182,212,0.1);
         }
+
+        .skeleton {
+            background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 10px; }
     </style>
 </head>
 
@@ -87,21 +82,24 @@
 
     <div id="dynamic-bg" class="bg-blur"></div>
 
-    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-gradient-to-b from-black/95 to-transparent backdrop-blur-sm">
+    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-gradient-to-b from-black/90 to-transparent backdrop-blur-md">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="index.html" class="flex items-center gap-2 group text-gray-300 hover:text-cyan-400 transition">
-                <i class="fa-solid fa-arrow-left text-lg group-hover:-translate-x-1 transition"></i>
+            <a href="index.html" class="flex items-center gap-2 group text-gray-400 hover:text-cyan-400 transition">
+                <i class="fa-solid fa-chevron-left group-hover:-translate-x-1 transition"></i>
                 <span class="uppercase text-xs tracking-widest font-black">Back to Hub</span>
             </a>
-            <h1 class="font-black uppercase tracking-tighter text-xl">
-                <span class="text-cyan-400">Cymor</span> Hub
-            </h1>
-        </div>
+            <div class="text-center">
+                <h1 class="font-black uppercase tracking-tighter text-xl">
+                    <span class="text-cyan-400">Cymor</span> Hub
+                </h1>
+            </div>
+            <div class="w-20"></div> </div>
     </nav>
 
-    <main class="pt-24 px-4 md:px-10 lg:px-20 max-w-[1600px] mx-auto">
+    <main class="pt-28 px-4 md:px-10 lg:px-20 max-w-[1600px] mx-auto">
 
-        <div class="flex flex-col xl:flex-row gap-8 mb-6">
+        <div class="flex flex-col xl:flex-row gap-8 mb-10">
+            
             <div class="flex-[3]">
                 <div class="video-container">
                     <iframe
@@ -109,73 +107,89 @@
                         src=""
                         allowfullscreen
                         allow="autoplay; fullscreen; picture-in-picture"
-                        scrolling="no"
                         sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-presentation">
                     </iframe>
                 </div>
 
-                <div class="flex items-center gap-3 mt-4 flex-wrap">
-                    <span class="text-xs uppercase tracking-widest font-black text-gray-500">Server:</span>
-                    <button id="btn-server-primary"
-                        onclick="switchServer('primary')"
-                        class="server-btn active text-xs px-4 py-2 rounded-full border border-white/10 font-bold transition">
-                        <i class="fa-solid fa-circle-check mr-1 text-cyan-400"></i> Primary
-                    </button>
-                    <button id="btn-server-fallback"
-                        onclick="switchServer('fallback')"
-                        class="server-btn text-xs px-4 py-2 rounded-full border border-white/10 font-bold transition hover:bg-white/5">
-                        <i class="fa-solid fa-rotate mr-1"></i> Fallback
-                    </button>
+                <div class="mt-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <span class="text-[10px] uppercase tracking-[0.2em] font-black text-gray-500">Source Selection</span>
+                        <button id="btn-server-primary" onclick="switchServer('primary')" class="server-btn active text-xs px-5 py-2.5 rounded-xl border border-white/10 font-bold transition flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-cyan-400"></i> Primary (v4)
+                        </button>
+                        <button id="btn-server-fallback" onclick="switchServer('fallback')" class="server-btn text-xs px-5 py-2.5 rounded-xl border border-white/10 font-bold transition flex items-center gap-2 hover:bg-white/5">
+                            <i class="fa-solid fa-shield-halved"></i> Fallback
+                        </button>
+                    </div>
+
+                    <div id="subtitle-status" class="glass px-4 py-2 rounded-xl border-cyan-500/20">
+                        <span class="text-[10px] text-cyan-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                            <i class="fa-solid fa-closed-captioning"></i> Subtitles Active
+                        </span>
+                    </div>
                 </div>
 
-                <div id="subtitle-controls" class="mt-3 flex flex-wrap items-center gap-3 min-h-[36px]">
-                    <span class="text-xs text-gray-600 italic">Loading subtitles...</span>
-                </div>
+                <div id="subtitle-controls" class="mt-4 flex flex-wrap items-center gap-2">
+                    </div>
             </div>
 
             <div id="episode-parent" class="flex-[1] hidden">
-                <div class="glass rounded-[1.5rem] h-full max-h-[500px] xl:max-h-full overflow-hidden flex flex-col">
-                    <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
-                        <h3 class="font-black text-sm uppercase tracking-widest text-cyan-400">Episodes</h3>
-                        <span id="season-label" class="text-xs font-bold opacity-60">Season 1</span>
+                <div class="glass rounded-[1.5rem] h-full max-h-[550px] xl:max-h-full overflow-hidden flex flex-col border-white/5">
+                    <div class="p-6 border-b border-white/5 bg-white/5">
+                        <h3 class="font-black text-xs uppercase tracking-[0.2em] text-cyan-400">Episode Selection</h3>
+                        <p id="season-label" class="text-[10px] font-bold opacity-40 mt-1 uppercase">Season 1</p>
                     </div>
-                    <div id="episode-selector-container" class="p-4 overflow-y-auto custom-scroll space-y-3">
-                        <div class="h-12 skeleton rounded-xl"></div>
-                        <div class="h-12 skeleton rounded-xl"></div>
+                    <div id="episode-selector-container" class="p-4 overflow-y-auto custom-scroll space-y-2">
+                        <div class="h-14 skeleton rounded-xl opacity-20"></div>
+                        <div class="h-14 skeleton rounded-xl opacity-20"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <section class="flex flex-col lg:flex-row gap-10 border-b border-white/5 pb-16 mb-16">
-            <div class="flex-1">
-                <div class="flex items-center gap-3 mb-6 flex-wrap">
-                    <span class="bg-cyan-500 text-black px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                        4K ULTRA HD
+        <section class="grid grid-cols-1 lg:grid-cols-4 gap-12 pb-20 border-b border-white/5">
+            <div class="lg:col-span-3">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest">
+                        Elite Scraper v4
                     </span>
-                    <span id="watch-rating" class="text-yellow-400 font-black text-sm">
-                        <i class="fa-solid fa-star"></i> --
+                    <span id="watch-rating" class="text-yellow-500 font-black text-sm">
+                        <i class="fa-solid fa-star mr-1"></i> --
                     </span>
-                    <span id="watch-year" class="text-gray-400 font-bold text-sm">----</span>
+                    <span id="watch-year" class="text-gray-500 font-bold text-sm">----</span>
                 </div>
-                <h1 id="watch-title" class="text-4xl md:text-6xl font-black mb-6 uppercase tracking-tighter leading-none">Loading...</h1>
-                <p id="watch-desc" class="text-gray-400 leading-relaxed text-lg max-w-4xl">Fetching description...</p>
+
+                <h1 id="watch-title" class="text-4xl md:text-7xl font-black mb-8 uppercase tracking-tighter leading-[0.9]">
+                    Loading...
+                </h1>
+
+                <p id="watch-desc" class="text-gray-400 leading-relaxed text-lg max-w-4xl font-medium">
+                    Fetching content description and metadata...
+                </p>
             </div>
 
-            <div class="w-full lg:w-[300px] shrink-0">
-                <div class="glass rounded-[2rem] p-6 space-y-4">
-                    <a id="btn-download"
-                       href="download.html"
-                       class="bg-cyan-500 hover:bg-cyan-600 text-black py-4 rounded-2xl font-black flex items-center justify-center gap-3 transition transform hover:scale-[1.02]">
-                        <i class="fa-solid fa-download text-lg"></i> DOWNLOAD
+            <div class="lg:col-span-1 space-y-4">
+                <div class="glass p-6 rounded-[2rem] border-white/10">
+                    <a id="btn-download" href="download.html" class="w-full bg-white text-black hover:bg-cyan-400 transition-colors py-4 rounded-2xl font-black flex items-center justify-center gap-3 transform hover:scale-[1.02]">
+                        <i class="fa-solid fa-cloud-arrow-down text-lg"></i> OFFLINE ACCESS
                     </a>
-                    <button onclick="navigator.share && navigator.share({title: document.getElementById('watch-title').innerText, url: window.location.href})"
-                        class="w-full glass hover:bg-white/10 py-4 rounded-2xl font-bold transition flex items-center justify-center gap-3">
-                        <i class="fa-solid fa-share-nodes"></i> Share
+                    <button onclick="navigator.share({title: 'Cymor Hub', url: window.location.href})" class="w-full mt-3 glass hover:bg-white/10 py-4 rounded-2xl font-bold transition flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-share-nodes"></i> SHARE LINK
                     </button>
                 </div>
             </div>
         </section>
+
+        <section class="mt-16">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="w-1.5 h-8 bg-cyan-400 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.5)]"></div>
+                <h2 class="text-3xl font-black uppercase tracking-tighter italic">Recommended</h2>
+            </div>
+
+            <div id="recommended-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                </div>
+        </section>
+
     </main>
 
     <script src="script.js"></script>
@@ -187,30 +201,27 @@
             if (!url) return;
 
             const player = document.getElementById('video-player');
-            if (player) {
-                player.src = url;
-            }
+            if (player) player.src = url;
 
-            document.querySelectorAll('.server-btn').forEach(b => {
-                b.classList.remove('active');
-                b.innerHTML = b.innerHTML.replace('fa-circle-check', 'fa-rotate');
+            // Update UI
+            document.querySelectorAll('.server-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.id === `btn-server-${which}`) btn.classList.add('active');
             });
-            
-            const activeBtn = document.getElementById(`btn-server-${which}`);
-            activeBtn.classList.add('active');
-            activeBtn.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-cyan-400"></i> ${which.charAt(0).toUpperCase() + which.slice(1)}`;
         }
 
+        // Connect frontend to v4 server data
         document.addEventListener('DOMContentLoaded', () => {
             const originalSetup = window.setupPlayer;
             window.setupPlayer = function(primary, fallback) {
-                window._streamUrls.primary  = primary  || '';
+                window._streamUrls.primary = primary || '';
                 window._streamUrls.fallback = fallback || '';
+                
+                const player = document.getElementById('video-player');
+                if (player) player.src = primary;
+                
                 if (typeof originalSetup === 'function') {
                     originalSetup(primary, fallback);
-                } else {
-                    const player = document.getElementById('video-player');
-                    if (player) player.src = primary;
                 }
             };
         });
