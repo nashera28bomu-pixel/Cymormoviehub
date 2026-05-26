@@ -3,45 +3,39 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Watching - Cymor Movie Hub</title>
+    <title>Streaming - Cymor Movie Hub</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
 
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-        }
-
-        body{
+        body {
             background:#060d17;
             color:white;
             font-family:'Inter',sans-serif;
             overflow-x:hidden;
         }
 
-        .glass{
+        .glass {
             background:rgba(255,255,255,0.03);
             backdrop-filter:blur(16px);
             border:1px solid rgba(255,255,255,0.08);
         }
 
-        .video-container{
+        /* Netflix Style Player Ratio */
+        .video-container {
             position:relative;
-            padding-bottom:56.25%;
+            padding-bottom:56.25%; /* 16:9 */
             height:0;
             overflow:hidden;
-            border-radius:2rem;
+            border-radius:1.5rem;
             background:black;
-            box-shadow:0 20px 60px rgba(0,0,0,0.5);
+            box-shadow:0 20px 60px rgba(0,0,0,0.6);
         }
 
-        .video-container iframe{
+        .video-container iframe {
             position:absolute;
             top:0;
             left:0;
@@ -50,365 +44,169 @@
             border:0;
         }
 
-        .skeleton{
-            background:linear-gradient(
-                90deg,
-                #131a26 25%,
-                #1f2937 50%,
-                #131a26 75%
-            );
-            background-size:200% 100%;
-            animation:shimmer 1.5s infinite;
+        .skeleton {
+            background: linear-gradient(90deg, #131a26 25%, #1f2937 50%, #131a26 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
         }
 
-        @keyframes shimmer{
-            0%{
-                background-position:200% 0;
-            }
-            100%{
-                background-position:-200% 0;
-            }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
 
-        .movie-card{
+        /* Movie Card Styling */
+        .movie-card {
             position:relative;
             overflow:hidden;
-            border-radius:1.5rem;
+            border-radius:1.2rem;
             cursor:pointer;
-            transition:0.4s ease;
-            height:320px;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 300px;
         }
 
-        .movie-card:hover{
-            transform:translateY(-8px) scale(1.02);
-        }
+        .movie-card:hover { transform: scale(1.05); z-index: 10; }
 
-        .movie-card img{
-            width:100%;
-            height:100%;
-            object-fit:cover;
-        }
-
-        .movie-overlay{
+        .movie-overlay {
             position:absolute;
             inset:0;
-            background:linear-gradient(
-                180deg,
-                rgba(0,0,0,0.1) 0%,
-                rgba(0,0,0,0.85) 100%
-            );
+            background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 60%);
             display:flex;
             flex-direction:column;
             justify-content:flex-end;
             padding:1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .scrollbar-hide::-webkit-scrollbar{
-            display:none;
-        }
+        .movie-card:hover .movie-overlay { opacity: 1; }
 
-        .bg-blur{
+        /* Custom Scrollbar for Episode List */
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 10px; }
+
+        .bg-blur {
             position:fixed;
             inset:0;
             z-index:-1;
             background-size:cover;
             background-position:center;
-            filter:blur(90px) brightness(0.2);
+            filter:blur(100px) brightness(0.15);
             transform:scale(1.2);
-            opacity:0.4;
         }
     </style>
 </head>
 
-<body>
+<body class="pb-20">
 
-    <!-- BACKGROUND -->
     <div id="dynamic-bg" class="bg-blur"></div>
 
-    <!-- NAVBAR -->
-    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-gradient-to-b from-black/90 to-transparent">
+    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-gradient-to-b from-black/95 to-transparent backdrop-blur-sm">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
-
-            <a href="index.html" class="flex items-center gap-3 group">
+            <a href="index.html" class="flex items-center gap-2 group text-gray-300 hover:text-cyan-400 transition">
                 <i class="fa-solid fa-arrow-left text-lg group-hover:-translate-x-1 transition"></i>
-
-                <span class="uppercase text-sm tracking-[0.3em] font-bold">
-                    Back
-                </span>
+                <span class="uppercase text-xs tracking-widest font-black">Back to Hub</span>
             </a>
-
             <div class="flex items-center gap-2">
-                <i class="fa-solid fa-clapperboard text-cyan-400"></i>
-
-                <h1 class="font-black uppercase tracking-tight">
-                    <span class="text-cyan-400">Cymor</span>
-                    Movie Hub
+                <h1 class="font-black uppercase tracking-tighter text-xl">
+                    <span class="text-cyan-400">Cymor</span> Hub
                 </h1>
             </div>
-
         </div>
     </nav>
 
-    <!-- MAIN -->
-    <main class="pt-24 pb-20 px-4 md:px-10">
-
-        <div class="max-w-7xl mx-auto">
-
-            <!-- PLAYER -->
-            <section class="mb-10">
-
+    <main class="pt-24 px-4 md:px-10 lg:px-20 max-w-[1600px] mx-auto">
+        
+        <div class="flex flex-col xl:flex-row gap-8 mb-12">
+            
+            <div class="flex-[3]">
                 <div class="video-container">
                     <iframe
                         id="video-player"
                         src=""
-                        allowfullscreen>
+                        allowfullscreen
+                        scrolling="no"
+                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation">
                     </iframe>
                 </div>
+            </div>
 
-            </section>
-
-            <!-- INFO -->
-            <section class="flex flex-col lg:flex-row gap-10 mb-16">
-
-                <!-- LEFT -->
-                <div class="flex-1">
-
-                    <div class="flex items-center gap-3 mb-5">
-
-                        <span class="bg-cyan-500/20 text-cyan-400 px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider">
-                            Streaming
-                        </span>
-
-                        <span class="glass px-4 py-1 rounded-full text-xs font-bold text-gray-300">
-                            Ultra HD
-                        </span>
-
+            <div id="episode-parent" class="flex-[1] hidden">
+                <div class="glass rounded-[1.5rem] h-full max-h-[500px] xl:max-h-full overflow-hidden flex flex-col">
+                    <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
+                        <h3 class="font-black text-sm uppercase tracking-widest text-cyan-400">Episodes</h3>
+                        <span id="season-label" class="text-xs font-bold opacity-60">Season 1</span>
                     </div>
-
-                    <h1
-                        id="watch-title"
-                        class="text-4xl md:text-5xl lg:text-6xl font-black mb-5 leading-tight">
-                        Loading Title...
-                    </h1>
-
-                    <div class="flex flex-wrap items-center gap-5 text-sm text-gray-400 mb-6">
-
-                        <span id="watch-year" class="glass px-3 py-1 rounded-lg">
-                            ----
-                        </span>
-
-                        <span id="watch-rating" class="text-yellow-400 font-bold">
-                            <i class="fa-solid fa-star"></i>
-                            --
-                        </span>
-
-                        <span id="watch-runtime">
-                            <i class="fa-regular fa-clock"></i>
-                            -- min
-                        </span>
-
-                        <span class="uppercase tracking-widest">
-                            Dolby Atmos
-                        </span>
-
+                    <div id="episode-selector-container" class="p-4 overflow-y-auto custom-scroll space-y-3">
+                        <div class="h-12 skeleton rounded-xl"></div>
+                        <div class="h-12 skeleton rounded-xl"></div>
+                        <div class="h-12 skeleton rounded-xl"></div>
                     </div>
-
-                    <p
-                        id="watch-desc"
-                        class="text-gray-400 leading-relaxed text-base md:text-lg max-w-4xl">
-                        Loading movie details from TMDB...
-                    </p>
-
                 </div>
-
-                <!-- RIGHT -->
-                <div class="w-full lg:w-[260px] shrink-0">
-
-                    <div class="glass rounded-[2rem] p-5 flex flex-col gap-4">
-
-                        <a
-                            id="btn-download"
-                            href="download.html"
-                            class="bg-emerald-500 hover:bg-emerald-600 py-4 rounded-2xl font-black flex items-center justify-center gap-3 transition hover:scale-[1.02]">
-
-                            <i class="fa-solid fa-download"></i>
-                            DOWNLOAD
-
-                        </a>
-
-                        <button class="glass hover:bg-white/10 py-4 rounded-2xl font-bold transition flex items-center justify-center gap-3">
-
-                            <i class="fa-solid fa-plus"></i>
-                            My List
-
-                        </button>
-
-                        <button class="glass hover:bg-white/10 py-4 rounded-2xl font-bold transition flex items-center justify-center gap-3">
-
-                            <i class="fa-solid fa-share-nodes"></i>
-                            Share
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-            <!-- CONTINUE WATCHING -->
-            <section class="mb-20">
-
-                <div class="flex items-center justify-between mb-8">
-
-                    <h2 class="text-2xl md:text-3xl font-black flex items-center gap-3">
-                        <i class="fa-solid fa-fire text-orange-500"></i>
-                        RELATED MOVIES
-                    </h2>
-
-                    <a href="movies.html" class="text-cyan-400 font-bold text-sm uppercase tracking-wider">
-                        View All
-                    </a>
-
-                </div>
-
-                <!-- BACKEND READY GRID -->
-                <div
-                    id="recommended-grid"
-                    class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-
-                    <!-- SKELETONS -->
-
-                    <div class="movie-card skeleton"></div>
-                    <div class="movie-card skeleton"></div>
-                    <div class="movie-card skeleton"></div>
-                    <div class="movie-card skeleton"></div>
-                    <div class="movie-card skeleton"></div>
-                    <div class="movie-card skeleton"></div>
-
-                </div>
-
-            </section>
-
-            <!-- TRENDING SERIES -->
-            <section>
-
-                <div class="flex items-center justify-between mb-8">
-
-                    <h2 class="text-2xl md:text-3xl font-black flex items-center gap-3">
-                        <i class="fa-solid fa-tv text-cyan-400"></i>
-                        MORE SERIES
-                    </h2>
-
-                    <a href="series.html" class="text-cyan-400 font-bold text-sm uppercase tracking-wider">
-                        Explore
-                    </a>
-
-                </div>
-
-                <!-- BACKEND READY -->
-                <div
-                    id="series-grid"
-                    class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-
-                    <!-- SKELETONS -->
-
-                    <div class="movie-card skeleton"></div>
-                    <div class="movie-card skeleton"></div>
-                    <div class="movie-card skeleton"></div>
-                    <div class="movie-card skeleton"></div>
-                    <div class="movie-card skeleton"></div>
-                    <div class="movie-card skeleton"></div>
-
-                </div>
-
-            </section>
-
+            </div>
         </div>
+
+        <section class="flex flex-col lg:flex-row gap-10 border-b border-white/5 pb-16 mb-16">
+            <div class="flex-1">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="bg-cyan-500 text-black px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">4K ULTRA HD</span>
+                    <span id="watch-rating" class="text-yellow-400 font-black text-sm">
+                        <i class="fa-solid fa-star"></i> --
+                    </span>
+                    <span id="watch-year" class="text-gray-400 font-bold text-sm">----</span>
+                </div>
+
+                <h1 id="watch-title" class="text-4xl md:text-6xl font-black mb-6 uppercase tracking-tighter leading-none">Loading Title...</h1>
+                
+                <p id="watch-desc" class="text-gray-400 leading-relaxed text-lg max-w-4xl">
+                    Loading description from TMDB...
+                </p>
+            </div>
+
+            <div class="w-full lg:w-[300px] shrink-0">
+                <div class="glass rounded-[2rem] p-6 space-y-4">
+                    <a id="btn-download" href="download.html" class="bg-cyan-500 hover:bg-cyan-600 text-black py-4 rounded-2xl font-black flex items-center justify-center gap-3 transition transform hover:scale-[1.02]">
+                        <i class="fa-solid fa-download text-lg"></i> DOWNLOAD
+                    </a>
+                    <button class="w-full glass hover:bg-white/10 py-4 rounded-2xl font-bold transition flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-plus"></i> My List
+                    </button>
+                    <button class="w-full glass hover:bg-white/10 py-4 rounded-2xl font-bold transition flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-share-nodes"></i> Share
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="flex items-center gap-4 mb-10">
+                <div class="w-1 h-8 bg-cyan-400 rounded-full"></div>
+                <h2 class="text-3xl font-black uppercase tracking-tighter italic">More Like This</h2>
+            </div>
+
+            <div id="recommended-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                <div class="movie-card skeleton"></div>
+                <div class="movie-card skeleton"></div>
+                <div class="movie-card skeleton"></div>
+                <div class="movie-card skeleton"></div>
+                <div class="movie-card skeleton"></div>
+                <div class="movie-card skeleton"></div>
+            </div>
+        </section>
 
     </main>
 
+    <script src="script.js"></script>
     <script>
-
-        // URL PARAMS
-        const urlParams = new URLSearchParams(window.location.search);
-        const movieId = urlParams.get("id");
-
-        // REDIRECT IF NO ID
-        if(!movieId){
-            window.location.href = "index.html";
-        }
-
-        // PLAYER
-        document.getElementById("video-player").src =
-            `https://vidsrc.to/embed/movie/${movieId}`;
-
-        // DOWNLOAD BUTTON
-        document.getElementById("btn-download").href =
-            `download.html?id=${movieId}`;
-
-        /*
-        ======================================================
-        BACKEND INGESTION READY
-        ======================================================
-
-        YOU WILL FETCH:
-
-        1. MOVIE DETAILS
-        - title
-        - overview
-        - runtime
-        - backdrop
-        - rating
-        - release_date
-
-        2. RELATED MOVIES
-        Populate #recommended-grid
-
-        3. RELATED SERIES
-        Populate #series-grid
-
-        ======================================================
-        SAMPLE CARD TEMPLATE
-        ======================================================
-
-        USE THIS IN JS:
-
-        recommendedGrid.innerHTML += `
-            <div
-                onclick="window.location.href='watch.html?id=${movie.id}'"
-                class="movie-card group">
-
-                <img
-                    src="https://image.tmdb.org/t/p/w500${movie.poster_path}"
-                    alt="${movie.title}">
-
-                <div class="movie-overlay">
-
-                    <div class="flex items-center justify-between mb-2">
-
-                        <span class="text-yellow-400 text-xs font-bold">
-                            ⭐ ${movie.vote_average.toFixed(1)}
-                        </span>
-
-                        <span class="text-xs text-gray-300">
-                            ${movie.release_date?.slice(0,4)}
-                        </span>
-
-                    </div>
-
-                    <h3 class="font-black text-sm line-clamp-2">
-                        ${movie.title}
-                    </h3>
-
-                </div>
-
-            </div>
-        `;
-
-        ======================================================
-        */
+        // Special logic to handle the episode sidebar visibility
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+            const type = params.get("type");
+            if (type === "tv") {
+                document.getElementById("episode-parent").classList.remove("hidden");
+            }
+        });
     </script>
-<script src="script.js"></script>
 </body>
 </html>
