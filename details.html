@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Details - Cymor Movie Hub</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #060d17;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .hero-gradient {
+            background: linear-gradient(to top, #060d17 10%, rgba(6,13,23,0.3) 45%, rgba(6,13,23,0.1) 100%);
+        }
+
+        .bg-blur {
+            position: fixed;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: blur(90px) brightness(0.25);
+            transform: scale(1.2);
+            z-index: -2;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #131a26 25%, #1f2937 50%, #131a26 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0%  { background-position: 200% 0; }
+            100%{ background-position: -200% 0; }
+        }
+
+        .cast-scroll::-webkit-scrollbar { height: 4px; }
+        .cast-scroll::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 999px; }
+
+        .movie-card { transition: 0.35s ease; }
+        .movie-card:hover { transform: translateY(-8px) scale(1.03); }
+
+        .movie-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0));
+        }
+
+        .genre-pill {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="dynamic-bg" class="bg-blur"></div>
+
+    <!-- ── NAVBAR ── -->
+    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-5 flex items-center justify-between bg-gradient-to-b from-black/90 to-transparent">
+        <a href="index.html"
+           class="flex items-center gap-3 font-bold uppercase tracking-widest text-xs hover:text-cyan-400 transition">
+            <i class="fa-solid fa-arrow-left"></i> Back To Hub
+        </a>
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-clapperboard text-cyan-400 text-xl"></i>
+            <h1 class="font-black uppercase tracking-tighter text-lg">
+                <span class="text-cyan-400">Cymor</span> Movie Hub
+            </h1>
+        </div>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <section class="relative min-h-screen flex items-end pt-32">
+
+        <div id="hero-backdrop" class="absolute inset-0 bg-cover bg-center opacity-30 transition-all duration-700"></div>
+        <div class="absolute inset-0 hero-gradient"></div>
+
+        <div class="relative z-10 w-full px-6 md:px-12 lg:px-20 pb-16">
+            <div class="max-w-7xl mx-auto grid lg:grid-cols-[350px_1fr] gap-12 items-end">
+
+                <!-- Poster -->
+                <div>
+                    <div id="detail-poster"
+                         class="w-full h-[520px] rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 skeleton bg-cover bg-center transition-all duration-500">
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div>
+                    <!-- Badges -->
+                    <div class="flex flex-wrap gap-3 mb-6">
+                        <div id="detail-type"
+                             class="bg-cyan-500 text-black px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider">
+                            MOVIE
+                        </div>
+                        <div id="detail-status"
+                             class="glass px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
+                        </div>
+                        <div class="glass px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
+                            4K ULTRA HD
+                        </div>
+                    </div>
+
+                    <!-- Title -->
+                    <h1 id="detail-title"
+                        class="text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-none mb-6">
+                        <span class="skeleton inline-block w-96 h-16 rounded-xl"></span>
+                    </h1>
+
+                    <!-- Meta -->
+                    <div class="flex flex-wrap items-center gap-6 mb-8 text-sm md:text-base">
+                        <div class="flex items-center gap-2 text-yellow-400">
+                            <i class="fa-solid fa-star"></i>
+                            <span id="detail-rating" class="font-black">--</span>
+                        </div>
+                        <div id="detail-runtime" class="text-gray-300">
+                            <i class="fa-regular fa-clock mr-1"></i>-- min
+                        </div>
+                        <div id="detail-date" class="text-gray-300">
+                            <i class="fa-regular fa-calendar mr-1"></i>----
+                        </div>
+                    </div>
+
+                    <!-- Genres -->
+                    <div id="genres-list" class="flex flex-wrap gap-3 mb-8"></div>
+
+                    <!-- Overview -->
+                    <p id="detail-overview"
+                       class="text-gray-300 leading-relaxed text-lg max-w-4xl mb-10">
+                        Fetching cinematic details...
+                    </p>
+
+                    <!-- Action buttons — hrefs set by script.js -->
+                    <div class="flex flex-wrap gap-4 mb-14">
+                        <a id="btn-watch" href="watch.html"
+                           class="bg-cyan-500 hover:bg-cyan-400 text-black px-10 py-4 rounded-2xl font-black flex items-center gap-3 transition hover:scale-105">
+                            <i class="fa-solid fa-play"></i> WATCH NOW
+                        </a>
+                        <a id="btn-download" href="download.html"
+                           class="glass hover:bg-white/10 px-10 py-4 rounded-2xl font-black flex items-center gap-3 transition">
+                            <i class="fa-solid fa-download"></i> DOWNLOAD
+                        </a>
+                        <button class="glass hover:bg-white/10 px-10 py-4 rounded-2xl font-black flex items-center gap-3 transition">
+                            <i class="fa-solid fa-plus"></i> MY LIST
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="px-6 md:px-12 lg:px-20 pb-24">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Seasons (TV only) -->
+            <section id="seasons-container" class="hidden mb-20">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-1 h-8 rounded-full bg-cyan-400"></div>
+                    <h2 class="text-2xl font-black uppercase tracking-tight">Seasons</h2>
+                </div>
+                <div id="seasons-list" class="flex gap-5 overflow-x-auto pb-4 cast-scroll"></div>
+            </section>
+
+            <!-- Cast -->
+            <section class="mb-20">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-1 h-8 rounded-full bg-cyan-400"></div>
+                    <h2 class="text-2xl font-black uppercase tracking-tight">Top Cast</h2>
+                </div>
+                <div id="cast-list" class="flex gap-6 overflow-x-auto pb-6 cast-scroll">
+                    <!-- Skeletons -->
+                    <div class="w-28 shrink-0">
+                        <div class="w-28 h-28 rounded-full skeleton mb-3"></div>
+                        <div class="h-4 rounded skeleton mb-2"></div>
+                        <div class="h-3 rounded skeleton w-2/3 mx-auto"></div>
+                    </div>
+                    <div class="w-28 shrink-0">
+                        <div class="w-28 h-28 rounded-full skeleton mb-3"></div>
+                        <div class="h-4 rounded skeleton mb-2"></div>
+                        <div class="h-3 rounded skeleton w-2/3 mx-auto"></div>
+                    </div>
+                    <div class="w-28 shrink-0">
+                        <div class="w-28 h-28 rounded-full skeleton mb-3"></div>
+                        <div class="h-4 rounded skeleton mb-2"></div>
+                        <div class="h-3 rounded skeleton w-2/3 mx-auto"></div>
+                    </div>
+                    <div class="w-28 shrink-0">
+                        <div class="w-28 h-28 rounded-full skeleton mb-3"></div>
+                        <div class="h-4 rounded skeleton mb-2"></div>
+                        <div class="h-3 rounded skeleton w-2/3 mx-auto"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Related / Recommendations -->
+            <section>
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-1 h-8 rounded-full bg-cyan-400"></div>
+                    <h2 class="text-2xl font-black uppercase tracking-tight">More Like This</h2>
+                </div>
+                <div id="related-grid"
+                     class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    <div class="h-80 rounded-[2rem] skeleton"></div>
+                    <div class="h-80 rounded-[2rem] skeleton"></div>
+                    <div class="h-80 rounded-[2rem] skeleton"></div>
+                    <div class="h-80 rounded-[2rem] skeleton"></div>
+                    <div class="h-80 rounded-[2rem] skeleton"></div>
+                    <div class="h-80 rounded-[2rem] skeleton"></div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

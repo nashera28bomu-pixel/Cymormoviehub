@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Download - Cymor Movie Hub</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #060d17;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #131a26 25%, #1f2937 50%, #131a26 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .quality-card {
+            transition: 0.35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .quality-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: rgba(6,182,212,0.4);
+        }
+        .quality-card:active { transform: scale(0.98); }
+
+        .download-bg {
+            position: fixed;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: blur(80px) brightness(0.18);
+            transform: scale(1.2);
+            z-index: -2;
+            opacity: 0.45;
+        }
+
+        .gradient-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(6,13,23,0.4), rgba(6,13,23,0.98));
+            z-index: -1;
+        }
+
+        .progress-ring {
+            animation: spin 1.2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        .netflix-shadow { box-shadow: 0 20px 60px rgba(0,0,0,0.45); }
+
+        .subtitle-track-btn {
+            transition: 0.2s ease;
+        }
+        .subtitle-track-btn:hover {
+            border-color: rgba(6,182,212,0.5);
+            color: #22d3ee;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="dynamic-bg" class="download-bg"></div>
+    <div class="gradient-overlay"></div>
+
+    <!-- ── NAVBAR ── -->
+    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-5 bg-gradient-to-b from-black/90 to-transparent">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="javascript:history.back()" class="flex items-center gap-3 group">
+                <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition"></i>
+                <span class="uppercase text-xs tracking-[0.3em] font-bold">Back</span>
+            </a>
+            <h1 class="font-black uppercase tracking-tight text-lg">
+                <span class="text-cyan-400">Cymor</span> Movie Hub
+            </h1>
+        </div>
+    </nav>
+
+    <!-- ── MAIN ── -->
+    <main class="min-h-screen pt-28 pb-20 px-4 md:px-8">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Movie details + download options -->
+            <div class="grid lg:grid-cols-[320px_1fr] gap-10 items-start">
+
+                <!-- Poster -->
+                <div>
+                    <div id="poster-skeleton" class="w-full h-[480px] rounded-[2rem] skeleton netflix-shadow"></div>
+                    <img id="movie-poster" src="" alt="Poster"
+                         class="hidden w-full h-[480px] object-cover rounded-[2rem] netflix-shadow">
+                </div>
+
+                <!-- Details & Downloads -->
+                <div>
+
+                    <!-- Badges -->
+                    <div class="flex flex-wrap items-center gap-3 mb-5">
+                        <span class="bg-cyan-500/20 text-cyan-400 px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                            Download Center
+                        </span>
+                        <span class="glass px-4 py-1 rounded-full text-xs font-bold text-gray-300">Ultra HD</span>
+                    </div>
+
+                    <!-- Title skeleton / real -->
+                    <div id="title-skeleton" class="h-14 w-[70%] rounded-xl skeleton mb-5"></div>
+                    <h1 id="movie-name" class="hidden text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6"></h1>
+
+                    <!-- Meta -->
+                    <div id="meta-skeleton" class="h-6 w-40 rounded-lg skeleton mb-7"></div>
+                    <div id="movie-meta" class="hidden flex flex-wrap items-center gap-5 text-sm text-gray-400 mb-7">
+                        <span id="movie-year"></span>
+                        <span id="movie-rating" class="text-yellow-400 font-bold"></span>
+                        <span id="movie-runtime"></span>
+                    </div>
+
+                    <!-- Overview skeleton / real -->
+                    <div id="overview-skeleton" class="space-y-3 mb-10">
+                        <div class="h-4 rounded skeleton"></div>
+                        <div class="h-4 rounded skeleton"></div>
+                        <div class="h-4 rounded w-[80%] skeleton"></div>
+                    </div>
+                    <p id="movie-overview" class="hidden text-gray-300 leading-relaxed text-lg max-w-4xl mb-10"></p>
+
+                    <!-- ── QUALITY BUTTONS ── -->
+                    <div class="space-y-4 mb-10">
+
+                        <button onclick="startDownload('1080p')"
+                            class="quality-card glass w-full rounded-[2rem] p-5 flex items-center justify-between">
+                            <div class="flex items-center gap-5">
+                                <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl">
+                                    <i class="fa-solid fa-tv"></i>
+                                </div>
+                                <div class="text-left">
+                                    <h3 class="font-black text-xl">1080p Full HD</h3>
+                                    <p class="text-sm text-gray-400 mt-1">Best cinematic experience</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-black text-cyan-400 text-sm">PREMIUM</p>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-gray-500 mt-2 text-sm"></i>
+                            </div>
+                        </button>
+
+                        <button onclick="startDownload('720p')"
+                            class="quality-card glass w-full rounded-[2rem] p-5 flex items-center justify-between">
+                            <div class="flex items-center gap-5">
+                                <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-white text-xl">
+                                    <i class="fa-solid fa-film"></i>
+                                </div>
+                                <div class="text-left">
+                                    <h3 class="font-black text-xl">720p HD</h3>
+                                    <p class="text-sm text-gray-400 mt-1">Balanced quality &amp; size</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-gray-500 text-sm"></i>
+                        </button>
+
+                        <button onclick="startDownload('480p')"
+                            class="quality-card glass w-full rounded-[2rem] p-5 flex items-center justify-between">
+                            <div class="flex items-center gap-5">
+                                <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl">
+                                    <i class="fa-solid fa-mobile-screen"></i>
+                                </div>
+                                <div class="text-left">
+                                    <h3 class="font-black text-xl">480p Mobile</h3>
+                                    <p class="text-sm text-gray-400 mt-1">Optimized for phones</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-gray-500 text-sm"></i>
+                        </button>
+
+                        <button onclick="startDownload('360p')"
+                            class="quality-card glass w-full rounded-[2rem] p-5 flex items-center justify-between">
+                            <div class="flex items-center gap-5">
+                                <div class="w-14 h-14 rounded-2xl bg-orange-500/20 flex items-center justify-center text-orange-400 text-xl">
+                                    <i class="fa-solid fa-wifi"></i>
+                                </div>
+                                <div class="text-left">
+                                    <h3 class="font-black text-xl">360p Saver</h3>
+                                    <p class="text-sm text-gray-400 mt-1">Lowest data consumption</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-gray-500 text-sm"></i>
+                        </button>
+
+                    </div>
+
+                    <!-- ── SUBTITLE DOWNLOADS ── -->
+                    <div class="glass rounded-[2rem] p-6">
+                        <h3 class="font-black text-sm uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-closed-captioning text-cyan-400"></i>
+                            Download Subtitles
+                        </h3>
+                        <div id="subtitle-list" class="flex flex-wrap gap-3">
+                            <span class="text-xs text-gray-500 italic">Loading subtitle tracks...</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ── RELATED DOWNLOADS ── -->
+            <section class="mt-24">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-2xl md:text-3xl font-black flex items-center gap-3">
+                        <i class="fa-solid fa-fire text-orange-500"></i>
+                        MORE DOWNLOADS
+                    </h2>
+                </div>
+
+                <div id="related-downloads"
+                     class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                    <div class="h-72 rounded-[2rem] skeleton"></div>
+                    <div class="h-72 rounded-[2rem] skeleton"></div>
+                    <div class="h-72 rounded-[2rem] skeleton"></div>
+                    <div class="h-72 rounded-[2rem] skeleton"></div>
+                    <div class="h-72 rounded-[2rem] skeleton"></div>
+                    <div class="h-72 rounded-[2rem] skeleton"></div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ── LOADING MODAL ── -->
+    <div id="progress-modal"
+         class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/90 backdrop-blur-xl p-6">
+        <div class="glass rounded-[2rem] p-10 max-w-md w-full text-center">
+            <div class="w-24 h-24 rounded-full border-4 border-cyan-500/20 border-t-cyan-400 mx-auto mb-6 progress-ring"></div>
+            <h3 class="text-2xl font-black mb-3">Finding Download Source</h3>
+            <p class="text-gray-400 leading-relaxed">
+                Cymor is locating the best available download for your chosen quality.
+            </p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        /**
+         * Load subtitles for the download page.
+         * Fetches tracks and renders download links.
+         */
+        async function loadDownloadSubtitles() {
+            const params = new URLSearchParams(window.location.search);
+            const id     = params.get('id');
+            const type   = params.get('type') || 'movie';
+            const s      = params.get('s') || 1;
+            const e      = params.get('e') || 1;
+
+            if (!id) return;
+
+            const container = document.getElementById('subtitle-list');
+            if (!container) return;
+
+            try {
+                const epSuffix = type === 'tv' ? `&s=${s}&e=${e}` : '';
+                const res  = await fetch(`/api/subtitles?id=${id}&type=${type}${epSuffix}`);
+                const data = await res.json();
+
+                if (!data.success || !data.tracks?.length) {
+                    container.innerHTML = '<span class="text-xs text-gray-500">No subtitles found for this title.</span>';
+                    return;
+                }
+
+                container.innerHTML = data.tracks.map(t => `
+                    <a href="${t.downloadUrl}"
+                       download
+                       target="_blank"
+                       class="subtitle-track-btn glass px-4 py-2 rounded-full text-xs font-bold border border-white/10 flex items-center gap-2 hover:text-cyan-400 transition">
+                        <i class="fa-solid fa-file-lines text-cyan-400/70"></i>
+                        ${t.label}
+                        <i class="fa-solid fa-download text-gray-500 text-[10px]"></i>
+                    </a>
+                `).join('');
+
+            } catch (err) {
+                container.innerHTML = '<span class="text-xs text-gray-500">Subtitle service unavailable.</span>';
+            }
+        }
+
+        // Run after script.js has initialized the page
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(loadDownloadSubtitles, 800);
+        });
+    </script>
+
+</body>
+</html>
