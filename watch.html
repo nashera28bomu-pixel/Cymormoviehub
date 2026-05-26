@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Watching - Cymor Movie Hub</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            background:#060d17;
+            color:white;
+            font-family:'Inter',sans-serif;
+            overflow-x:hidden;
+        }
+
+        .glass{
+            background:rgba(255,255,255,0.03);
+            backdrop-filter:blur(16px);
+            border:1px solid rgba(255,255,255,0.08);
+        }
+
+        .video-container{
+            position:relative;
+            padding-bottom:56.25%;
+            height:0;
+            overflow:hidden;
+            border-radius:2rem;
+            background:black;
+            box-shadow:0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .video-container iframe{
+            position:absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            border:0;
+        }
+
+        .skeleton{
+            background:linear-gradient(
+                90deg,
+                #131a26 25%,
+                #1f2937 50%,
+                #131a26 75%
+            );
+            background-size:200% 100%;
+            animation:shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer{
+            0%{
+                background-position:200% 0;
+            }
+            100%{
+                background-position:-200% 0;
+            }
+        }
+
+        .movie-card{
+            position:relative;
+            overflow:hidden;
+            border-radius:1.5rem;
+            cursor:pointer;
+            transition:0.4s ease;
+            height:320px;
+        }
+
+        .movie-card:hover{
+            transform:translateY(-8px) scale(1.02);
+        }
+
+        .movie-card img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .movie-overlay{
+            position:absolute;
+            inset:0;
+            background:linear-gradient(
+                180deg,
+                rgba(0,0,0,0.1) 0%,
+                rgba(0,0,0,0.85) 100%
+            );
+            display:flex;
+            flex-direction:column;
+            justify-content:flex-end;
+            padding:1rem;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar{
+            display:none;
+        }
+
+        .bg-blur{
+            position:fixed;
+            inset:0;
+            z-index:-1;
+            background-size:cover;
+            background-position:center;
+            filter:blur(90px) brightness(0.2);
+            transform:scale(1.2);
+            opacity:0.4;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- BACKGROUND -->
+    <div id="dynamic-bg" class="bg-blur"></div>
+
+    <!-- NAVBAR -->
+    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-gradient-to-b from-black/90 to-transparent">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+
+            <a href="index.html" class="flex items-center gap-3 group">
+                <i class="fa-solid fa-arrow-left text-lg group-hover:-translate-x-1 transition"></i>
+
+                <span class="uppercase text-sm tracking-[0.3em] font-bold">
+                    Back
+                </span>
+            </a>
+
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-clapperboard text-cyan-400"></i>
+
+                <h1 class="font-black uppercase tracking-tight">
+                    <span class="text-cyan-400">Cymor</span>
+                    Movie Hub
+                </h1>
+            </div>
+
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="pt-24 pb-20 px-4 md:px-10">
+
+        <div class="max-w-7xl mx-auto">
+
+            <!-- PLAYER -->
+            <section class="mb-10">
+
+                <div class="video-container">
+                    <iframe
+                        id="video-player"
+                        src=""
+                        allowfullscreen>
+                    </iframe>
+                </div>
+
+            </section>
+
+            <!-- INFO -->
+            <section class="flex flex-col lg:flex-row gap-10 mb-16">
+
+                <!-- LEFT -->
+                <div class="flex-1">
+
+                    <div class="flex items-center gap-3 mb-5">
+
+                        <span class="bg-cyan-500/20 text-cyan-400 px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                            Streaming
+                        </span>
+
+                        <span class="glass px-4 py-1 rounded-full text-xs font-bold text-gray-300">
+                            Ultra HD
+                        </span>
+
+                    </div>
+
+                    <h1
+                        id="watch-title"
+                        class="text-4xl md:text-5xl lg:text-6xl font-black mb-5 leading-tight">
+                        Loading Title...
+                    </h1>
+
+                    <div class="flex flex-wrap items-center gap-5 text-sm text-gray-400 mb-6">
+
+                        <span id="watch-year" class="glass px-3 py-1 rounded-lg">
+                            ----
+                        </span>
+
+                        <span id="watch-rating" class="text-yellow-400 font-bold">
+                            <i class="fa-solid fa-star"></i>
+                            --
+                        </span>
+
+                        <span id="watch-runtime">
+                            <i class="fa-regular fa-clock"></i>
+                            -- min
+                        </span>
+
+                        <span class="uppercase tracking-widest">
+                            Dolby Atmos
+                        </span>
+
+                    </div>
+
+                    <p
+                        id="watch-desc"
+                        class="text-gray-400 leading-relaxed text-base md:text-lg max-w-4xl">
+                        Loading movie details from TMDB...
+                    </p>
+
+                </div>
+
+                <!-- RIGHT -->
+                <div class="w-full lg:w-[260px] shrink-0">
+
+                    <div class="glass rounded-[2rem] p-5 flex flex-col gap-4">
+
+                        <a
+                            id="btn-download"
+                            href="download.html"
+                            class="bg-emerald-500 hover:bg-emerald-600 py-4 rounded-2xl font-black flex items-center justify-center gap-3 transition hover:scale-[1.02]">
+
+                            <i class="fa-solid fa-download"></i>
+                            DOWNLOAD
+
+                        </a>
+
+                        <button class="glass hover:bg-white/10 py-4 rounded-2xl font-bold transition flex items-center justify-center gap-3">
+
+                            <i class="fa-solid fa-plus"></i>
+                            My List
+
+                        </button>
+
+                        <button class="glass hover:bg-white/10 py-4 rounded-2xl font-bold transition flex items-center justify-center gap-3">
+
+                            <i class="fa-solid fa-share-nodes"></i>
+                            Share
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- CONTINUE WATCHING -->
+            <section class="mb-20">
+
+                <div class="flex items-center justify-between mb-8">
+
+                    <h2 class="text-2xl md:text-3xl font-black flex items-center gap-3">
+                        <i class="fa-solid fa-fire text-orange-500"></i>
+                        RELATED MOVIES
+                    </h2>
+
+                    <a href="movies.html" class="text-cyan-400 font-bold text-sm uppercase tracking-wider">
+                        View All
+                    </a>
+
+                </div>
+
+                <!-- BACKEND READY GRID -->
+                <div
+                    id="recommended-grid"
+                    class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+
+                    <!-- SKELETONS -->
+
+                    <div class="movie-card skeleton"></div>
+                    <div class="movie-card skeleton"></div>
+                    <div class="movie-card skeleton"></div>
+                    <div class="movie-card skeleton"></div>
+                    <div class="movie-card skeleton"></div>
+                    <div class="movie-card skeleton"></div>
+
+                </div>
+
+            </section>
+
+            <!-- TRENDING SERIES -->
+            <section>
+
+                <div class="flex items-center justify-between mb-8">
+
+                    <h2 class="text-2xl md:text-3xl font-black flex items-center gap-3">
+                        <i class="fa-solid fa-tv text-cyan-400"></i>
+                        MORE SERIES
+                    </h2>
+
+                    <a href="series.html" class="text-cyan-400 font-bold text-sm uppercase tracking-wider">
+                        Explore
+                    </a>
+
+                </div>
+
+                <!-- BACKEND READY -->
+                <div
+                    id="series-grid"
+                    class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+
+                    <!-- SKELETONS -->
+
+                    <div class="movie-card skeleton"></div>
+                    <div class="movie-card skeleton"></div>
+                    <div class="movie-card skeleton"></div>
+                    <div class="movie-card skeleton"></div>
+                    <div class="movie-card skeleton"></div>
+                    <div class="movie-card skeleton"></div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <script>
+
+        // URL PARAMS
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieId = urlParams.get("id");
+
+        // REDIRECT IF NO ID
+        if(!movieId){
+            window.location.href = "index.html";
+        }
+
+        // PLAYER
+        document.getElementById("video-player").src =
+            `https://vidsrc.to/embed/movie/${movieId}`;
+
+        // DOWNLOAD BUTTON
+        document.getElementById("btn-download").href =
+            `download.html?id=${movieId}`;
+
+        /*
+        ======================================================
+        BACKEND INGESTION READY
+        ======================================================
+
+        YOU WILL FETCH:
+
+        1. MOVIE DETAILS
+        - title
+        - overview
+        - runtime
+        - backdrop
+        - rating
+        - release_date
+
+        2. RELATED MOVIES
+        Populate #recommended-grid
+
+        3. RELATED SERIES
+        Populate #series-grid
+
+        ======================================================
+        SAMPLE CARD TEMPLATE
+        ======================================================
+
+        USE THIS IN JS:
+
+        recommendedGrid.innerHTML += `
+            <div
+                onclick="window.location.href='watch.html?id=${movie.id}'"
+                class="movie-card group">
+
+                <img
+                    src="https://image.tmdb.org/t/p/w500${movie.poster_path}"
+                    alt="${movie.title}">
+
+                <div class="movie-overlay">
+
+                    <div class="flex items-center justify-between mb-2">
+
+                        <span class="text-yellow-400 text-xs font-bold">
+                            ⭐ ${movie.vote_average.toFixed(1)}
+                        </span>
+
+                        <span class="text-xs text-gray-300">
+                            ${movie.release_date?.slice(0,4)}
+                        </span>
+
+                    </div>
+
+                    <h3 class="font-black text-sm line-clamp-2">
+                        ${movie.title}
+                    </h3>
+
+                </div>
+
+            </div>
+        `;
+
+        ======================================================
+        */
+    </script>
+<script src="script.js"></script>
+</body>
+</html>
