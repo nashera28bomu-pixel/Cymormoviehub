@@ -6,254 +6,187 @@
 
     <title>Cymor Movie Hub | Unlimited Streaming</title>
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
+        body { background:#060d17; color:white; font-family:'Inter',sans-serif; overflow-x:hidden; }
 
-        body{
-            background:#060d17;
-            color:white;
-            font-family:'Inter',sans-serif;
-            overflow-x:hidden;
+        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar-thumb { background:#06b6d4; border-radius:999px; }
+
+        .glass { background:rgba(255,255,255,0.03); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.08); }
+
+        .hero-gradient {
+            background: linear-gradient(to top,#060d17 10%,rgba(6,13,23,0.4) 45%,transparent);
         }
 
-        ::-webkit-scrollbar{width:6px}
-        ::-webkit-scrollbar-thumb{background:#06b6d4;border-radius:999px}
-
-        .glass{
-            background:rgba(255,255,255,0.03);
-            backdrop-filter:blur(16px);
-            border:1px solid rgba(255,255,255,0.08);
-        }
-
-        .hero-gradient{
-            background:linear-gradient(to top,#060d17 8%,rgba(6,13,23,0.4) 45%,rgba(6,13,23,0.1) 100%);
-        }
-
-        .movie-card{
-            position:relative;
-            overflow:hidden;
-            border-radius:28px;
-            cursor:pointer;
-            transition:0.4s ease;
-        }
-
-        .movie-card:hover{
-            transform:translateY(-8px) scale(1.02);
-        }
-
-        .movie-card img{
-            transition:0.5s ease;
-        }
-
-        .movie-card:hover img{
-            transform:scale(1.08);
-        }
-
-        .skeleton{
-            background:linear-gradient(90deg,#131a26 25%,#1f2937 50%,#131a26 75%);
+        .skeleton {
+            background: linear-gradient(90deg,#131a26 25%,#1f2937 50%,#131a26 75%);
             background-size:200% 100%;
             animation:shimmer 1.5s infinite;
         }
 
-        @keyframes shimmer{
-            0%{background-position:200% 0}
-            100%{background-position:-200% 0}
+        @keyframes shimmer {
+            0% { background-position:200% 0; }
+            100% { background-position:-200% 0; }
         }
 
-        .fade-in{
-            animation:fade 1s ease;
-        }
-
-        @keyframes fade{
-            from{opacity:0;transform:translateY(15px)}
-            to{opacity:1;transform:translateY(0)}
-        }
-
-        .glow{
-            box-shadow:0 0 40px rgba(6,182,212,0.15);
-        }
+        .movie-card { transition:0.4s; }
+        .movie-card:hover { transform:translateY(-8px) scale(1.03); }
     </style>
 </head>
 
 <body>
 
 <!-- BACKGROUND GLOW -->
-<div class="fixed top-[-10%] left-[-10%] w-[400px] h-[400px] bg-cyan-500/10 blur-[120px] rounded-full -z-50"></div>
-<div class="fixed bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-blue-500/10 blur-[120px] rounded-full -z-50"></div>
+<div class="fixed w-[400px] h-[400px] bg-cyan-500/10 blur-[120px] rounded-full top-[-10%] left-[-10%] -z-50"></div>
+<div class="fixed w-[400px] h-[400px] bg-blue-500/10 blur-[120px] rounded-full bottom-[-10%] right-[-10%] -z-50"></div>
 
-<!-- NAVBAR -->
-<nav class="sticky top-0 z-[100] px-6 py-5 glass flex items-center justify-between">
+<!-- NAV -->
+<nav class="sticky top-0 z-50 glass px-6 md:px-10 py-5 flex justify-between items-center">
 
-    <!-- LOGO -->
-    <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center glow">
-            <i class="fa-solid fa-clapperboard text-cyan-400 text-xl"></i>
-        </div>
+    <h1 class="font-black text-xl md:text-2xl">
+        <span class="text-cyan-400">Cymor</span> Movie Hub
+    </h1>
 
-        <div>
-            <h1 class="text-xl font-black uppercase">
-                <span class="text-cyan-400">Cymor</span> Movie Hub
-            </h1>
-        </div>
+    <div class="hidden md:flex gap-8 text-sm uppercase font-semibold tracking-widest">
+        <a href="index.html" class="text-cyan-400">Home</a>
+        <a href="movies.html">Movies</a>
+        <a href="series.html">Series</a>
+        <a href="#">Trending</a>
     </div>
 
-    <!-- ACTIONS -->
-    <div class="flex items-center gap-3">
-
-        <!-- 🔥 NETFLIX SEARCH BUTTON -->
-        <button id="open-search" class="w-11 h-11 rounded-2xl glass hover:bg-cyan-500/20 transition">
-            <i class="fa-solid fa-search"></i>
+    <div class="flex gap-3">
+        <button id="open-search" class="w-11 h-11 glass rounded-xl">
+            <i class="fa fa-search"></i>
         </button>
-
-        <button class="w-11 h-11 rounded-2xl glass hover:bg-cyan-500/20 transition">
-            <i class="fa-solid fa-bell"></i>
+        <button class="w-11 h-11 glass rounded-xl">
+            <i class="fa fa-bell"></i>
         </button>
-
     </div>
 
 </nav>
 
-<!-- HERO -->
-<section class="relative w-full h-[78vh] mt-6 flex items-end px-8 pb-16 overflow-hidden rounded-[3rem] mx-auto max-w-[97%]">
+<!-- SEARCH INPUT (hooked to script.js overlay system) -->
+<section class="px-6 mt-6">
+    <div class="max-w-3xl mx-auto">
+        <input
+            id="search-input"
+            placeholder="Search movies, series..."
+            class="w-full bg-[#0f172a] border border-white/10 p-5 rounded-2xl outline-none focus:border-cyan-500"
+        />
+    </div>
+</section>
 
-    <img id="hero-backdrop" class="absolute inset-0 w-full h-full object-cover opacity-0 transition duration-1000"/>
+<!-- HERO (IMPORTANT: matches script.js IDs exactly) -->
+<section
+    id="hero-container"
+    class="relative h-[78vh] mt-6 mx-auto max-w-[97%] rounded-[3rem] overflow-hidden flex items-end px-8 pb-16"
+>
+
+    <div class="absolute inset-0 skeleton"></div>
+
+    <img id="hero-backdrop"
+         class="absolute inset-0 w-full h-full object-cover opacity-0 transition duration-700">
 
     <div class="absolute inset-0 hero-gradient"></div>
 
-    <div class="max-w-2xl fade-in z-10">
+    <div class="relative max-w-2xl z-10">
 
-        <h2 id="hero-title" class="text-5xl font-black mb-4"></h2>
+        <h2 id="hero-title" class="text-4xl md:text-6xl font-black mb-4">
+            <div class="w-64 h-10 skeleton rounded"></div>
+        </h2>
 
-        <p id="hero-description" class="text-gray-300 mb-6"></p>
+        <p id="hero-description" class="text-gray-300 mb-6">
+            <div class="space-y-2">
+                <div class="h-3 w-full skeleton"></div>
+                <div class="h-3 w-[80%] skeleton"></div>
+            </div>
+        </p>
 
         <div class="flex gap-4">
-                <section id="hero-container" ...>
-        </section>
-
-    <section id="continue-watching-section" class="px-8 py-12 hidden">
-        <div class="flex items-center gap-4 mb-6">
-            <div class="w-1 h-8 bg-cyan-500 rounded-full"></div>
-            <h3 class="text-2xl font-black tracking-tight">CONTINUE WATCHING</h3>
-        </div>
-        <div id="history-grid" class="flex gap-6 overflow-x-auto pb-6 no-scrollbar">
-            </div>
-    </section>
-
-    <main class="px-6 md:px-10 py-14">
-        </main>
-
-
-            <!-- CONTROLLED BY JS (NO DIRECT REDIRECT LOGIC) -->
-            <button id="hero-watch-btn"
-                class="bg-cyan-500 px-8 py-4 rounded-2xl font-black hover:bg-cyan-600">
-                <i class="fa-solid fa-play"></i> WATCH
-            </button>
-
-            <a id="hero-details-btn"
-               class="glass px-8 py-4 rounded-2xl font-black">
-                DETAILS
+            <a id="hero-watch-btn"
+               class="bg-cyan-500 px-8 py-3 rounded-xl font-black">
+                Watch
             </a>
 
+            <a id="hero-details-btn"
+               class="glass px-8 py-3 rounded-xl font-black">
+                Details
+            </a>
         </div>
 
     </div>
 
 </section>
 
-<!-- MAIN -->
-<main class="px-6 py-14">
+<!-- CONTINUE WATCHING (YOUR REQUIRED UPDATE) -->
+<section id="continue-watching-section" class="px-8 py-12 hidden">
 
-    <h3 class="text-3xl font-black mb-6">TRENDING NOW</h3>
+    <div class="flex items-center gap-4 mb-6">
+        <div class="w-1 h-8 bg-cyan-500 rounded-full"></div>
+        <h3 class="text-2xl font-black">CONTINUE WATCHING</h3>
+    </div>
+
+    <div id="history-grid"
+         class="flex gap-6 overflow-x-auto pb-6 no-scrollbar">
+    </div>
+
+</section>
+
+<!-- MAIN -->
+<main class="px-6 md:px-10 py-14">
+
+    <div class="flex items-center gap-4 mb-8">
+        <div class="w-1 h-10 bg-cyan-500 rounded-full"></div>
+        <h3 class="text-3xl font-black">TRENDING NOW</h3>
+    </div>
 
     <div id="trending-grid"
-         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-
-        <!-- skeletons -->
-        <div class="h-[320px] rounded-2xl skeleton"></div>
-        <div class="h-[320px] rounded-2xl skeleton"></div>
-        <div class="h-[320px] rounded-2xl skeleton"></div>
-        <div class="h-[320px] rounded-2xl skeleton"></div>
-        <div class="h-[320px] rounded-2xl skeleton"></div>
-
+         class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
     </div>
 
 </main>
 
-<!-- 🔥 NETFLIX SEARCH OVERLAY -->
-<div id="search-overlay" class="hidden fixed inset-0 bg-black/95 z-[9999] p-6 overflow-y-auto">
-
-    <div class="max-w-2xl mx-auto mt-10">
-
-        <input
-            id="search-input"
-            type="text"
-            placeholder="Search movies, series..."
-            class="w-full p-4 text-xl rounded-xl bg-gray-900 text-white border border-gray-700"
-        />
-
-        <p class="text-gray-400 mt-2 text-sm">
-            Type to search instantly (Netflix style)
-        </p>
-
-    </div>
-
-    <div id="search-results"
-         class="max-w-6xl mx-auto mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-    </div>
-
-    <button id="close-search"
-        class="fixed top-4 right-4 bg-red-600 px-4 py-2 rounded-lg">
-        Close
-    </button>
-
-</div>
-
-<!-- MODAL -->
-<div id="action-modal" class="fixed inset-0 hidden items-center justify-center z-[200]">
+<!-- MODAL (NO LOGIC HERE - CONTROLLED BY SCRIPT.JS) -->
+<div id="action-modal"
+     class="fixed inset-0 hidden items-center justify-center z-50">
 
     <div class="absolute inset-0 bg-black/90" onclick="closeModal()"></div>
 
-    <div class="glass p-6 rounded-3xl z-10 w-[90%] max-w-sm text-center">
+    <div class="glass p-8 rounded-3xl relative z-10 w-[90%] max-w-sm text-center">
 
-        <div id="modal-poster" class="w-40 h-56 mx-auto rounded-2xl mb-4 bg-cover"></div>
+        <div id="modal-poster"
+             class="w-36 h-52 mx-auto mb-5 rounded-2xl bg-cover bg-center"></div>
 
         <h3 id="modal-title" class="text-xl font-black mb-6"></h3>
 
-        <button id="modal-watch"
-            class="bg-cyan-500 w-full py-3 rounded-xl font-black mb-3">
-            Watch Now
-        </button>
+        <div class="space-y-3">
 
-        <a id="modal-details"
-           class="block bg-white/10 w-full py-3 rounded-xl mb-3">
-            Details
-        </a>
+            <a id="modal-watch"
+               class="block bg-cyan-500 py-3 rounded-xl font-black">
+                Watch
+            </a>
 
-        <a id="modal-download"
-           class="block bg-green-500 w-full py-3 rounded-xl">
-            Download
-        </a>
+            <a id="modal-details"
+               class="block glass py-3 rounded-xl font-bold">
+                Details
+            </a>
+
+            <a id="modal-download"
+               class="block bg-emerald-500 py-3 rounded-xl font-black">
+                Download
+            </a>
+
+        </div>
 
     </div>
 
 </div>
 
-<script>
-function closeModal(){
-    document.getElementById('action-modal').classList.add('hidden');
-}
-</script>
-
-<!-- YOUR ENGINE -->
+<!-- SCRIPT -->
 <script src="script.js"></script>
 
 </body>
