@@ -1,230 +1,549 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Cymor Music Downloader</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>Cymor Movie Hub | Unlimited Streaming</title>
 
-<style>
-* {
-  font-family: 'Poppins', sans-serif;
-  -webkit-tap-highlight-color: transparent;
-}
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-body {
-  margin: 0;
-  background: #000;
-  color: white;
-  overflow-x: hidden;
-}
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
-/* ================= COLORS FROM SCREENSHOT ================= */
-:root {
-    --primary-yellow: #facc15;
-    --accent-orange: #ff5722;
-    --soft-pink: #fff1f1;
-    --glass-white: rgba(235, 245, 255, 0.9);
-}
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-/* ================= GLASS & UI ================= */
-.glass {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
-}
+    <style>
 
-.search-pill {
-    background: var(--glass-white);
-    color: #444;
-}
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
 
-/* ================= OVERLAY ================= */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.98);
-  z-index: 9999;
-  transform: translateY(100%);
-  transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  flex-direction: column;
-}
+        body{
+            background:#060d17;
+            color:white;
+            font-family:'Inter',sans-serif;
+            overflow-x:hidden;
+        }
 
-.overlay.active {
-  transform: translateY(0);
-}
+        ::-webkit-scrollbar{
+            width:6px;
+        }
 
-/* ================= LOADER ================= */
-.loader {
-  position: fixed;
-  inset: 0;
-  background: black;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  z-index: 10000;
-}
+        ::-webkit-scrollbar-thumb{
+            background:#06b6d4;
+            border-radius:999px;
+        }
 
-.loader.active {
-  display: flex;
-}
+        .glass{
+            background:rgba(255,255,255,0.03);
+            backdrop-filter:blur(16px);
+            border:1px solid rgba(255,255,255,0.08);
+        }
 
-/* ================= NAV ================= */
-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #0a0a0a;
-  border-top: 1px solid rgba(255,255,255,0.05);
-  display: flex;
-  justify-content: space-around;
-  padding: 15px 10px 25px;
-  z-index: 100;
-}
+        .hero-gradient{
+            background:
+            linear-gradient(to top,#060d17 8%,rgba(6,13,23,0.4) 45%,rgba(6,13,23,0.1) 100%);
+        }
 
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 10px;
-    color: #888;
-}
+        .card-overlay{
+            background:
+            linear-gradient(to top,rgba(0,0,0,0.95),rgba(0,0,0,0));
+        }
 
-.nav-item.active { color: var(--primary-yellow); }
+        .movie-card{
+            position:relative;
+            overflow:hidden;
+            border-radius:28px;
+            cursor:pointer;
+            transition:0.4s ease;
+        }
 
-/* ================= CUSTOM CARDS ================= */
-.action-card {
-    border-radius: 24px;
-    height: 120px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #ff5722;
-    font-weight: 700;
-}
+        .movie-card:hover{
+            transform:translateY(-8px) scale(1.02);
+        }
 
-</style>
+        .movie-card img{
+            transition:0.5s ease;
+        }
+
+        .movie-card:hover img{
+            transform:scale(1.08);
+        }
+
+        .movie-info{
+            position:absolute;
+            inset:0;
+            display:flex;
+            flex-direction:column;
+            justify-content:flex-end;
+            padding:18px;
+            opacity:0;
+            transition:0.4s ease;
+        }
+
+        .movie-card:hover .movie-info{
+            opacity:1;
+        }
+
+        .skeleton{
+            background:linear-gradient(
+                90deg,
+                #131a26 25%,
+                #1f2937 50%,
+                #131a26 75%
+            );
+            background-size:200% 100%;
+            animation:shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer{
+            0%{
+                background-position:200% 0;
+            }
+            100%{
+                background-position:-200% 0;
+            }
+        }
+
+        .fade-in{
+            animation:fade 1s ease;
+        }
+
+        @keyframes fade{
+            from{
+                opacity:0;
+                transform:translateY(15px);
+            }
+            to{
+                opacity:1;
+                transform:translateY(0);
+            }
+        }
+
+        .glow{
+            box-shadow:0 0 40px rgba(6,182,212,0.15);
+        }
+
+    </style>
 </head>
 
 <body>
 
-<div id="loader" class="loader">
-  <div class="w-10 h-10 border-3 border-white/20 border-t-[#facc15] rounded-full animate-spin"></div>
-  <p class="mt-4 text-xs text-gray-400">Booting Cymor Engine...</p>
-</div>
+    <!-- BACKGROUND GLOW -->
+    <div class="fixed top-[-10%] left-[-10%] w-[400px] h-[400px] bg-cyan-500/10 blur-[120px] rounded-full -z-50"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-blue-500/10 blur-[120px] rounded-full -z-50"></div>
 
-<div id="overlay" class="overlay">
-  <div class="p-6 flex justify-between items-center">
-    <div>
-        <h1 class="text-xl font-black">Search Result</h1>
-        <p class="text-[10px] text-gray-500 uppercase tracking-widest">Cymor Engine v9.0</p>
-    </div>
-    <button onclick="document.getElementById('overlay').classList.remove('active')" class="bg-white/10 p-2 rounded-full">✕</button>
-  </div>
+    <!-- NAVBAR -->
+    <nav class="sticky top-0 z-[100] px-6 md:px-10 py-5 glass">
 
-  <div id="results-container" class="px-4 pb-32"></div>
+        <div class="flex items-center justify-between">
 
-  <div class="fixed bottom-24 left-0 right-0 px-4">
-    <div class="search-pill flex items-center p-1 rounded-full shadow-2xl">
-        <span class="px-4">🔍</span>
-        <input id="search-input" class="flex-1 bg-transparent py-3 outline-none text-black font-medium" placeholder="Search music or video..." />
-        <button id="search-btn" class="bg-black text-white px-6 py-2.5 rounded-full">Search</button>
-    </div>
-  </div>
-</div>
+            <!-- LOGO -->
+            <div class="flex items-center gap-3">
 
-<main class="p-6 pb-32">
-    
-    <div class="flex flex-col items-center mt-10 mb-10">
-        <div class="w-24 h-24 bg-[#facc15] rounded-[30%] flex items-center justify-center shadow-2xl shadow-yellow-500/20">
-            <div class="bg-white p-3 rounded-lg shadow-inner">
-                <span class="text-3xl">📥</span>
+                <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center glow">
+                    <i class="fa-solid fa-clapperboard text-cyan-400 text-xl"></i>
+                </div>
+
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-tight uppercase">
+                        <span class="text-cyan-400">Cymor</span> Movie Hub
+                    </h1>
+
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[4px]">
+                        Unlimited Streaming
+                    </p>
+                </div>
+
             </div>
+
+            <!-- MENU -->
+            <div class="hidden md:flex items-center gap-8 font-semibold text-sm uppercase tracking-widest">
+
+                <a href="index.html" class="text-cyan-400">
+                    Home
+                </a>
+
+                <a href="movies.html" class="hover:text-cyan-400 transition">
+                    Movies
+                </a>
+
+                <a href="series.html" class="hover:text-cyan-400 transition">
+                    Series
+                </a>
+
+                <a href="#" class="hover:text-cyan-400 transition">
+                    Trending
+                </a>
+
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="flex items-center gap-3">
+
+                <button class="w-11 h-11 rounded-2xl glass hover:bg-cyan-500/20 transition">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+
+                <button class="w-11 h-11 rounded-2xl glass hover:bg-cyan-500/20 transition">
+                    <i class="fa-solid fa-bell"></i>
+                </button>
+
+                <button class="md:hidden w-11 h-11 rounded-2xl glass">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
+
+            </div>
+
         </div>
-        <h1 class="text-4xl font-black mt-4 tracking-tighter">Download</h1>
-        <h2 class="text-4xl font-black tracking-tighter">Video MP4</h2>
+
+    </nav>
+
+    <!-- SEARCH -->
+    <section class="px-6 mt-6">
+
+        <div class="relative max-w-3xl mx-auto">
+
+            <span class="absolute inset-y-0 left-0 flex items-center pl-5">
+                <i class="fa-solid fa-search text-gray-500"></i>
+            </span>
+
+            <input
+                type="text"
+                id="movie-search"
+                placeholder="Search for movies, series or actors..."
+                class="w-full bg-[#0f172a] border border-white/5 py-5 pl-14 pr-5 rounded-[1.5rem] outline-none focus:border-cyan-500 transition text-white shadow-2xl"
+            >
+
+        </div>
+
+    </section>
+
+    <!-- HERO -->
+    <section
+        id="hero-container"
+        class="relative w-full h-[78vh] mt-6 flex items-end px-8 md:px-14 pb-16 overflow-hidden rounded-[3rem] mx-auto max-w-[97%] shadow-2xl"
+    >
+
+        <!-- BACKDROP -->
+        <div class="absolute inset-0 skeleton -z-30"></div>
+
+        <img
+            id="hero-backdrop"
+            src=""
+            alt=""
+            class="absolute inset-0 w-full h-full object-cover -z-20 opacity-0 transition duration-1000"
+        >
+
+        <div class="absolute inset-0 hero-gradient -z-10"></div>
+
+        <!-- CONTENT -->
+        <div class="max-w-2xl fade-in">
+
+            <!-- BADGES -->
+            <div class="flex items-center gap-3 mb-5">
+
+                <span class="bg-cyan-500 text-black text-xs font-black px-4 py-1 rounded-full uppercase tracking-widest">
+                    Trending
+                </span>
+
+                <span class="glass px-4 py-1 rounded-full text-xs uppercase tracking-widest">
+                    4K Ultra HD
+                </span>
+
+            </div>
+
+            <!-- TITLE -->
+            <h2
+                id="hero-title"
+                class="text-4xl md:text-7xl font-black leading-[0.95] mb-5 tracking-tight"
+            >
+
+                <!-- Skeleton -->
+                <div class="w-64 h-14 rounded-xl skeleton"></div>
+
+            </h2>
+
+            <!-- DESCRIPTION -->
+            <p
+                id="hero-description"
+                class="text-gray-300 text-base md:text-lg mb-8 leading-relaxed"
+            >
+
+                <!-- Skeleton -->
+                <div class="space-y-3">
+
+                    <div class="h-4 rounded skeleton w-full"></div>
+                    <div class="h-4 rounded skeleton w-[90%]"></div>
+                    <div class="h-4 rounded skeleton w-[70%]"></div>
+
+                </div>
+
+            </p>
+
+            <!-- BUTTONS -->
+            <div class="flex flex-wrap gap-4">
+
+                <a
+                    id="hero-watch-btn"
+                    href="watch.html"
+                    class="bg-cyan-500 hover:bg-cyan-600 px-10 py-4 rounded-2xl font-black flex items-center gap-3 transition hover:scale-105 shadow-lg shadow-cyan-500/20"
+                >
+                    <i class="fa-solid fa-play"></i>
+                    WATCH NOW
+                </a>
+
+                <a
+                    id="hero-details-btn"
+                    href="details.html"
+                    class="glass hover:bg-white/10 px-10 py-4 rounded-2xl font-black flex items-center gap-3 transition"
+                >
+                    <i class="fa-solid fa-circle-info"></i>
+                    DETAILS
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- MAIN -->
+    <main class="px-6 md:px-10 py-14">
+
+        <!-- SECTION HEADER -->
+        <div class="flex justify-between items-center mb-10">
+
+            <div class="flex items-center gap-4">
+
+                <div class="w-1 h-10 bg-cyan-500 rounded-full"></div>
+
+                <div>
+                    <h3 class="text-3xl font-black tracking-tight flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-orange-500"></i>
+                        TRENDING NOW
+                    </h3>
+
+                    <p class="text-gray-500 text-sm mt-1">
+                        Most watched movies worldwide.
+                    </p>
+                </div>
+
+            </div>
+
+            <a
+                href="movies.html"
+                class="text-sm font-bold text-gray-400 hover:text-cyan-400 flex items-center gap-2 group transition"
+            >
+                VIEW ALL
+                <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+            </a>
+
+        </div>
+
+        <!-- MOVIE GRID -->
+        <div
+            id="trending-grid"
+            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"
+        >
+
+            <!-- SKELETON CARD -->
+            <div class="space-y-3">
+
+                <div class="h-[340px] rounded-[2rem] skeleton"></div>
+
+                <div class="space-y-2">
+                    <div class="h-4 rounded skeleton w-[80%]"></div>
+                    <div class="h-3 rounded skeleton w-[40%]"></div>
+                </div>
+
+            </div>
+
+            <!-- SKELETON CARD -->
+            <div class="space-y-3">
+
+                <div class="h-[340px] rounded-[2rem] skeleton"></div>
+
+                <div class="space-y-2">
+                    <div class="h-4 rounded skeleton w-[70%]"></div>
+                    <div class="h-3 rounded skeleton w-[50%]"></div>
+                </div>
+
+            </div>
+
+            <!-- SKELETON CARD -->
+            <div class="space-y-3">
+
+                <div class="h-[340px] rounded-[2rem] skeleton"></div>
+
+                <div class="space-y-2">
+                    <div class="h-4 rounded skeleton w-[85%]"></div>
+                    <div class="h-3 rounded skeleton w-[30%]"></div>
+                </div>
+
+            </div>
+
+            <!-- SKELETON CARD -->
+            <div class="space-y-3">
+
+                <div class="h-[340px] rounded-[2rem] skeleton"></div>
+
+                <div class="space-y-2">
+                    <div class="h-4 rounded skeleton w-[60%]"></div>
+                    <div class="h-3 rounded skeleton w-[45%]"></div>
+                </div>
+
+            </div>
+
+            <!-- SKELETON CARD -->
+            <div class="space-y-3">
+
+                <div class="h-[340px] rounded-[2rem] skeleton"></div>
+
+                <div class="space-y-2">
+                    <div class="h-4 rounded skeleton w-[80%]"></div>
+                    <div class="h-3 rounded skeleton w-[35%]"></div>
+                </div>
+
+            </div>
+
+            <!-- SKELETON CARD -->
+            <div class="space-y-3">
+
+                <div class="h-[340px] rounded-[2rem] skeleton"></div>
+
+                <div class="space-y-2">
+                    <div class="h-4 rounded skeleton w-[65%]"></div>
+                    <div class="h-3 rounded skeleton w-[50%]"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- MODAL -->
+    <div
+        id="action-modal"
+        class="fixed inset-0 z-[200] hidden items-center justify-center p-4"
+    >
+
+        <!-- BACKDROP -->
+        <div
+            class="absolute inset-0 bg-black/90 backdrop-blur-md"
+            onclick="closeModal()"
+        ></div>
+
+        <!-- CARD -->
+        <div
+            class="glass w-full max-w-sm rounded-[2.5rem] overflow-hidden p-8 relative flex flex-col items-center text-center shadow-2xl"
+        >
+
+            <div
+                id="modal-poster"
+                class="w-36 h-52 rounded-[2rem] mb-5 shadow-2xl bg-cover bg-center skeleton"
+            ></div>
+
+            <h4
+                id="modal-title"
+                class="text-2xl font-black mb-6"
+            >
+                Movie Title
+            </h4>
+
+            <div class="flex flex-col w-full gap-3">
+
+                <a
+                    id="modal-watch"
+                    href="watch.html"
+                    class="bg-cyan-500 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-cyan-600 transition"
+                >
+                    <i class="fa-solid fa-play"></i>
+                    Watch Now
+                </a>
+
+                <a
+                    id="modal-details"
+                    href="details.html"
+                    class="bg-white/10 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/20 transition"
+                >
+                    <i class="fa-solid fa-circle-info"></i>
+                    View Details
+                </a>
+
+                <a
+                    id="modal-download"
+                    href="download.html"
+                    class="bg-emerald-500 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-emerald-600 transition"
+                >
+                    <i class="fa-solid fa-download"></i>
+                    Download
+                </a>
+
+            </div>
+
+        </div>
+
     </div>
 
-    <div onclick="openSearch()" class="search-pill flex items-center p-4 rounded-2xl mb-4 cursor-pointer">
-        <span class="mr-3 opacity-50">🔍</span>
-        <span class="text-gray-500 font-medium">Search Video Online</span>
-    </div>
+    <!-- SCRIPT -->
+    <script>
 
-    <div class="bg-[#ff5722] p-5 rounded-2xl mb-6 flex items-center gap-4 relative overflow-hidden">
-        <div class="bg-white/20 p-3 rounded-xl">
-            <span class="text-2xl">👑</span>
-        </div>
-        <div>
-            <h3 class="font-bold text-white leading-tight">Legendary Smiley Cymor</h3>
-            <p class="text-[10px] text-white/80 uppercase font-black">C.E.O CymorTechServices</p>
-            <p class="text-[9px] text-white/70 mt-1">Inspired by Joyce ❤️</p>
-        </div>
-        <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl">💎</div>
-    </div>
+        // CLOSE MODAL
 
-    <div class="grid grid-cols-2 gap-4">
-        <div onclick="togglePrivacyModal(true)" class="action-card bg-[#fff1f1]">
-            <div class="bg-[#ff5722]/10 p-3 rounded-2xl mb-2 text-2xl">🛡️</div>
-            <span class="text-xs">Privacy Policy</span>
-        </div>
+        function closeModal() {
 
-        <div onclick="window.open('https://github.com', '_blank')" class="action-card bg-[#fff1f1]">
-            <div class="bg-[#ff5722]/10 p-3 rounded-2xl mb-2 text-2xl">⭐</div>
-            <span class="text-xs">Rate App</span>
-        </div>
-    </div>
+            document
+                .getElementById('action-modal')
+                .classList.add('hidden');
 
-    <div class="mt-10">
-        <h3 class="font-bold text-lg mb-4 flex items-center">
-            <span class="mr-2">📂</span> Recent Downloads
-        </h3>
-        <div id="downloads-container" class="space-y-3">
-            <p class="text-[10px] text-gray-500 text-center py-10 glass rounded-2xl">No recent downloads found.</p>
-        </div>
-    </div>
+        }
 
-</main>
+        // OPEN MODAL
 
-<div id="privacy-modal" class="hidden fixed inset-0 bg-black/95 z-[20000] flex items-center justify-center p-8">
-  <div class="glass p-8 rounded-[40px] text-center border-white/10">
-    <div class="text-4xl mb-4">🛡️</div>
-    <h2 class="text-[#facc15] font-black text-xl mb-4 tracking-tight">Privacy Policy</h2>
-    <p class="text-xs text-gray-400 leading-relaxed mb-8">
-        Cymor Music Downloader respects your privacy. We do not store personal data on our servers. All your download history and preferences are kept locally on your browser's storage.
-    </p>
-    <button onclick="togglePrivacyModal(false)" class="bg-[#ff5722] text-white w-full py-4 rounded-2xl font-bold">I Understand</button>
-  </div>
-</div>
+        function openModal(id, title, poster) {
 
-<nav>
-  <div class="nav-item active" onclick="window.location.reload()">
-      <span class="text-xl">🏠</span>
-      <span>Home</span>
-  </div>
-  <div class="nav-item" onclick="openSearch()">
-      <span class="text-xl">📥</span>
-      <span>Download</span>
-  </div>
-  <div class="nav-item" onclick="openSearch()">
-      <span class="text-xl">🎬</span>
-      <span>Videos</span>
-  </div>
-  <div class="nav-item" onclick="openSearch()">
-      <span class="text-xl">🎵</span>
-      <span>Audio</span>
-  </div>
-  <div class="nav-item" onclick="togglePrivacyModal(true)">
-      <span class="text-xl">☰</span>
-      <span>More</span>
-  </div>
-</nav>
+            document.getElementById('modal-title').innerText = title;
 
+            document.getElementById('modal-poster').style.backgroundImage =
+                `url(${poster})`;
+
+            document.getElementById('modal-watch').href =
+                `watch.html?id=${id}`;
+
+            document.getElementById('modal-details').href =
+                `details.html?id=${id}`;
+
+            document.getElementById('modal-download').href =
+                `download.html?id=${id}`;
+
+            document
+                .getElementById('action-modal')
+                .classList.remove('hidden');
+
+            document
+                .getElementById('action-modal')
+                .classList.add('flex');
+
+        }
+
+        // ESC CLOSE
+
+        document.addEventListener('keydown', (e) => {
+
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+
+        });
+
+    </script>
 <script src="script.js"></script>
 </body>
 </html>
