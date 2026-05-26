@@ -24,7 +24,6 @@
             border: 1px solid rgba(255,255,255,0.08);
         }
 
-        /* ── 16:9 Responsive Player ── */
         .video-container {
             position: relative;
             padding-bottom: 56.25%;
@@ -42,19 +41,6 @@
             border: 0;
         }
 
-        /* ── Subtitle overlay lives inside .video-container ── */
-        #subtitle-overlay {
-            position: absolute;
-            bottom: 8%;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 20;
-            pointer-events: none;
-            text-align: center;
-            width: 90%;
-        }
-
-        /* ── Skeleton shimmer ── */
         .skeleton {
             background: linear-gradient(90deg, #131a26 25%, #1f2937 50%, #131a26 75%);
             background-size: 200% 100%;
@@ -66,7 +52,6 @@
             100% { background-position: -200% 0; }
         }
 
-        /* ── Movie grid cards ── */
         .movie-card {
             position: relative;
             overflow: hidden;
@@ -77,25 +62,9 @@
         }
         .movie-card:hover { transform: scale(1.05); z-index: 10; }
 
-        .movie-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 60%);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 1rem;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .movie-card:hover .movie-overlay { opacity: 1; }
-
-        /* ── Episode list scrollbar ── */
         .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 10px; }
 
-        /* ── Blurred ambient background ── */
         .bg-blur {
             position: fixed;
             inset: 0;
@@ -106,7 +75,6 @@
             transform: scale(1.2);
         }
 
-        /* ── Server switcher pills ── */
         .server-btn.active {
             background: rgba(6,182,212,0.25);
             border-color: rgba(6,182,212,0.6);
@@ -119,7 +87,6 @@
 
     <div id="dynamic-bg" class="bg-blur"></div>
 
-    <!-- ── NAVBAR ── -->
     <nav class="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-gradient-to-b from-black/95 to-transparent backdrop-blur-sm">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <a href="index.html" class="flex items-center gap-2 group text-gray-300 hover:text-cyan-400 transition">
@@ -134,22 +101,9 @@
 
     <main class="pt-24 px-4 md:px-10 lg:px-20 max-w-[1600px] mx-auto">
 
-        <!-- ── PLAYER + EPISODE SIDEBAR ── -->
         <div class="flex flex-col xl:flex-row gap-8 mb-6">
-
-            <!-- Player -->
             <div class="flex-[3]">
                 <div class="video-container">
-                    <!--
-                        SANDBOX NOTES:
-                        ✅ allow-scripts          — player JS works
-                        ✅ allow-same-origin       — player cookies/local storage work
-                        ✅ allow-forms             — some players use forms
-                        ✅ allow-pointer-lock      — fullscreen mouse capture
-                        ✅ allow-presentation      — Picture-in-Picture / fullscreen API
-                        ❌ allow-top-navigation   — REMOVED: this was causing redirects
-                        ❌ allow-popups            — REMOVED: prevents ad popups
-                    -->
                     <iframe
                         id="video-player"
                         src=""
@@ -160,7 +114,6 @@
                     </iframe>
                 </div>
 
-                <!-- ── Server switcher ── -->
                 <div class="flex items-center gap-3 mt-4 flex-wrap">
                     <span class="text-xs uppercase tracking-widest font-black text-gray-500">Server:</span>
                     <button id="btn-server-primary"
@@ -175,13 +128,11 @@
                     </button>
                 </div>
 
-                <!-- ── Subtitle controls (injected by script.js) ── -->
                 <div id="subtitle-controls" class="mt-3 flex flex-wrap items-center gap-3 min-h-[36px]">
                     <span class="text-xs text-gray-600 italic">Loading subtitles...</span>
                 </div>
             </div>
 
-            <!-- Episode sidebar (TV only) -->
             <div id="episode-parent" class="flex-[1] hidden">
                 <div class="glass rounded-[1.5rem] h-full max-h-[500px] xl:max-h-full overflow-hidden flex flex-col">
                     <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
@@ -191,16 +142,12 @@
                     <div id="episode-selector-container" class="p-4 overflow-y-auto custom-scroll space-y-3">
                         <div class="h-12 skeleton rounded-xl"></div>
                         <div class="h-12 skeleton rounded-xl"></div>
-                        <div class="h-12 skeleton rounded-xl"></div>
-                        <div class="h-12 skeleton rounded-xl"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ── TITLE + ACTION BUTTONS ── -->
         <section class="flex flex-col lg:flex-row gap-10 border-b border-white/5 pb-16 mb-16">
-
             <div class="flex-1">
                 <div class="flex items-center gap-3 mb-6 flex-wrap">
                     <span class="bg-cyan-500 text-black px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
@@ -211,95 +158,61 @@
                     </span>
                     <span id="watch-year" class="text-gray-400 font-bold text-sm">----</span>
                 </div>
-
-                <h1 id="watch-title" class="text-4xl md:text-6xl font-black mb-6 uppercase tracking-tighter leading-none">
-                    Loading...
-                </h1>
-
-                <p id="watch-desc" class="text-gray-400 leading-relaxed text-lg max-w-4xl">
-                    Fetching description...
-                </p>
+                <h1 id="watch-title" class="text-4xl md:text-6xl font-black mb-6 uppercase tracking-tighter leading-none">Loading...</h1>
+                <p id="watch-desc" class="text-gray-400 leading-relaxed text-lg max-w-4xl">Fetching description...</p>
             </div>
 
-            <!-- Action buttons -->
             <div class="w-full lg:w-[300px] shrink-0">
                 <div class="glass rounded-[2rem] p-6 space-y-4">
-
-                    <!-- Download: href is set dynamically by script.js -->
                     <a id="btn-download"
                        href="download.html"
                        class="bg-cyan-500 hover:bg-cyan-600 text-black py-4 rounded-2xl font-black flex items-center justify-center gap-3 transition transform hover:scale-[1.02]">
                         <i class="fa-solid fa-download text-lg"></i> DOWNLOAD
                     </a>
-
-                    <button onclick="window.location.href=document.getElementById('btn-download').href.replace('download','details')"
+                    <button onclick="navigator.share && navigator.share({title: document.getElementById('watch-title').innerText, url: window.location.href})"
                         class="w-full glass hover:bg-white/10 py-4 rounded-2xl font-bold transition flex items-center justify-center gap-3">
-                        <i class="fa-solid fa-circle-info"></i> Details
-                    </button>
-
-                    <button class="w-full glass hover:bg-white/10 py-4 rounded-2xl font-bold transition flex items-center justify-center gap-3"
-                        onclick="navigator.share && navigator.share({title: document.getElementById('watch-title').innerText, url: window.location.href})">
                         <i class="fa-solid fa-share-nodes"></i> Share
                     </button>
                 </div>
             </div>
         </section>
-
-        <!-- ── RECOMMENDATIONS ── -->
-        <section>
-            <div class="flex items-center gap-4 mb-10">
-                <div class="w-1 h-8 bg-cyan-400 rounded-full"></div>
-                <h2 class="text-3xl font-black uppercase tracking-tighter italic">More Like This</h2>
-            </div>
-
-            <div id="recommended-grid"
-                 class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-                <!-- Skeletons while loading -->
-                <div class="movie-card skeleton"></div>
-                <div class="movie-card skeleton"></div>
-                <div class="movie-card skeleton"></div>
-                <div class="movie-card skeleton"></div>
-                <div class="movie-card skeleton"></div>
-                <div class="movie-card skeleton"></div>
-            </div>
-        </section>
-
     </main>
 
     <script src="script.js"></script>
     <script>
-        /**
-         * Server switcher — swaps between primary and fallback embed
-         * URLs without reloading the page.
-         * The URLs are stored when script.js calls setupPlayer().
-         */
         window._streamUrls = { primary: '', fallback: '' };
-
-        // Patch setupPlayer to also store URLs for the switcher
-        const _origSetupPlayer = window.setupPlayer;
 
         function switchServer(which) {
             const url = window._streamUrls[which];
             if (!url) return;
 
             const player = document.getElementById('video-player');
-            if (player) player.src = url;
+            if (player) {
+                player.src = url;
+            }
 
-            document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`btn-server-${which}`)?.classList.add('active');
+            document.querySelectorAll('.server-btn').forEach(b => {
+                b.classList.remove('active');
+                b.innerHTML = b.innerHTML.replace('fa-circle-check', 'fa-rotate');
+            });
+            
+            const activeBtn = document.getElementById(`btn-server-${which}`);
+            activeBtn.classList.add('active');
+            activeBtn.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-cyan-400"></i> ${which.charAt(0).toUpperCase() + which.slice(1)}`;
         }
 
-        // Intercept setupPlayer to capture both URLs
-        // (script.js defines setupPlayer at runtime, so we override after load)
         document.addEventListener('DOMContentLoaded', () => {
             const originalSetup = window.setupPlayer;
-            if (typeof originalSetup === 'function') {
-                window.setupPlayer = function(primary, fallback) {
-                    window._streamUrls.primary  = primary  || '';
-                    window._streamUrls.fallback = fallback || '';
+            window.setupPlayer = function(primary, fallback) {
+                window._streamUrls.primary  = primary  || '';
+                window._streamUrls.fallback = fallback || '';
+                if (typeof originalSetup === 'function') {
                     originalSetup(primary, fallback);
-                };
-            }
+                } else {
+                    const player = document.getElementById('video-player');
+                    if (player) player.src = primary;
+                }
+            };
         });
     </script>
 </body>
