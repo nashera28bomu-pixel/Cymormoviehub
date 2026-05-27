@@ -1,0 +1,26 @@
+/**
+ * =========================================================
+ * CYMOR MOVIE HUB — INFRASTRUCTURE CONFIG (v5.0)
+ * ✅ Docker Runtime Selection
+ * ✅ Free Tier Resource Mapping
+ * ✅ Auto-Environment Injection
+ * =========================================================
+ */
+
+services:
+  - type: web
+    name: cymor-movie-hub
+    env: docker
+    plan: free
+    region: ohio # Change to your preferred region (e.g., frankfurt, singapore)
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health # Linked to the FastAPI health endpoint
+    envVars:
+      - key: TMDB_API_KEY
+        sync: false # Set this in the Render Dashboard for security
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+    autoDeploy: true
