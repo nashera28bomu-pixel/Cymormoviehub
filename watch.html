@@ -16,123 +16,120 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800;900&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
         }
 
-        body {
-            background: #060d17;
-            color: white;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+        body{
+            background:#060d17;
+            color:white;
+            font-family:'Inter',sans-serif;
+            overflow-x:hidden;
         }
 
-        .glass {
-            background: rgba(255,255,255,0.04);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.08);
+        .glass{
+            background:rgba(255,255,255,0.04);
+            backdrop-filter:blur(20px);
+            border:1px solid rgba(255,255,255,0.08);
         }
 
-        .bg-blur {
-            position: fixed;
-            inset: 0;
-            z-index: -2;
-            background-size: cover;
-            background-position: center;
-            filter: blur(100px) brightness(0.15);
-            transform: scale(1.2);
+        .bg-blur{
+            position:fixed;
+            inset:0;
+            z-index:-2;
+            background-size:cover;
+            background-position:center;
+            filter:blur(100px) brightness(0.15);
+            transform:scale(1.2);
         }
 
-        .overlay-dark {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
+        .overlay-dark{
+            position:fixed;
+            inset:0;
+            z-index:-1;
             background:
                 linear-gradient(
                     to bottom,
                     rgba(0,0,0,0.6),
-                    rgba(0,0,0,0.9)
+                    rgba(0,0,0,0.92)
                 );
         }
 
-        .video-container {
-            position: relative;
-            width: 100%;
-            padding-bottom: 56.25%;
-            border-radius: 2rem;
-            overflow: hidden;
-            background: black;
-            box-shadow:
-                0 25px 60px rgba(0,0,0,0.6);
+        .video-container{
+            position:relative;
+            width:100%;
+            padding-bottom:56.25%;
+            border-radius:2rem;
+            overflow:hidden;
+            background:black;
+            box-shadow:0 25px 60px rgba(0,0,0,0.65);
         }
 
-        .video-container iframe {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
+        .video-container iframe{
+            position:absolute;
+            inset:0;
+            width:100%;
+            height:100%;
+            border:0;
         }
 
-        .movie-card {
-            position: relative;
-            overflow: hidden;
-            border-radius: 1.5rem;
-            cursor: pointer;
-            transition: 0.4s ease;
+        .movie-card{
+            position:relative;
+            overflow:hidden;
+            border-radius:1.5rem;
+            cursor:pointer;
+            transition:0.4s ease;
         }
 
-        .movie-card:hover {
-            transform: scale(1.04);
+        .movie-card:hover{
+            transform:scale(1.04);
         }
 
-        .movie-card img {
-            transition: 0.5s ease;
+        .movie-card img{
+            transition:0.5s ease;
         }
 
-        .movie-card:hover img {
-            transform: scale(1.1);
+        .movie-card:hover img{
+            transform:scale(1.1);
         }
 
-        .skeleton {
-            background: linear-gradient(
+        .skeleton{
+            background:linear-gradient(
                 90deg,
                 #131a26 25%,
                 #1f2937 50%,
                 #131a26 75%
             );
 
-            background-size: 200% 100%;
-
-            animation: shimmer 1.5s infinite;
+            background-size:200% 100%;
+            animation:shimmer 1.5s infinite;
         }
 
-        @keyframes shimmer {
-
-            0% {
-                background-position: 200% 0;
+        @keyframes shimmer{
+            0%{
+                background-position:200% 0;
             }
 
-            100% {
-                background-position: -200% 0;
+            100%{
+                background-position:-200% 0;
             }
         }
 
-        .custom-scroll::-webkit-scrollbar {
-            width: 5px;
+        .custom-scroll::-webkit-scrollbar{
+            width:5px;
         }
 
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #06b6d4;
-            border-radius: 20px;
+        .custom-scroll::-webkit-scrollbar-thumb{
+            background:#06b6d4;
+            border-radius:20px;
         }
 
-        .server-btn.active {
-            background: rgba(6,182,212,0.2);
-            color: #22d3ee;
-            border-color: rgba(6,182,212,0.5);
+        .server-btn.active{
+            background:rgba(6,182,212,0.2);
+            color:#22d3ee;
+            border-color:rgba(6,182,212,0.5);
         }
     </style>
 </head>
@@ -176,16 +173,20 @@
     <!-- Main -->
     <main class="pt-28 pb-20 px-4 md:px-10 lg:px-16 max-w-[1600px] mx-auto">
 
-        <!-- Player Section -->
+        <!-- Player -->
         <div class="flex flex-col xl:flex-row gap-8 mb-10">
 
-            <!-- Player -->
+            <!-- Video -->
             <section class="flex-[3]">
 
-                <div
-                    id="player-wrapper"
-                    class="video-container"
-                >
+                <div class="video-container">
+
+                    <!-- 
+                        SANDBOX REMOVED
+                        This allows embeds to fully function.
+                        Ads inside providers may still appear,
+                        but external redirect restrictions are reduced.
+                    -->
 
                     <iframe
                         id="video-player"
@@ -193,26 +194,17 @@
                         allowfullscreen
                         referrerpolicy="origin"
                         loading="eager"
-                        importance="high"
-
                         allow="
                             autoplay;
                             encrypted-media;
                             picture-in-picture;
                             fullscreen
-                        "
-
-                        sandbox="
-                            allow-scripts
-                            allow-same-origin
-                            allow-forms
-                            allow-presentation
-                        "
-                    ></iframe>
+                        ">
+                    </iframe>
 
                 </div>
 
-                <!-- Server Buttons -->
+                <!-- Servers -->
                 <div class="flex flex-wrap items-center gap-3 mt-5">
 
                     <span class="text-xs uppercase tracking-widest font-black text-gray-500">
@@ -222,25 +214,28 @@
                     <button
                         id="server-primary"
                         onclick="switchServer(0)"
-                        class="server-btn active border border-white/10 px-4 py-2 rounded-full text-xs font-bold transition"
-                    >
+                        class="server-btn active border border-white/10 px-4 py-2 rounded-full text-xs font-bold transition">
+
                         Primary
+
                     </button>
 
                     <button
                         id="server-fallback"
                         onclick="switchServer(1)"
-                        class="server-btn border border-white/10 px-4 py-2 rounded-full text-xs font-bold transition hover:bg-white/5"
-                    >
+                        class="server-btn border border-white/10 px-4 py-2 rounded-full text-xs font-bold transition hover:bg-white/5">
+
                         Fallback
+
                     </button>
 
                     <button
                         id="server-backup"
                         onclick="switchServer(2)"
-                        class="server-btn border border-white/10 px-4 py-2 rounded-full text-xs font-bold transition hover:bg-white/5"
-                    >
+                        class="server-btn border border-white/10 px-4 py-2 rounded-full text-xs font-bold transition hover:bg-white/5">
+
                         Backup
+
                     </button>
 
                 </div>
@@ -248,11 +243,12 @@
                 <!-- Subtitles -->
                 <div
                     id="subtitle-controls"
-                    class="mt-5 flex flex-wrap gap-3"
-                >
+                    class="mt-5 flex flex-wrap gap-3">
+
                     <span class="text-xs opacity-40">
                         Loading subtitles...
                     </span>
+
                 </div>
 
             </section>
@@ -260,8 +256,7 @@
             <!-- Episodes -->
             <aside
                 id="episode-parent"
-                class="flex-[1] hidden"
-            >
+                class="flex-[1] hidden">
 
                 <div class="glass rounded-[2rem] overflow-hidden max-h-[700px] flex flex-col">
 
@@ -273,17 +268,17 @@
 
                         <span
                             id="season-label"
-                            class="text-xs opacity-60"
-                        >
+                            class="text-xs opacity-60">
+
                             Season 1
+
                         </span>
 
                     </div>
 
                     <div
                         id="episode-selector-container"
-                        class="overflow-y-auto custom-scroll p-4 space-y-3"
-                    >
+                        class="overflow-y-auto custom-scroll p-4 space-y-3">
 
                         <div class="h-14 rounded-2xl skeleton"></div>
                         <div class="h-14 rounded-2xl skeleton"></div>
@@ -300,7 +295,6 @@
         <!-- Details -->
         <section class="flex flex-col lg:flex-row gap-10 border-b border-white/5 pb-16 mb-16">
 
-            <!-- Left -->
             <div class="flex-1">
 
                 <div class="flex items-center gap-4 flex-wrap mb-5">
@@ -311,32 +305,36 @@
 
                     <span
                         id="watch-rating"
-                        class="text-yellow-400 font-black text-sm"
-                    >
+                        class="text-yellow-400 font-black text-sm">
+
                         ★ --
+
                     </span>
 
                     <span
                         id="watch-year"
-                        class="text-gray-400 text-sm font-bold"
-                    >
+                        class="text-gray-400 text-sm font-bold">
+
                         ----
+
                     </span>
 
                 </div>
 
                 <h1
                     id="watch-title"
-                    class="text-4xl md:text-6xl font-black uppercase tracking-tight mb-6"
-                >
+                    class="text-4xl md:text-6xl font-black uppercase tracking-tight mb-6">
+
                     Loading...
+
                 </h1>
 
                 <p
                     id="watch-desc"
-                    class="text-gray-400 text-lg leading-relaxed max-w-4xl"
-                >
+                    class="text-gray-400 text-lg leading-relaxed max-w-4xl">
+
                     Fetching movie details...
+
                 </p>
 
             </div>
@@ -349,8 +347,7 @@
                     <a
                         id="btn-download"
                         href="#"
-                        class="bg-cyan-500 hover:bg-cyan-600 transition text-black py-4 rounded-2xl font-black flex items-center justify-center gap-3"
-                    >
+                        class="bg-cyan-500 hover:bg-cyan-600 transition text-black py-4 rounded-2xl font-black flex items-center justify-center gap-3">
 
                         <i class="fa-solid fa-download"></i>
 
@@ -360,8 +357,7 @@
 
                     <button
                         onclick="window.history.back()"
-                        class="w-full glass hover:bg-white/10 transition py-4 rounded-2xl font-bold flex items-center justify-center gap-3"
-                    >
+                        class="w-full glass hover:bg-white/10 transition py-4 rounded-2xl font-bold flex items-center justify-center gap-3">
 
                         <i class="fa-solid fa-arrow-left"></i>
 
@@ -371,8 +367,7 @@
 
                     <button
                         onclick="shareMovie()"
-                        class="w-full glass hover:bg-white/10 transition py-4 rounded-2xl font-bold flex items-center justify-center gap-3"
-                    >
+                        class="w-full glass hover:bg-white/10 transition py-4 rounded-2xl font-bold flex items-center justify-center gap-3">
 
                         <i class="fa-solid fa-share-nodes"></i>
 
@@ -401,8 +396,7 @@
 
             <div
                 id="recommended-grid"
-                class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"
-            >
+                class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
 
                 <div class="movie-card skeleton h-80"></div>
                 <div class="movie-card skeleton h-80"></div>
@@ -423,17 +417,14 @@
 
         let activeServers = [];
 
-        function switchServer(index) {
+        function switchServer(index){
 
-            if (!activeServers[index]) return;
+            if(!activeServers[index]) return;
 
             const player =
-                document.getElementById(
-                    'video-player'
-                );
+                document.getElementById('video-player');
 
-            player.src =
-                activeServers[index];
+            player.src = activeServers[index];
 
             document
                 .querySelectorAll('.server-btn')
@@ -452,26 +443,26 @@
                 ?.classList.add('active');
         }
 
-        // Hook setupPlayer from script.js
-        const oldSetupPlayer =
-            window.setupPlayer;
-
-        window.setupPlayer = function(streams) {
+        // Main setup player
+        window.setupPlayer = function(primary, fallback, backup){
 
             activeServers = [
-                streams.primary,
-                streams.fallback,
-                streams.backup
+                primary || '',
+                fallback || '',
+                backup || ''
             ];
 
-            if (typeof oldSetupPlayer === 'function') {
-                oldSetupPlayer(streams);
+            const player =
+                document.getElementById('video-player');
+
+            if(player && primary){
+                player.src = primary;
             }
         };
 
-        function shareMovie() {
+        function shareMovie(){
 
-            if (navigator.share) {
+            if(navigator.share){
 
                 navigator.share({
                     title:
@@ -482,7 +473,9 @@
                     url:
                         window.location.href
                 });
+
             }
+
         }
 
     </script>
