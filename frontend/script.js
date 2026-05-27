@@ -1,9 +1,9 @@
 /**
  * ============================================================
- * CYMOR MOVIE HUB — MASTER ENGINE v4.0 (ELITE)
- * ✅ Consumet Scraper Integration
- * ✅ Auto-Failover to vidsrc.to
- * ✅ Ad-Block Sandbox Handshake
+ * CYMOR MOVIE HUB — MASTER ENGINE v5.0 (PYTHON ELITE)
+ * ✅ FastAPI / MovieBox-API Integration
+ * ✅ Direct Stream URL Extraction
+ * ✅ Structured Subtitle Mapping
  * ============================================================
  */
 
@@ -44,7 +44,7 @@ function initGlobalFeatures() {
 }
 
 /* ============================================================
-   WATCH PAGE LOGIC (v4.0 SCRAPER INTEGRATION)
+   WATCH PAGE LOGIC (PYTHON SCRAPER INTEGRATION)
 ============================================================ */
 
 async function initWatchPage() {
@@ -59,19 +59,25 @@ async function initWatchPage() {
     if (dlBtn) dlBtn.href = `download.html?id=${id}&type=${type}${type === 'tv' ? `&s=${s}&e=${e}` : ''}`;
 
     try {
-        // Fetch source from Elite Scraper Endpoint
-        const res = await fetch(`/api/get-source?id=${id}&type=${type}&s=${s}&e=${e}`);
+        // 1. Get Title from TMDB first (Scraper needs the name for 10/10 accuracy)
+        const meta = await tmdb(`/${type}/${id}`);
+        const queryTitle = meta.title || meta.name;
+
+        // 2. Fetch from your NEW Python Scraper Endpoint
+        // We call our Node backend, which proxies to the Python service
+        const res = await fetch(`/api/get-source?q=${encodeURIComponent(queryTitle)}&type=${type}&s=${s}&e=${e}`);
         const data = await res.json();
         
         if (data.success) {
-            // Priority: primary (vidsrc.to) is the cleanest embed in 2026
-            window.setupPlayer(data.stream.primary, data.stream.fallback);
-            loadSubtitles(data.subtitleEndpoint);
+            // Data from Python app.py structure
+            setupPlayer(data.stream.url, data.subtitles);
+        } else {
+            throw new Error(data.error || "No stream found");
         }
     } catch (err) {
-        console.error("Source fetch failed. Reverting to basic embed.");
+        console.error("Elite Scraper failed. Reverting to Vidsrc.to Fallback.");
         const fallback = `https://vidsrc.to/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`;
-        window.setupPlayer(fallback);
+        setupPlayer(fallback);
     }
 
     if (type === 'tv') {
@@ -84,60 +90,55 @@ async function initWatchPage() {
     loadWatchRecommendations(id, type);
 }
 
-window.setupPlayer = function(primary, fallback) {
-    const player = document.getElementById('video-player');
-    if (!player) return;
+/**
+ * Enhanced Player Setup
+ * Handles both Direct Stream URLs and Iframe Fallbacks
+ */
+window.setupPlayer = function(sourceUrl, subtitles = []) {
+    const playerContainer = document.querySelector('.video-container');
+    if (!playerContainer) return;
 
-    // Set primary
-    player.src = primary;
-    window._streamUrls = { primary, fallback };
-
-    // Error handling for auto-switch
-    player.onerror = () => {
-        if (fallback && player.src !== fallback) {
-            player.src = fallback;
-            console.log("Switched to fallback server.");
-        }
-    };
+    // If it's a direct video file (Elite Mode)
+    if (sourceUrl.includes('.m3u8') || sourceUrl.includes('.mp4')) {
+        playerContainer.innerHTML = `
+            <video id="video-player" controls crossorigin="anonymous" class="w-full h-full">
+                <source src="${sourceUrl}" type="application/x-mpegURL">
+                ${subtitles.map(sub => `<track kind="subtitles" src="${sub.url}" srclang="en" label="${sub.lang}" ${sub.lang === 'English' ? 'default' : ''}>`).join('')}
+            </video>
+        `;
+        renderSubtitleUI(subtitles);
+    } else {
+        // If it's an iframe (Fallback Mode)
+        playerContainer.innerHTML = `
+            <iframe id="video-player" src="${sourceUrl}" allowfullscreen frameborder="0" 
+            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-presentation"></iframe>
+        `;
+    }
 };
 
 /* ============================================================
-   SUBTITLE SYSTEM (v4.0 STEALTH BYPASS)
+   SUBTITLE UI (For Direct Player)
 ============================================================ */
 
-async function loadSubtitles(endpoint) {
+function renderSubtitleUI(subtitles) {
     const container = document.getElementById('subtitle-controls');
     const status = document.getElementById('subtitle-status');
-    
-    try {
-        const res = await fetch(endpoint);
-        const data = await res.json();
-        
-        if (data.success && data.tracks.length > 0) {
-            if (status) status.classList.remove('hidden');
-            renderSubtitleTracks(data.tracks);
-        } else {
-            if (container) container.innerHTML = '<span class="text-[10px] opacity-40 uppercase">No extra tracks found</span>';
-        }
-    } catch (e) {
-        console.warn("Subtitle proxy unreachable.");
+    if (!container) return;
+
+    if (subtitles && subtitles.length > 0) {
+        if (status) status.classList.remove('hidden');
+        container.innerHTML = subtitles.slice(0, 10).map(t => `
+            <button class="glass px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-cyan-500/20 hover:text-cyan-400 transition">
+                <i class="fa-solid fa-closed-captioning mr-1"></i> ${t.lang}
+            </button>
+        `).join('');
+    } else {
+        container.innerHTML = '<span class="text-[10px] opacity-40 uppercase">No subtitles found</span>';
     }
 }
 
-function renderSubtitleTracks(tracks) {
-    const container = document.getElementById('subtitle-controls');
-    if (!container) return;
-
-    container.innerHTML = tracks.slice(0, 8).map(t => `
-        <button class="glass px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-cyan-500/20 hover:text-cyan-400 transition" 
-                onclick="alert('Subtitles are enabled in player menu (CC)')">
-            <i class="fa-solid fa-language mr-1"></i> ${t.label}
-        </button>
-    `).join('');
-}
-
 /* ============================================================
-   TV & HOME PAGE LOGIC (UNCHANGED BUT CLEANED)
+   EPISODES & UI COMPONENTS (Optimized)
 ============================================================ */
 
 async function loadEpisodeSelector(id, currentS, currentE) {
