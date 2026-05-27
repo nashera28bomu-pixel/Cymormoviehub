@@ -1,0 +1,21 @@
+# =========================================================
+# CYMOR MOVIE HUB — RENDER CONFIG v5.1
+# =========================================================
+
+services:
+  - type: web
+    name: cymor-movie-hub
+    env: docker
+    plan: free
+    region: oregon          # oregon / frankfurt / singapore / ohio
+    dockerContext: .        # Build context = repo root
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: TMDB_API_KEY
+        sync: false         # Set manually in Render Dashboard → Environment
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+    autoDeploy: true
