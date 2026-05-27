@@ -1,34 +1,27 @@
-# --- Stage 1: Build Python Environment ---
+# --- Stage 1: Python Builder ---
 FROM python:3.10-slim AS python-build
-WORKDIR /app/backend
+WORKDIR /app
 COPY backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --target=/app/deps -r requirements.txt
 
-# --- Stage 2: Build Node Environment & Final Image ---
+# --- Stage 2: Final Image ---
 FROM node:18-slim
 WORKDIR /app
 
-# Install Python and Supervisor (to run two processes at once)
+# Install system essentials
 RUN apt-get update && apt-get install -y python3 python3-pip supervisor && rm -rf /var/lib/apt/lists/*
 
-# Copy Python dependencies from Stage 1
-COPY --from=python-build /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
-COPY --from=python-build /usr/local/bin /usr/local/bin
-
-# Copy Backend code
+# Copy Python deps and code
+COPY --from=python-build /app/deps /usr/local/lib/python3.10/dist-packages
 COPY backend /app/backend
 
-# Copy Frontend code and install Node dependencies
+# Copy Node code
 COPY frontend /app/frontend
 WORKDIR /app/frontend
 RUN npm install --production
 
-# --- Stage 3: Setup Supervisor Configuration ---
-# This tells Docker how to start both servers at once
+# Supervisor Config (Multi-process management)
 RUN printf "[supervisord]\nnodaemon=true\n\n[program:python_engine]\ncommand=python3 /app/backend/app.py\nautostart=true\nautorestart=true\n\n[program:node_server]\ncommand=node /app/frontend/server.js\nautostart=true\nautorestart=true\n" > /etc/supervisor/conf.d/supervisord.conf
 
-# Expose the Node.js port (Render only listens to one port)
 EXPOSE 3000
-
-# Start everything
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
