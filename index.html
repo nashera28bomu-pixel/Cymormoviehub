@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Cymor Script Writer</title>
+<meta name="theme-color" content="#12141C">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ================= LIBRARY ================= -->
+<section id="view-library" class="view active">
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark">✦</span>
+      <span class="brand-name">Cymor Script Writer</span>
+    </div>
+  </header>
+  <main class="library-main">
+    <button id="new-script-btn" class="primary-btn">+ New Script</button>
+    <div id="library-list" class="library-list"></div>
+  </main>
+</section>
+
+<!-- ================= TITLE PAGE ================= -->
+<section id="view-titlepage" class="view">
+  <header class="app-header">
+    <button id="titlepage-back" class="icon-btn">←</button>
+    <span class="header-title">Title Page</span>
+    <span class="header-spacer"></span>
+  </header>
+  <main class="titlepage-main">
+    <div class="paper titlepage-paper">
+      <label class="field-label">Title</label>
+      <input id="tp-title" class="field-input tp-title-input" type="text" placeholder="Untitled Screenplay">
+
+      <label class="field-label">Written by</label>
+      <input id="tp-author" class="field-input" type="text" placeholder="Your name / pen name">
+
+      <label class="field-label">Contact</label>
+      <textarea id="tp-contact" class="field-input" rows="3" placeholder="Email, phone, or agency"></textarea>
+
+      <label class="field-label">Draft date</label>
+      <input id="tp-date" class="field-input" type="text" placeholder="e.g. 2 July 2026">
+    </div>
+    <button id="titlepage-continue" class="primary-btn">Continue to Editor</button>
+  </main>
+</section>
+
+<!-- ================= EDITOR ================= -->
+<section id="view-editor" class="view">
+  <header class="app-header">
+    <button id="editor-back" class="icon-btn">←</button>
+    <span id="editor-script-title" class="header-title">Untitled</span>
+    <button id="edit-titlepage-btn" class="icon-btn" title="Edit title page">⧉</button>
+  </header>
+
+  <div class="editor-subbar">
+    <span id="save-status" class="save-status saved">Saved</span>
+    <button id="export-pdf-btn" class="ghost-btn">Export PDF</button>
+  </div>
+
+  <main class="editor-main">
+    <div class="paper editor-paper">
+      <div id="script-body" class="script-body"></div>
+    </div>
+  </main>
+
+  <nav class="element-toolbar">
+    <button class="el-btn" data-type="scene_heading">Scene</button>
+    <button class="el-btn" data-type="action">Action</button>
+    <button class="el-btn" data-type="character">Character</button>
+    <button class="el-btn" data-type="parenthetical">Parens</button>
+    <button class="el-btn active" data-type="dialogue">Dialogue</button>
+    <button class="el-btn" data-type="transition">Trans</button>
+  </nav>
+</section>
+
+<!-- ================= PRINT-ONLY OUTPUT (built at export time) ================= -->
+<div id="print-root"></div>
+
+<script src="js/db.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
